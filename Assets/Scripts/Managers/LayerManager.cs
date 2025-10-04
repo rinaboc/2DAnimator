@@ -30,7 +30,7 @@ public class LayerManager : MonoBehaviour
         }
     }
 
-    private ArtMesh SelectedArtMesh
+    public ArtMesh SelectedArtMesh
     {
         get
         {

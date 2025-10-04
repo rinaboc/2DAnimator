@@ -103,4 +103,14 @@ public class ArtMesh : MonoBehaviour, ISelectable
     {
         BoundingBox.SetSelected(isSelected);
     }
+
+    public void UpdatePosition(Vector3 position)
+    {
+        MeshData meshData = MeshRegistry.instance.GetMeshData(MeshID);
+        Debug.Log($"updating position of {meshData}");
+        meshData.Position = position;
+        Debug.Log(meshData);
+
+        ParameterManager.instance.UpdateAnimationData(meshData, TransformType.POSITION);
+    }
 }

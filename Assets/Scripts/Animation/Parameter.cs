@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-public struct Parameter
+public class Parameter
 {
     private static ushort _paramCounter = 0;
 

@@ -1,7 +1,7 @@
 
 using System.Collections.Generic;
 
-public struct ParamCurve
+public class ParamCurve
 {
     private static ushort _paramCurveCounter = 0;
 

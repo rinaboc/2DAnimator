@@ -8,7 +8,7 @@ public class ParameterManager : MonoBehaviour
     [SerializeField] private GameObject ParamSliderPrefab;
     [SerializeField] private Transform ParamWidgetContent;
 
-    private Dictionary<ushort, GameObject> paramSliders = new();
+    private readonly Dictionary<ushort, GameObject> paramSliders = new();
 
     private int _selectedParamID = -1;
 
@@ -27,6 +27,15 @@ public class ParameterManager : MonoBehaviour
     public void CreateDebugParam()
     {
         CreateParameter(0, 1, 0);
+    }
+
+    public void CreatePointsForCurrentMesh()
+    {
+        ArtMesh selectedArtMesh = LayerManager.instance.SelectedArtMesh;
+        if (_selectedParamID >= 0 && selectedArtMesh != null)
+        {
+            CreateParamPoints((ushort)_selectedParamID, selectedArtMesh.MeshID);
+        }
     }
 
     public void CreateParameter(int min, int max, int defaultValue)
@@ -48,6 +57,9 @@ public class ParameterManager : MonoBehaviour
         paramCurve.ParamPoints.Add(minPoint.ID);
         paramCurve.ParamPoints.Add(maxPoint.ID);
 
+        parameter.ParamCurves.Add(paramCurve.ID);
+
+        Debug.Log("created parampoints");
     }
 
     public void SelectParameter(ushort id)
@@ -59,5 +71,46 @@ public class ParameterManager : MonoBehaviour
 
         paramSliders[id].GetComponent<ParameterSlider>().SetSelected(true);
         _selectedParamID = id;
+    }
+
+    public void UpdateAnimationData(MeshData meshData, TransformType transformType)
+    {
+        if (_selectedParamID < 0) return;
+
+        ParameterRegistry parameterRegistry = ParameterRegistry.instance;
+
+        Parameter currentParam = parameterRegistry.GetParameter((ushort)_selectedParamID);
+        List<ParamCurve> currentParamCurves = parameterRegistry.GetParamCurve(currentParam.ParamCurves);
+
+        float sliderValue = paramSliders[currentParam.ID].GetComponent<ParameterSlider>().GetValue();
+        for (int i = 0; i < currentParamCurves.Count; i++)
+        {
+            ParamCurve paramCurve = currentParamCurves[i];
+            if (paramCurve.MeshID == meshData.ID)
+            {
+                List<ParamPoint> paramPoints = parameterRegistry.GetParamPoint(paramCurve.ParamPoints);
+
+                foreach (ParamPoint point in paramPoints)
+                {
+                    if (point.ParamValue == sliderValue)
+                    {
+                        switch (transformType)
+                        {
+                            case TransformType.POSITION:
+                                point.Position = meshData.Position;
+                                break;
+                            case TransformType.ROTATION:
+                                point.Rotation = meshData.Rotation;
+                                break;
+                            case TransformType.SCALE:
+                                point.Scale = meshData.Scale;
+                                break;
+                        }
+                        Debug.Log("updated point: " + point);
+                        return;
+                    }
+                }
+            }
+        }
     }
 }

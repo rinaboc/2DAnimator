@@ -95,6 +95,11 @@ public class MeshRegistry : MonoBehaviour
         }
     }
 
+    public void UpdateMeshData(MeshData meshData)
+    {
+        MeshDataEntries[meshData.ID] = meshData;
+    }
+
     public void RegisterMeshData(MeshData meshData)
     {
         if (MeshDataEntries.ContainsKey(meshData.ID))

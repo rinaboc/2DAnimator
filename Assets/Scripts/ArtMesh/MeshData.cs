@@ -1,10 +1,16 @@
-public struct MeshData
+using UnityEngine;
+
+public class MeshData
 {
     private static ushort _objCounter = 0;
     public readonly ushort ID;
     public ushort drawOrder;
     public string sourcePath;
     public string name;
+
+    public Vector3 Position { get; set; }
+    public Vector3 Rotation { get; set; }
+    public Vector3 Scale { get; set; }
 
     public MeshData(string sourcePath)
     {
@@ -14,6 +20,6 @@ public struct MeshData
         name = "ArtObject" + ID;
     }
 
-    public override readonly string ToString() => $"{ID}: {name}, {drawOrder}, {sourcePath}";
+    public override string ToString() => $"{ID}: {name}, {drawOrder}, {sourcePath}";
 
 }

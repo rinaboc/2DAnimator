@@ -57,6 +57,22 @@ public class ParameterRegistry : MonoBehaviour
         }
     }
 
+    public List<ParamCurve> GetParamCurve(List<ushort> ids)
+    {
+        List<ParamCurve> retCurves = new();
+
+        for (int i = 0; i < ids.Count; i++)
+        {
+            ushort id = ids[i];
+            if (ParamCurves.ContainsKey(id))
+            {
+                retCurves.Add(ParamCurves[id]);
+            }
+        }
+
+        return retCurves;
+    }
+
     public void RegisterParamCurve(ParamCurve paramCurve)
     {
         if (ParamCurves.ContainsKey(paramCurve.ID))
@@ -78,6 +94,22 @@ public class ParameterRegistry : MonoBehaviour
             Debug.LogError("no such id in registry");
             throw new System.Exception();
         }
+    }
+
+    public List<ParamPoint> GetParamPoint(List<ushort> ids)
+    {
+        List<ParamPoint> retCurves = new();
+
+        for (int i = 0; i < ids.Count; i++)
+        {
+            ushort id = ids[i];
+            if (ParamPoints.ContainsKey(id))
+            {
+                retCurves.Add(ParamPoints[id]);
+            }
+        }
+
+        return retCurves;
     }
 
     public void RegisterParamPoint(ParamPoint paramPoint)
