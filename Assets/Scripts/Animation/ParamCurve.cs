@@ -7,13 +7,15 @@ public class ParamCurve
 
     public ushort ID;
     public ushort MeshID;
+    public ushort ParamID;
 
     public readonly List<ushort> ParamPoints;
 
-    public ParamCurve(ushort meshID, bool autoRegister = true)
+    public ParamCurve(ushort meshID, ushort paramID, bool autoRegister = true)
     {
         ID = _paramCurveCounter++;
         MeshID = meshID;
+        ParamID = paramID;
         ParamPoints = new();
 
         if (autoRegister) Register();

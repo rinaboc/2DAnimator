@@ -22,6 +22,11 @@ public class ScaleHandle : DraggableHandle
 
     protected override void OnDragFinished(InputAction.CallbackContext context)
     {
+        if (dragging)
+        {
+            ArtMesh artMesh = ParentTransform.gameObject.GetComponent<ArtMesh>();
+            artMesh.UpdateTransform(artMesh.ArtMeshObject.transform.localScale, TransformType.SCALE);
+        }
         dragging = false;
     }
 

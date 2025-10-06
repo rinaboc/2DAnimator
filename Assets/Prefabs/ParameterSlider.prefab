@@ -55,6 +55,10 @@ MonoBehaviour:
   DefaultColor: {r: 0.20000002, g: 0.20000002, b: 0.20000002, a: 1}
   Background: {fileID: 4412316700297695629}
   slider: {fileID: 5955696974692705453}
+  CurveNormalColor: {r: 0.6627451, g: 0.6627451, b: 0.65882355, a: 1}
+  CurveAssignedColor: {r: 0.8115862, g: 0.4625756, b: 0.990566, a: 1}
+  ParamPointPrefab: {fileID: 1823596982632864227, guid: ccb12d25a2980f04a862dd396dfe1280, type: 3}
+  SlideArea: {fileID: 266638492934928885}
 --- !u!65 &2155134587304028579
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -734,7 +738,7 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0
+  m_Value: 0.793
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:

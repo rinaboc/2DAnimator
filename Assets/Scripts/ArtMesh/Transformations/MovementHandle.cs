@@ -31,7 +31,7 @@ public class MovementHandle : DraggableHandle
     {
         if (dragging)
         {
-            ArtObjectTransform.gameObject.GetComponent<ArtMesh>().UpdatePosition(ArtObjectTransform.localPosition);
+            ArtObjectTransform.gameObject.GetComponent<ArtMesh>().UpdateTransform(ArtObjectTransform.localPosition, TransformType.POSITION);
         }
         dragging = false;
     }

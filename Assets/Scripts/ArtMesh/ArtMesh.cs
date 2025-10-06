@@ -104,13 +104,25 @@ public class ArtMesh : MonoBehaviour, ISelectable
         BoundingBox.SetSelected(isSelected);
     }
 
-    public void UpdatePosition(Vector3 position)
+    public void UpdateTransform(object value, TransformType type)
     {
         MeshData meshData = MeshRegistry.instance.GetMeshData(MeshID);
-        Debug.Log($"updating position of {meshData}");
-        meshData.Position = position;
-        Debug.Log(meshData);
 
-        ParameterManager.instance.UpdateAnimationData(meshData, TransformType.POSITION);
+        switch (type)
+        {
+            case TransformType.POSITION:
+                meshData.Position = (Vector3)value;
+                break;
+            case TransformType.ROTATION:
+                meshData.Rotation = (Quaternion)value;
+                break;
+            case TransformType.SCALE:
+                meshData.Scale = (Vector3)value;
+                break;
+        }
+
+        ParameterManager.instance.UpdateAnimationData(meshData, type);
     }
+
+
 }

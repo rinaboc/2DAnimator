@@ -35,6 +35,7 @@ public class ParameterManager : MonoBehaviour
         if (_selectedParamID >= 0 && selectedArtMesh != null)
         {
             CreateParamPoints((ushort)_selectedParamID, selectedArtMesh.MeshID);
+            HighlightCreatedCurves(selectedArtMesh.MeshID);
         }
     }
 
@@ -50,7 +51,7 @@ public class ParameterManager : MonoBehaviour
     public void CreateParamPoints(ushort parameterID, ushort meshID)
     {
         Parameter parameter = ParameterRegistry.instance.GetParameter(parameterID);
-        ParamCurve paramCurve = new(meshID);
+        ParamCurve paramCurve = new(meshID, parameter.ID);
         ParamPoint minPoint = new(parameter.minValue);
         ParamPoint maxPoint = new(parameter.maxValue);
 
@@ -58,6 +59,14 @@ public class ParameterManager : MonoBehaviour
         paramCurve.ParamPoints.Add(maxPoint.ID);
 
         parameter.ParamCurves.Add(paramCurve.ID);
+
+        List<int> paramValues = new()
+        {
+            minPoint.ParamValue,
+            maxPoint.ParamValue
+        };
+
+        paramSliders[parameterID].GetComponent<ParameterSlider>().CreateParamPointHandles(paramValues);
 
         Debug.Log("created parampoints");
     }
@@ -73,6 +82,16 @@ public class ParameterManager : MonoBehaviour
         _selectedParamID = id;
     }
 
+    public void HighlightCreatedCurves(ushort meshID)
+    {
+        List<ushort> assignedParams = ParameterRegistry.instance.GetAssignedParamIDsOfMesh(meshID);
+
+        foreach (var item in paramSliders)
+        {
+            item.Value.GetComponent<ParameterSlider>().SetAssignedCurve(assignedParams.Contains(item.Key));
+        }
+    }
+
     public void UpdateAnimationData(MeshData meshData, TransformType transformType)
     {
         if (_selectedParamID < 0) return;
@@ -86,30 +105,32 @@ public class ParameterManager : MonoBehaviour
         for (int i = 0; i < currentParamCurves.Count; i++)
         {
             ParamCurve paramCurve = currentParamCurves[i];
-            if (paramCurve.MeshID == meshData.ID)
-            {
-                List<ParamPoint> paramPoints = parameterRegistry.GetParamPoint(paramCurve.ParamPoints);
 
-                foreach (ParamPoint point in paramPoints)
+            if (paramCurve.MeshID != meshData.ID) // filter by mesh id
+                continue;
+
+            List<ParamPoint> paramPoints = parameterRegistry.GetParamPoint(paramCurve.ParamPoints);
+
+            foreach (ParamPoint point in paramPoints)
+            {
+                if (point.ParamValue != sliderValue) // filter by set parameter point values
+                    continue;
+
+                switch (transformType)
                 {
-                    if (point.ParamValue == sliderValue)
-                    {
-                        switch (transformType)
-                        {
-                            case TransformType.POSITION:
-                                point.Position = meshData.Position;
-                                break;
-                            case TransformType.ROTATION:
-                                point.Rotation = meshData.Rotation;
-                                break;
-                            case TransformType.SCALE:
-                                point.Scale = meshData.Scale;
-                                break;
-                        }
-                        Debug.Log("updated point: " + point);
-                        return;
-                    }
+                    case TransformType.POSITION:
+                        point.Position = meshData.Position;
+                        break;
+                    case TransformType.ROTATION:
+                        point.Rotation = meshData.Rotation;
+                        break;
+                    case TransformType.SCALE:
+                        point.Scale = meshData.Scale;
+                        break;
                 }
+
+                Debug.Log("updated point: " + point);
+                break;
             }
         }
     }

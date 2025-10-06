@@ -73,6 +73,21 @@ public class ParameterRegistry : MonoBehaviour
         return retCurves;
     }
 
+    public List<ushort> GetAssignedParamIDsOfMesh(ushort meshID)
+    {
+        List<ushort> retIDs = new();
+
+        for (int i = 0; i < ParamCurves.Count; i++)
+        {
+            if (ParamCurves[(ushort)i].MeshID == meshID)
+            {
+                retIDs.Add(ParamCurves[(ushort)i].ParamID);
+            }
+        }
+
+        return retIDs;
+    }
+
     public void RegisterParamCurve(ParamCurve paramCurve)
     {
         if (ParamCurves.ContainsKey(paramCurve.ID))

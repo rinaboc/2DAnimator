@@ -116,6 +116,8 @@ public class LayerManager : MonoBehaviour
             .SetSelected(true);
         SelectedArtMesh.SetSelected(true);
 
+        ParameterManager.instance.HighlightCreatedCurves(SelectedArtMesh.MeshID);
+
     }
 
     public void MoveUIArtLayerUp()
