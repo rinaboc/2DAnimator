@@ -18,6 +18,8 @@ public class MeshData
         drawOrder = ID;
         this.sourcePath = sourcePath;
         name = "ArtObject" + ID;
+
+        Scale = Vector3.one;
     }
 
     public override string ToString() => $"{ID}: {name}, {drawOrder}, {sourcePath}";

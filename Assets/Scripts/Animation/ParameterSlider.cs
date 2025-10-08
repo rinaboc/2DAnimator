@@ -82,6 +82,8 @@ public class ParameterSlider : Clickable, ISelectable
     {
         sliderValue = slider.value;
         Debug.Log("value changed");
+
+        AnimationManager.instance.InterpolateParameter(sliderValue, paramID);
     }
 
     public int GetValue()
