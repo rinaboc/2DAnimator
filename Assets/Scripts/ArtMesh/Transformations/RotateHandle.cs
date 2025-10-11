@@ -18,6 +18,11 @@ public class RotateHandle : DraggableHandle
 
     protected override void OnDragFinished(InputAction.CallbackContext context)
     {
+        if (dragging)
+        {
+            ArtMesh artMesh = ParentTransform.gameObject.GetComponent<ArtMesh>();
+            artMesh.UpdateTransform(artMesh.gameObject.transform.localRotation, TransformType.ROTATION);
+        }
         dragging = false;
     }
 

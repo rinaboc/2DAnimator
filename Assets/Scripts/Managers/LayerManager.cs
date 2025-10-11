@@ -30,7 +30,7 @@ public class LayerManager : MonoBehaviour
         }
     }
 
-    private ArtMesh SelectedArtMesh
+    public ArtMesh SelectedArtMesh
     {
         get
         {
@@ -115,6 +115,8 @@ public class LayerManager : MonoBehaviour
             .GetComponentInChildren<LayerInteractionController>()
             .SetSelected(true);
         SelectedArtMesh.SetSelected(true);
+
+        ParameterManager.instance.HighlightCreatedCurves(SelectedArtMesh.MeshID);
 
     }
 

@@ -7,6 +7,7 @@ public class ScaleHandle : DraggableHandle
     private Vector3 originalOffset;
     private Vector3 cornerOffset;
     private Vector3 originalScale;
+    private Vector3 offsetRatio;
 
     protected override void OnClickStarted(InputAction.CallbackContext context)
     {
@@ -22,6 +23,11 @@ public class ScaleHandle : DraggableHandle
 
     protected override void OnDragFinished(InputAction.CallbackContext context)
     {
+        if (dragging)
+        {
+            ArtMesh artMesh = ParentTransform.gameObject.GetComponent<ArtMesh>();
+            artMesh.UpdateTransform(artMesh.ArtMeshObject.transform.localScale, TransformType.SCALE);
+        }
         dragging = false;
     }
 
@@ -31,11 +37,12 @@ public class ScaleHandle : DraggableHandle
         {
             Corner.position = ClickWorldPosition + cornerOffset;
 
-            Vector3 currentOffset = ParentTransform.position - Corner.position;
+            Vector3 originalOffsetLocal = ParentTransform.InverseTransformVector(originalOffset);
+            Vector3 currentOffsetLocal = ParentTransform.InverseTransformVector(ParentTransform.position - Corner.position);
 
-            Vector3 offsetRatio = new(
-                currentOffset.x / originalOffset.x,
-                currentOffset.y / originalOffset.y,
+            offsetRatio = new Vector3(
+                currentOffsetLocal.x / originalOffsetLocal.x,
+                currentOffsetLocal.y / originalOffsetLocal.y,
                 1f
             );
 

@@ -29,6 +29,10 @@ public class MovementHandle : DraggableHandle
 
     protected override void OnDragFinished(InputAction.CallbackContext context)
     {
+        if (dragging)
+        {
+            ArtObjectTransform.gameObject.GetComponent<ArtMesh>().UpdateTransform(ArtObjectTransform.localPosition, TransformType.POSITION);
+        }
         dragging = false;
     }
 }
