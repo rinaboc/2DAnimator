@@ -16,7 +16,6 @@ public class ParamPoint
         ID = _paramPtCounter++;
         this.ParamValue = paramValue;
         Rotation = Quaternion.identity;
-        Scale = Vector3.one;
 
         if (autoRegister) Register();
     }

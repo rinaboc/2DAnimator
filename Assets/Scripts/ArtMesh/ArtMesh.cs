@@ -108,20 +108,37 @@ public class ArtMesh : MonoBehaviour, ISelectable
     {
         MeshData meshData = MeshRegistry.instance.GetMeshData(MeshID);
 
+        bool areParametersAssigned = ParameterRegistry.instance.GetAssignedParamIDsOfMesh(meshData.ID).Count > 0;
+
+        object updatedAnimationData = null;
         switch (type)
         {
             case TransformType.POSITION:
-                meshData.Position = (Vector3)value;
+                if (areParametersAssigned)
+                    updatedAnimationData = (Vector3)value - meshData.Position;
+                else
+                    meshData.Position = (Vector3)value;
                 break;
             case TransformType.ROTATION:
-                meshData.Rotation = (Quaternion)value;
+                if (areParametersAssigned)
+                    updatedAnimationData = Quaternion.Inverse(meshData.Rotation) * (Quaternion)value;
+                else
+                    meshData.Rotation = (Quaternion)value;
                 break;
             case TransformType.SCALE:
-                meshData.Scale = (Vector3)value;
+                if (areParametersAssigned)
+                    updatedAnimationData = (Vector3)value - meshData.Scale;
+                else
+                    meshData.Scale = (Vector3)value;
                 break;
         }
 
-        ParameterManager.instance.UpdateAnimationData(meshData, type);
+        if (updatedAnimationData != null)
+        {
+            ParameterManager.instance.UpdateAnimationData(updatedAnimationData, type, meshData.ID);
+        }
+        else
+            Debug.Log("updated animation data is null");
     }
 
 

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class AnimationManager : MonoBehaviour
 {
@@ -58,13 +59,12 @@ public class AnimationManager : MonoBehaviour
             float t = (value - minPoint.ParamValue) / (maxPoint.ParamValue - minPoint.ParamValue);
 
             Vector3 interpPos = (1f - t) * minPoint.Position + t * maxPoint.Position;
-            artMeshObject.transform.localPosition = interpPos;
-
             Vector3 interpScale = (1f - t) * minPoint.Scale + t * maxPoint.Scale;
-            artMeshObject.GetComponent<ArtMesh>().ScaleArtMesh(Vector3.one, interpScale);
-
             Quaternion interpRotation = Quaternion.Lerp(minPoint.Rotation, maxPoint.Rotation, t);
-            artMeshObject.GetComponent<ArtMesh>().RotateArtMesh(Quaternion.identity, interpRotation);
+
+            artMeshObject.transform.localPosition = meshData.Position + interpPos;
+            artMeshObject.GetComponent<ArtMesh>().ScaleArtMesh(meshData.Scale, meshData.Scale + interpScale);
+            artMeshObject.GetComponent<ArtMesh>().RotateArtMesh(meshData.Rotation, interpRotation);
         }
     }
 }

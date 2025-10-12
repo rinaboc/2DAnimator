@@ -19,6 +19,7 @@ public class MeshData
         this.sourcePath = sourcePath;
         name = "ArtObject" + ID;
 
+        Rotation = Quaternion.identity;
         Scale = Vector3.one;
     }
 

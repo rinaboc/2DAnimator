@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class ParameterRegistry : MonoBehaviour
@@ -42,6 +43,11 @@ public class ParameterRegistry : MonoBehaviour
         }
 
         Parameters.Add(parameter.ID, parameter);
+    }
+
+    public Dictionary<ushort, ParamCurve> GetAllParamCurves()
+    {
+        return ParamCurves;
     }
 
     public ParamCurve GetParamCurve(ushort id)

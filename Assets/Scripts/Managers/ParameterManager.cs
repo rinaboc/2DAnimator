@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -98,7 +99,7 @@ public class ParameterManager : MonoBehaviour
         }
     }
 
-    public void UpdateAnimationData(MeshData meshData, TransformType transformType)
+    public void UpdateAnimationData(object data, TransformType transformType, ushort meshID)
     {
         if (_selectedParamID < 0) return;
 
@@ -112,26 +113,30 @@ public class ParameterManager : MonoBehaviour
         {
             ParamCurve paramCurve = currentParamCurves[i];
 
-            if (paramCurve.MeshID != meshData.ID) // filter by mesh id
+            if (paramCurve.MeshID != meshID) // filter by mesh id
                 continue;
 
             List<ParamPoint> paramPoints = parameterRegistry.GetParamPoint(paramCurve.ParamPoints);
 
             foreach (ParamPoint point in paramPoints)
             {
-                if (point.ParamValue != sliderValue) // filter by set parameter point values
+                // if (point.ParamValue != sliderValue) // filter by set parameter point values
+                //     continue;
+                if (Math.Abs(point.ParamValue - sliderValue) > 0.01f)
+                {
                     continue;
+                }
 
                 switch (transformType)
                 {
                     case TransformType.POSITION:
-                        point.Position = meshData.Position;
+                        point.Position = (Vector3)data;
                         break;
                     case TransformType.ROTATION:
-                        point.Rotation = meshData.Rotation;
+                        point.Rotation = (Quaternion)data;
                         break;
                     case TransformType.SCALE:
-                        point.Scale = meshData.Scale;
+                        point.Scale = (Vector3)data;
                         break;
                 }
 
