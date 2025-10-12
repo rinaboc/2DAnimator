@@ -159,6 +159,8 @@ public class LayerManager : MonoBehaviour
     {
         if (_selectedLayer < 0) return;
 
+        ParameterManager.instance.DeleteParamPointsOfMesh(SelectedArtMesh.MeshID);
+
         MeshRegistry.instance.DeleteArtMeshObj((ushort)_selectedLayer);
         MeshRegistry.instance.DeleteUILayer((ushort)_selectedLayer);
         MeshRegistry.instance.DeleteMeshData((ushort)_selectedLayer);

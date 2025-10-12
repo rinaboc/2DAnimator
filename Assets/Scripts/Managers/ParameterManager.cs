@@ -71,6 +71,12 @@ public class ParameterManager : MonoBehaviour
         Debug.Log("created parampoints");
     }
 
+    public void DeleteParamPointsOfMesh(ushort meshID)
+    {
+        ParameterRegistry.instance.DeleteAnimationDataOfMesh(meshID);
+        HighlightCreatedCurves(meshID);
+    }
+
     public void SelectParameter(ushort id)
     {
         if (_selectedParamID >= 0)

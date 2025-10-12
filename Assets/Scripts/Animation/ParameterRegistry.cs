@@ -79,7 +79,7 @@ public class ParameterRegistry : MonoBehaviour
 
         for (int i = 0; i < ParamCurves.Count; i++)
         {
-            if (ParamCurves[(ushort)i].MeshID == meshID)
+            if (ParamCurves.ContainsKey((ushort)i) && ParamCurves[(ushort)i].MeshID == meshID)
             {
                 retIDs.Add(ParamCurves[(ushort)i].ParamID);
             }
@@ -135,5 +135,19 @@ public class ParameterRegistry : MonoBehaviour
         }
 
         ParamPoints.Add(paramPoint.ID, paramPoint);
+    }
+
+    public void DeleteAnimationDataOfMesh(ushort id)
+    {
+        List<ParamCurve> paramCurves = GetParamCurve(GetAssignedParamIDsOfMesh(id));
+        for (int i = 0; i < paramCurves.Count; i++)
+        {
+            ParamCurve paramCurve = paramCurves[i];
+            foreach (ushort pointID in paramCurve.ParamPoints)
+            {
+                ParamPoints.Remove(pointID);
+            }
+            ParamCurves.Remove(paramCurve.ID);
+        }
     }
 }
