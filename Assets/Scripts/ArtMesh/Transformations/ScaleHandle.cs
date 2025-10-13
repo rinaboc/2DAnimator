@@ -25,8 +25,7 @@ public class ScaleHandle : DraggableHandle
     {
         if (dragging)
         {
-            ArtMesh artMesh = ParentTransform.gameObject.GetComponent<ArtMesh>();
-            artMesh.UpdateTransform(artMesh.ArtMeshObject.transform.localScale, TransformType.SCALE);
+            ParentTransform.gameObject.GetComponent<ArtMesh>().SaveTransform(TransformType.SCALE);
         }
         dragging = false;
     }
@@ -46,7 +45,8 @@ public class ScaleHandle : DraggableHandle
                 1f
             );
 
-            ParentTransform.gameObject.GetComponent<ArtMesh>().ScaleArtMesh(originalScale, offsetRatio);
+            Vector3 newScale = Vector3.Scale(originalScale, offsetRatio);
+            ParentTransform.gameObject.GetComponent<ArtMesh>().UpdateTransform(newScale, TransformType.SCALE);
         }
     }
 }

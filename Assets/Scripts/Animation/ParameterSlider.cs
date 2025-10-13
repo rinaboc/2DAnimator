@@ -65,9 +65,9 @@ public class ParameterSlider : Clickable, ISelectable
         }
     }
 
-    public void CreateParamPointHandles(List<int> values)
+    public void CreateParamPointHandles(List<float> values)
     {
-        foreach (int value in values)
+        foreach (float value in values)
         {
             GameObject pointHandle = Instantiate(ParamPointPrefab, SlideArea);
             RectTransform pointTransform = pointHandle.GetComponent<RectTransform>();
@@ -86,8 +86,15 @@ public class ParameterSlider : Clickable, ISelectable
         AnimationManager.instance.InterpolateParameter(sliderValue, paramID);
     }
 
-    public int GetValue()
+    public void SetValue(float value)
     {
-        return (int)Math.Round(sliderValue, MidpointRounding.AwayFromZero);
+        sliderValue = value;
+        slider.value = value;
+    }
+
+    public float GetValue()
+    {
+        // return (int)Math.Round(sliderValue, MidpointRounding.AwayFromZero);
+        return sliderValue;
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class ParameterManager : MonoBehaviour
@@ -55,16 +56,19 @@ public class ParameterManager : MonoBehaviour
         ParamCurve paramCurve = new(meshID, parameter.ID);
         ParamPoint minPoint = new(parameter.minValue);
         ParamPoint maxPoint = new(parameter.maxValue);
+        ParamPoint midPoint = new((parameter.maxValue + parameter.minValue) / 2f);
 
         paramCurve.ParamPoints.Add(minPoint.ID);
         paramCurve.ParamPoints.Add(maxPoint.ID);
+        paramCurve.ParamPoints.Add(midPoint.ID);
 
         parameter.ParamCurves.Add(paramCurve.ID);
 
-        List<int> paramValues = new()
+        List<float> paramValues = new()
         {
             minPoint.ParamValue,
-            maxPoint.ParamValue
+            maxPoint.ParamValue,
+            midPoint.ParamValue
         };
 
         paramSliders[parameterID].GetComponent<ParameterSlider>().CreateParamPointHandles(paramValues);
@@ -118,15 +122,19 @@ public class ParameterManager : MonoBehaviour
 
             List<ParamPoint> paramPoints = parameterRegistry.GetParamPoint(paramCurve.ParamPoints);
 
-            foreach (ParamPoint point in paramPoints)
+            bool isPointUpdated = false;
+            float[] distFromPointValues = new float[paramPoints.Count];
+            for (int j = 0; j < paramPoints.Count; j++)
             {
-                // if (point.ParamValue != sliderValue) // filter by set parameter point values
-                //     continue;
-                if (Math.Abs(point.ParamValue - sliderValue) > 0.01f)
+                ParamPoint point = paramPoints[j];
+                distFromPointValues[j] = Math.Abs(point.ParamValue - sliderValue);
+
+                if (distFromPointValues[j] > 0.01f)
                 {
                     continue;
                 }
 
+                isPointUpdated = true;
                 switch (transformType)
                 {
                     case TransformType.POSITION:
@@ -140,9 +148,17 @@ public class ParameterManager : MonoBehaviour
                         break;
                 }
 
-                Debug.Log("updated point: " + point);
+                Debug.Log($"updated point at {sliderValue}: " + point);
                 break;
             }
+            if (!isPointUpdated)
+            {
+                Debug.Log("no point was updated");
+                int minIndex = Array.IndexOf(distFromPointValues, distFromPointValues.Min());
+                paramSliders[paramCurve.ParamID].GetComponent<ParameterSlider>().SetValue(paramPoints[minIndex].ParamValue);
+                AnimationManager.instance.InterpolateParameter(paramPoints[minIndex].ParamValue, paramCurve.ParamID);
+            }
         }
+
     }
 }

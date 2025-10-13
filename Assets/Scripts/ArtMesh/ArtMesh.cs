@@ -87,16 +87,53 @@ public class ArtMesh : MonoBehaviour, ISelectable
         return this;
     }
 
-    public void ScaleArtMesh(Vector3 currentScale, Vector3 scale)
+    public void LoadTransformationFromMeshData()
     {
-        ArtMeshObject.transform.localScale = Vector3.Scale(currentScale, scale);
+        MeshData meshData = MeshRegistry.instance.GetMeshData(MeshID);
+
+        this.transform.position = meshData.Position;
+        ArtMeshObject.transform.localScale = meshData.Scale;
+        UpdateBoundingBox();
+        this.transform.localRotation = meshData.Rotation;
+
+    }
+
+    private void UpdateBoundingBox()
+    {
         BoxCollider boxCollider = ArtMeshObject.GetComponent<BoxCollider>();
         BoundingBox.CreateBoundingBox(boxCollider.center, Vector3.Scale(boxCollider.size, ArtMeshObject.transform.localScale));
     }
 
-    public void RotateArtMesh(Quaternion currentRotation, Quaternion rotation)
+    public void ScaleArtMesh(Vector3 scale)
     {
-        this.transform.localRotation = currentRotation * rotation;
+        ArtMeshObject.transform.localScale = scale;
+        UpdateBoundingBox();
+    }
+
+    public void RotateArtMesh(Quaternion rotation)
+    {
+        this.transform.localRotation = rotation;
+    }
+
+    public void MoveArtMesh(Vector3 newPosition)
+    {
+        this.transform.localPosition = newPosition;
+    }
+
+    public void UpdateTransform(object value, TransformType type)
+    {
+        switch (type)
+        {
+            case TransformType.POSITION:
+                MoveArtMesh((Vector3)value);
+                break;
+            case TransformType.ROTATION:
+                RotateArtMesh((Quaternion)value);
+                break;
+            case TransformType.SCALE:
+                ScaleArtMesh((Vector3)value);
+                break;
+        }
     }
 
     public void SetSelected(bool isSelected)
@@ -104,7 +141,13 @@ public class ArtMesh : MonoBehaviour, ISelectable
         BoundingBox.SetSelected(isSelected);
     }
 
-    public void UpdateTransform(object value, TransformType type)
+    /// <summary>
+    /// Saves a mesh's transformation values into the appropriate data objects. 
+    /// When there are parameter points assigned, 
+    /// the mesh's transformation difference from the value is calculated and the animation data is updated.
+    /// </summary>
+    /// <param name="value">transformation's value</param>
+    public void SaveTransform(TransformType type)
     {
         MeshData meshData = MeshRegistry.instance.GetMeshData(MeshID);
 
@@ -115,21 +158,21 @@ public class ArtMesh : MonoBehaviour, ISelectable
         {
             case TransformType.POSITION:
                 if (areParametersAssigned)
-                    updatedAnimationData = (Vector3)value - meshData.Position;
+                    updatedAnimationData = this.transform.localPosition - meshData.Position;
                 else
-                    meshData.Position = (Vector3)value;
+                    meshData.Position = this.transform.localPosition;
                 break;
             case TransformType.ROTATION:
                 if (areParametersAssigned)
-                    updatedAnimationData = Quaternion.Inverse(meshData.Rotation) * (Quaternion)value;
+                    updatedAnimationData = Quaternion.Inverse(meshData.Rotation) * this.transform.localRotation;
                 else
-                    meshData.Rotation = (Quaternion)value;
+                    meshData.Rotation = this.transform.localRotation;
                 break;
             case TransformType.SCALE:
                 if (areParametersAssigned)
-                    updatedAnimationData = (Vector3)value - meshData.Scale;
+                    updatedAnimationData = ArtMeshObject.transform.localScale - meshData.Scale;
                 else
-                    meshData.Scale = (Vector3)value;
+                    meshData.Scale = ArtMeshObject.transform.localScale;
                 break;
         }
 
