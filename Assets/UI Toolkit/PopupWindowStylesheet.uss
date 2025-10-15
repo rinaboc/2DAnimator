@@ -1,0 +1,8 @@
+.unity-float-field__input {
+    width: auto;
+    min-width: 80px;
+}
+
+.hide {
+    display: none;
+}
