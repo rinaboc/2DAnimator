@@ -8,15 +8,15 @@ public class PopupWindowController : MonoBehaviour
 {
     private VisualElement ui;
     private Button createButton;
-    private TextField paramNameField;
-    private FloatField minField;
-    private FloatField maxField;
-    private FloatField defaultField;
 
     [SerializeField, CreateProperty]
     private float m_minValue, m_maxValue, m_defaultValue;
     [SerializeField, CreateProperty]
     private string m_paramName;
+    [SerializeField, CreateProperty]
+    private string m_errorMessage = "";
+
+    private ushort _editedParamID;
 
     void Awake()
     {
@@ -28,62 +28,116 @@ public class PopupWindowController : MonoBehaviour
     {
         createButton = ui.Q<Button>("CreateButton");
 
-        paramNameField = ui.Q<TextField>("ParamName");
-        minField = ui.Q<FloatField>("MinField");
-        maxField = ui.Q<FloatField>("MaxField");
-        defaultField = ui.Q<FloatField>("DefaultField");
-
-        FillFields();
+        HidePanel();
 
         Debug.Log($"{m_minValue}, {m_maxValue}, {m_defaultValue}");
     }
 
     void OnDisable()
     {
+        RemoveButtonListeners();
+    }
+
+    private void RemoveButtonListeners()
+    {
         createButton.clicked -= OnCreateButtonClicked;
         createButton.clicked -= OnEditButtonClicked;
     }
 
-    private void FillFields()
+    public void EditParameter(Parameter parameter)
     {
-        try
-        {
-            ushort paramID = ParameterManager.instance.SelectedParamID;
-            Parameter parameter = ParameterRegistry.instance.GetParameter(paramID);
+        ShowPanel();
+        RemoveButtonListeners();
+        _editedParamID = parameter.ID;
+        m_minValue = parameter.MinValue;
+        m_maxValue = parameter.MaxValue;
+        m_defaultValue = parameter.DefaultValue;
+        m_paramName = parameter.Name;
 
-            m_minValue = parameter.minValue;
-            m_maxValue = parameter.maxValue;
-            m_defaultValue = parameter.defaultValue;
+        createButton.text = "Save";
+        createButton.clicked += OnEditButtonClicked;
+    }
 
-            createButton.clicked += OnEditButtonClicked;
-        }
-        catch (Exception)
-        {
-            m_minValue = -1;
-            m_maxValue = 1;
-            m_defaultValue = 0;
-            m_paramName = "parameter";
-            createButton.clicked += OnCreateButtonClicked;
-            Debug.Log("Creating new parameter");
-        }
+    public void CreateParameter()
+    {
+        ShowPanel();
+        RemoveButtonListeners();
+
+        createButton.text = "Create";
+        createButton.clicked += OnCreateButtonClicked;
+        Debug.Log("Creating new parameter");
     }
 
     private void OnCreateButtonClicked()
     {
-        ParameterManager.instance.CreateParameter(m_minValue, m_maxValue, m_defaultValue);
-        gameObject.SetActive(false);
+        if (!ValidateInput()) return;
+
+        ParameterManager.instance.CreateParameter(m_minValue, m_maxValue, m_defaultValue, m_paramName);
+        HidePanel();
     }
 
     private void OnEditButtonClicked()
     {
-        ushort paramID = ParameterManager.instance.SelectedParamID;
-        Parameter parameter = ParameterRegistry.instance.GetParameter(paramID);
+        if (!ValidateInput()) return;
 
-        parameter.minValue = m_minValue;
-        parameter.maxValue = m_maxValue;
-        parameter.defaultValue = m_defaultValue;
+        try
+        {
+            Parameter parameter = ParameterRegistry.instance.GetParameter(_editedParamID);
 
-        Debug.Log("editing");
-        gameObject.SetActive(false);
+            parameter.MinValue = m_minValue;
+            parameter.MaxValue = m_maxValue;
+            parameter.DefaultValue = m_defaultValue;
+            parameter.Name = m_paramName;
+
+            ParameterManager.instance.UpdateParameter(parameter);
+        }
+        catch (Exception)
+        {
+            Debug.LogError("Couldn't fetch parameter.");
+        }
+
+        HidePanel();
+    }
+
+    private bool ValidateInput()
+    {
+        if (m_minValue <= m_defaultValue && m_maxValue >= m_defaultValue && m_paramName != "")
+        {
+            HideErrorMessage();
+            return true;
+        }
+
+        DisplayErrorMessage("Invalid values.");
+
+        return false;
+    }
+
+    private void DisplayErrorMessage(string message)
+    {
+        m_errorMessage = message;
+        ui.Q<Label>("ErrorMessage").visible = true;
+    }
+
+    private void HideErrorMessage()
+    {
+        ui.Q<Label>("ErrorMessage").visible = false;
+    }
+
+    private void SetVisible(string elementID, bool isVisible)
+    {
+        if (isVisible)
+            ui.Q<VisualElement>(elementID).RemoveFromClassList("hide");
+        else
+            ui.Q<VisualElement>(elementID).AddToClassList("hide");
+    }
+
+    private void ShowPanel()
+    {
+        SetVisible("MainPanel", true);
+    }
+
+    private void HidePanel()
+    {
+        SetVisible("MainPanel", false);
     }
 }

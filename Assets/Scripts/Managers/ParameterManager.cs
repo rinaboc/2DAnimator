@@ -7,6 +7,8 @@ public class ParameterManager : MonoBehaviour
 {
     public static ParameterManager instance;
 
+    [SerializeField] private PopupWindowController popupWindow;
+
     [SerializeField] private GameObject ParamSliderPrefab;
     [SerializeField] private Transform ParamWidgetContent;
 
@@ -48,11 +50,31 @@ public class ParameterManager : MonoBehaviour
         }
     }
 
-    public void CreateParameter(float min, float max, float defaultValue)
+    /// <summary>
+    /// Called when there's an update made to a parameter data object. Updates parameter slider.
+    /// </summary>
+    public void UpdateParameter(Parameter parameter)
     {
-        Parameter parameter = new(min, max, defaultValue);
+        ParameterSlider parameterSlider = paramSliders[parameter.ID].GetComponent<ParameterSlider>();
+        parameterSlider.UpdateSlider(parameter);
+    }
+
+    /// <summary>
+    /// Call popup window to edit parameter details.
+    /// </summary>
+    public void StartParameterEditing(ushort paramID)
+    {
+        Parameter parameter = ParameterRegistry.instance.GetParameter(paramID);
+        popupWindow.EditParameter(parameter);
+    }
+
+    public void CreateParameter(float min, float max, float defaultValue, string name = "parameter")
+    {
+        Parameter parameter = new(min, max, defaultValue, name);
         GameObject paramSlider = Instantiate(ParamSliderPrefab, ParamWidgetContent);
-        paramSlider.GetComponent<ParameterSlider>().SetParamID(parameter.ID);
+        ParameterSlider parameterSlider = paramSlider.GetComponent<ParameterSlider>();
+        parameterSlider.SetParamID(parameter.ID);
+        parameterSlider.UpdateSlider(parameter);
 
         paramSliders.Add(parameter.ID, paramSlider);
     }
@@ -61,22 +83,27 @@ public class ParameterManager : MonoBehaviour
     {
         Parameter parameter = ParameterRegistry.instance.GetParameter(parameterID);
         ParamCurve paramCurve = new(meshID, parameter.ID);
-        ParamPoint minPoint = new(parameter.minValue);
-        ParamPoint maxPoint = new(parameter.maxValue);
-        ParamPoint midPoint = new((parameter.maxValue + parameter.minValue) / 2f);
+        ParamPoint minPoint = new(parameter.MinValue);
+        ParamPoint maxPoint = new(parameter.MaxValue);
 
         paramCurve.ParamPoints.Add(minPoint.ID);
         paramCurve.ParamPoints.Add(maxPoint.ID);
-        paramCurve.ParamPoints.Add(midPoint.ID);
 
         parameter.ParamCurves.Add(paramCurve.ID);
 
         List<float> paramValues = new()
         {
             minPoint.ParamValue,
-            maxPoint.ParamValue,
-            midPoint.ParamValue
+            maxPoint.ParamValue
         };
+
+        if (Math.Abs(parameter.MinValue - parameter.DefaultValue) > 0.1f
+        && Math.Abs(parameter.MaxValue - parameter.DefaultValue) > 0.1f)
+        {
+            ParamPoint midPoint = new(parameter.DefaultValue);
+            paramCurve.ParamPoints.Add(midPoint.ID);
+            paramValues.Add(midPoint.ParamValue);
+        }
 
         paramSliders[parameterID].GetComponent<ParameterSlider>().CreateParamPointHandles(paramValues);
 
@@ -134,7 +161,7 @@ public class ParameterManager : MonoBehaviour
             for (int j = 0; j < paramPoints.Count; j++)
             {
                 ParamPoint point = paramPoints[j];
-                distFromPointValues[j] = Math.Abs(point.ParamValue - sliderValue);
+                distFromPointValues[j] = point.Dist(sliderValue);
 
                 if (distFromPointValues[j] > 0.01f)
                 {

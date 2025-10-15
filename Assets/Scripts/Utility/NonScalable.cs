@@ -6,7 +6,7 @@ public class NonScalable : MonoBehaviour
     {
         ScaleManager.instance.onScaleChange.AddListener(() =>
         {
-            this.transform.localScale = Vector3.one * ScaleManager.instance.OriginalScale / ScaleManager.instance.CurrentScale;
+            this.transform.localScale = Vector3.one * ScaleManager.OriginalScale / ScaleManager.instance.CurrentScale;
         });
     }
 }

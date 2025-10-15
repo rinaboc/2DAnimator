@@ -339,10 +339,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1803608288}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
+      - m_Target: {fileID: 1803608291}
+        m_TargetAssemblyTypeName: PopupWindowController, Assembly-CSharp
+        m_MethodName: CreateParameter
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -3286,6 +3286,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08746c52103917a448376573fb7d82de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  popupWindow: {fileID: 1803608291}
   ParamSliderPrefab: {fileID: 65736109725081048, guid: 9a65e218bcc716b4eba94aa7d406f534, type: 3}
   ParamWidgetContent: {fileID: 313228744}
 --- !u!4 &1368651308
@@ -4502,7 +4503,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1803608289
 Transform:
   m_ObjectHideFlags: 0
@@ -4552,6 +4553,8 @@ MonoBehaviour:
   m_minValue: 0
   m_maxValue: 0
   m_defaultValue: 0
+  m_paramName: 
+  m_errorMessage: 
 --- !u!1 &1828470114
 GameObject:
   m_ObjectHideFlags: 0
@@ -4706,7 +4709,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1895156964
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4723,10 +4726,10 @@ RectTransform:
   - {fileID: 1330522877}
   m_Father: {fileID: 307449596}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 52, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 290, y: -26}
+  m_SizeDelta: {x: 52, y: 52}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1895156965
 MonoBehaviour:

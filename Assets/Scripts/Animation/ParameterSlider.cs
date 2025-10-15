@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -14,6 +16,9 @@ public class ParameterSlider : Clickable, ISelectable
     [SerializeField] private Color SelectedColor;
     [SerializeField] private Color DefaultColor;
     [SerializeField] private Image Background;
+    [SerializeField] private TMP_Text ParameterNameText;
+    [SerializeField] private TMP_InputField ParameterValueField;
+    private InputAction DoubleClickAction;
 
     [Header("Parameter Curve Assignment")]
     [SerializeField] private Slider slider;
@@ -25,13 +30,41 @@ public class ParameterSlider : Clickable, ISelectable
     private readonly List<GameObject> paramPoints = new();
 
     private float sliderValue;
+    private string paramName;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected override void Start()
     {
         base.Start();
         clickAction = InputSystem.actions.FindAction("Click");
         clickAction.performed += OnClick;
+
+        DoubleClickAction = InputSystem.actions.FindAction("DoubleClick");
+        DoubleClickAction.performed += OnDoubleClick;
+
+        ParameterValueField.onSubmit.AddListener((context) =>
+        {
+            if (float.TryParse(ParameterValueField.text, out float input))
+                SetValue(input);
+        });
+    }
+
+    private void OnDoubleClick(InputAction.CallbackContext context)
+    {
+        if (IsInsideCollider())
+        {
+            ParameterManager.instance.StartParameterEditing(paramID);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        DoubleClickAction.performed -= OnDoubleClick;
+    }
+
+    public void SetParamName(string name)
+    {
+        paramName = name;
+        ParameterNameText.text = paramName;
     }
 
     public void SetParamID(ushort paramID)
@@ -52,6 +85,12 @@ public class ParameterSlider : Clickable, ISelectable
         Background.color = isSelected ? SelectedColor : DefaultColor;
     }
 
+    private void SetMinMaxValues(float min, float max)
+    {
+        slider.minValue = min;
+        slider.maxValue = max;
+    }
+
     public void SetAssignedCurve(bool isAssigned)
     {
         ColorBlock colorBlock = slider.colors;
@@ -67,22 +106,26 @@ public class ParameterSlider : Clickable, ISelectable
 
     public void CreateParamPointHandles(List<float> values)
     {
+        float maxValue = values.Max();
+        float minValue = values.Min();
         foreach (float value in values)
         {
             GameObject pointHandle = Instantiate(ParamPointPrefab, SlideArea);
             RectTransform pointTransform = pointHandle.GetComponent<RectTransform>();
-            pointTransform.anchorMax = pointTransform.anchorMin = new Vector2(value, pointTransform.anchorMin.y);
+            float normalizedPoint = (value - minValue) / (maxValue - minValue);
+            pointTransform.anchorMax = pointTransform.anchorMin = new Vector2(normalizedPoint, pointTransform.anchorMin.y);
             pointHandle.transform.SetAsFirstSibling();
 
             paramPoints.Add(pointHandle);
         }
+
+        SetMinMaxValues(minValue, maxValue);
     }
 
     public void OnValueChanged()
     {
         sliderValue = slider.value;
-        Debug.Log("value changed");
-
+        ParameterValueField.text = sliderValue.ToString("F1");
         AnimationManager.instance.InterpolateParameter(sliderValue, paramID);
     }
 
@@ -90,11 +133,19 @@ public class ParameterSlider : Clickable, ISelectable
     {
         sliderValue = value;
         slider.value = value;
+        ParameterValueField.text = sliderValue.ToString();
     }
 
     public float GetValue()
     {
         // return (int)Math.Round(sliderValue, MidpointRounding.AwayFromZero);
         return sliderValue;
+    }
+
+    public void UpdateSlider(Parameter parameter)
+    {
+        SetParamName(parameter.Name);
+        SetMinMaxValues(parameter.MinValue, parameter.MaxValue);
+        SetValue(parameter.DefaultValue);
     }
 }

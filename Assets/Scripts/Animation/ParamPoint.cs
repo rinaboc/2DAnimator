@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class ParamPoint
@@ -27,4 +28,6 @@ public class ParamPoint
 
     public override string ToString() => $"{ID}: paramValue {ParamValue}, position {Position}, rotation {Rotation}, scale {Scale}";
 
+    public float Dist(ParamPoint pp) => Math.Abs(this.ParamValue - pp.ParamValue);
+    public float Dist(float value) => Math.Abs(this.ParamValue - value);
 }

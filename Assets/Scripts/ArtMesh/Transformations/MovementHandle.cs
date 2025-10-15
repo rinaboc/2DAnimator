@@ -3,7 +3,6 @@ using UnityEngine.InputSystem;
 
 public class MovementHandle : DraggableHandle
 {
-    private Vector3 offset;
     private Vector3 offsetLocal;
 
     void Update()
@@ -26,7 +25,6 @@ public class MovementHandle : DraggableHandle
             Vector3 localClickPosition = ParentTransform.parent.InverseTransformPoint(ClickWorldPosition);
             offsetLocal = ParentTransform.localPosition - localClickPosition;
 
-            offset = ParentTransform.position - ClickWorldPosition;
             dragging = true;
         }
     }

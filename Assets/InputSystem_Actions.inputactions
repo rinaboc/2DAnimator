@@ -502,7 +502,7 @@
                     "name": "Cancel",
                     "type": "Button",
                     "id": "15cef263-9014-4fd5-94d9-4e4a6234a6ef",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -585,7 +585,7 @@
                     "id": "cf9adcc0-9e39-4245-852a-ee89816e8b21",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "MultiTap",
+                    "interactions": "",
                     "initialStateCheck": false
                 }
             ],
@@ -1056,7 +1056,7 @@
                     "name": "",
                     "id": "99aadcc6-26f9-4853-b243-2e7478a30127",
                     "path": "<Mouse>/leftButton",
-                    "interactions": "",
+                    "interactions": "MultiTap",
                     "processors": "",
                     "groups": "",
                     "action": "DoubleClick",
@@ -1078,7 +1078,7 @@
                     "name": "",
                     "id": "82f5b2b8-56a1-48c7-b7d6-e5988eb2fa70",
                     "path": "<Touchscreen>/touch*/press",
-                    "interactions": "",
+                    "interactions": "Hold",
                     "processors": "",
                     "groups": "Touch",
                     "action": "DoubleClick",
