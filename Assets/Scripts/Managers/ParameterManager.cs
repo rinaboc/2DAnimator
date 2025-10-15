@@ -13,6 +13,13 @@ public class ParameterManager : MonoBehaviour
     private readonly Dictionary<ushort, GameObject> paramSliders = new();
 
     private int _selectedParamID = -1;
+    public ushort SelectedParamID
+    {
+        get
+        {
+            return _selectedParamID >= 0 ? (ushort)_selectedParamID : throw new Exception("No parameters are selected");
+        }
+    }
 
     void Awake()
     {
@@ -41,7 +48,7 @@ public class ParameterManager : MonoBehaviour
         }
     }
 
-    public void CreateParameter(int min, int max, int defaultValue)
+    public void CreateParameter(float min, float max, float defaultValue)
     {
         Parameter parameter = new(min, max, defaultValue);
         GameObject paramSlider = Instantiate(ParamSliderPrefab, ParamWidgetContent);

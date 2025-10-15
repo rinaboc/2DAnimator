@@ -5,13 +5,13 @@ public class Parameter
     private static ushort _paramCounter = 0;
 
     public readonly ushort ID;
-    public int minValue;
-    public int maxValue;
-    public int defaultValue;
+    public float minValue;
+    public float maxValue;
+    public float defaultValue;
 
     public readonly List<ushort> ParamCurves;
 
-    public Parameter(int min, int max, int defaultValue, bool autoRegister = true)
+    public Parameter(float min, float max, float defaultValue, bool autoRegister = true)
     {
         ID = _paramCounter++;
         minValue = min;
