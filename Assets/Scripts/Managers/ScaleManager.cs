@@ -6,11 +6,11 @@ public class ScaleManager : MonoBehaviour
     [SerializeField] private RectTransform ViewportScaledTransform;
     public UnityEvent onScaleChange = new();
 
-    public float MaxScale = 800f;
-    public float MinScale = 50f;
-    public float ScaleSpeed = 0.15f;
+    public const float MaxScale = 800f;
+    public const float MinScale = 50f;
+    public const float ScaleSpeed = 0.15f;
 
-    public float OriginalScale = 100f;
+    public const float OriginalScale = 100f;
     private float _currentScale;
     public float CurrentScale
     {

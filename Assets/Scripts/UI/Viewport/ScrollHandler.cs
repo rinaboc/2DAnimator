@@ -68,7 +68,7 @@ public class ScrollHandler : MonoBehaviour
             Vector3 localPoint = ViewportScaledTransform.InverseTransformPoint(mouseWorldPos);
             Vector3 worldBefore = ViewportScaledTransform.TransformPoint(localPoint);
 
-            ViewportScale += ScaleManager.instance.ScaleSpeed * scrollValue.y * ViewportScale;
+            ViewportScale += ScaleManager.ScaleSpeed * scrollValue.y * ViewportScale;
 
             Vector3 worldAfter = ViewportScaledTransform.TransformPoint(localPoint);
             ViewportScaledTransform.position += worldBefore - worldAfter;
@@ -116,8 +116,8 @@ public class ScrollHandler : MonoBehaviour
             if (difference < 0f)
             {
                 float scaleAmount = 1f / (float)Math.Sqrt(Math.Abs(difference));
-                if (scaleAmount < 1f - ScaleManager.instance.ScaleSpeed)
-                    scaleAmount = 1f - ScaleManager.instance.ScaleSpeed;
+                if (scaleAmount < 1f - ScaleManager.ScaleSpeed)
+                    scaleAmount = 1f - ScaleManager.ScaleSpeed;
                 ViewportScale *= scaleAmount;
             }
             else

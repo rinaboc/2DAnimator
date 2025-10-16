@@ -18,6 +18,9 @@ public class AnimationManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Interpolate parameter point values assigned to the selected parameter and set the interpolated transformations on the meshes.
+    /// </summary>
     public void InterpolateParameter(float value, ushort paramID)
     {
         ParameterRegistry parameterRegistry = ParameterRegistry.instance;
@@ -35,6 +38,7 @@ public class AnimationManager : MonoBehaviour
                 if (value > orderedPoints[i].ParamValue) continue;
 
                 maxP = i;
+                minP = i;
                 if (i <= 0) break;
 
                 minP = i - 1;
@@ -47,24 +51,20 @@ public class AnimationManager : MonoBehaviour
 
             GameObject artMeshObject = MeshRegistry.instance.GetArtMesh(paramCurve.MeshID);
             MeshData meshData = MeshRegistry.instance.GetMeshData(paramCurve.MeshID);
-
-            if (minP == -1) // slider is at left corner
-            {
-                artMeshObject.transform.localPosition = maxPoint.Position;
-                break;
-            }
+            ArtMesh artMesh = artMeshObject.GetComponent<ArtMesh>();
 
             ParamPoint minPoint = orderedPoints[minP];
 
-            float t = (value - minPoint.ParamValue) / (maxPoint.ParamValue - minPoint.ParamValue);
+            float t = maxP != minP ? // not left end of the slider
+                (value - minPoint.ParamValue) / (maxPoint.ParamValue - minPoint.ParamValue) : 0f;
 
-            Vector3 interpPos = (1f - t) * minPoint.Position + t * maxPoint.Position;
-            Vector3 interpScale = (1f - t) * minPoint.Scale + t * maxPoint.Scale;
+            Vector3 interpPos = Vector3.Lerp(minPoint.Position, maxPoint.Position, t);
+            Vector3 interpScale = Vector3.Lerp(minPoint.Scale, maxPoint.Scale, t);
             Quaternion interpRotation = Quaternion.Lerp(minPoint.Rotation, maxPoint.Rotation, t);
 
-            artMeshObject.transform.localPosition = meshData.Position + interpPos;
-            artMeshObject.GetComponent<ArtMesh>().ScaleArtMesh(meshData.Scale, meshData.Scale + interpScale);
-            artMeshObject.GetComponent<ArtMesh>().RotateArtMesh(meshData.Rotation, interpRotation);
+            artMesh.MoveArtMesh(meshData.Position + interpPos);
+            artMesh.ScaleArtMesh(meshData.Scale + interpScale);
+            artMesh.RotateArtMesh(meshData.Rotation * interpRotation);
         }
     }
 }

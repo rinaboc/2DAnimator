@@ -3,16 +3,18 @@ using UnityEngine.InputSystem;
 
 public class MovementHandle : DraggableHandle
 {
-    [SerializeField] private Transform ArtObjectTransform;
-    private Vector3 offset;
+    private Vector3 offsetLocal;
 
     void Update()
     {
         if (dragging)
         {
-            Vector3 mouseWorldPos = cam.ScreenToWorldPoint(pointPositionAction.ReadValue<Vector2>());
-            mouseWorldPos.z = ArtObjectTransform.position.z;
-            ArtObjectTransform.position = mouseWorldPos + offset;
+            // ParentTransform.gameObject.GetComponent<ArtMesh>().MoveArtMesh(ClickWorldPosition + offset);
+            Vector3 localClickPosition = ParentTransform.parent.InverseTransformPoint(ClickWorldPosition);
+
+            ParentTransform.gameObject
+                .GetComponent<ArtMesh>()
+                .UpdateTransform(localClickPosition + offsetLocal, TransformType.POSITION);
         }
     }
 
@@ -20,9 +22,9 @@ public class MovementHandle : DraggableHandle
     {
         if (IsInsideCollider())
         {
-            Vector3 mouseWorldPos = cam.ScreenToWorldPoint(pointPositionAction.ReadValue<Vector2>());
-            mouseWorldPos.z = ArtObjectTransform.position.z;
-            offset = ArtObjectTransform.position - mouseWorldPos;
+            Vector3 localClickPosition = ParentTransform.parent.InverseTransformPoint(ClickWorldPosition);
+            offsetLocal = ParentTransform.localPosition - localClickPosition;
+
             dragging = true;
         }
     }
@@ -31,7 +33,7 @@ public class MovementHandle : DraggableHandle
     {
         if (dragging)
         {
-            ArtObjectTransform.gameObject.GetComponent<ArtMesh>().UpdateTransform(ArtObjectTransform.localPosition, TransformType.POSITION);
+            ParentTransform.gameObject.GetComponent<ArtMesh>().SaveTransform(TransformType.POSITION);
         }
         dragging = false;
     }

@@ -13,7 +13,6 @@ public class LayerInteractionController : Clickable, ISelectable
     [SerializeField] private TMP_InputField LayerInput;
 
     private InputAction DoubleClickAction;
-
     protected override void Start()
     {
         base.Start();
@@ -24,9 +23,9 @@ public class LayerInteractionController : Clickable, ISelectable
         LayerInput.enabled = false;
     }
 
-    private void OnDestroy()
+    void OnDestroy()
     {
-        DoubleClickAction.performed -= OnDoubleClick;
+        DoubleClickAction.Dispose();
     }
 
     public void SetSelected(bool isSelected)

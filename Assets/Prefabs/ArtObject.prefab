@@ -207,7 +207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba5b1e35799a3a643aa8fd7f9e11033b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ParentTransform: {fileID: 0}
+  ParentTransform: {fileID: 6809835954876336752}
   ArtObjectTransform: {fileID: 6809835954876336752}
 --- !u!65 &6563170548079002652
 BoxCollider:

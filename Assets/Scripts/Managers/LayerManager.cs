@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
+using System;
 
 public class LayerManager : MonoBehaviour
 {
@@ -12,6 +14,8 @@ public class LayerManager : MonoBehaviour
     [Header("UI settings")]
     [SerializeField] private GameObject UIArtLayerPrefab;
     [SerializeField] private GameObject UILayersContent;
+
+    private InputAction CancelAction;
 
     /// <summary>
     /// Currently selected mesh data's id
@@ -44,6 +48,17 @@ public class LayerManager : MonoBehaviour
 
     public static LayerManager instance;
 
+    void Start()
+    {
+        CancelAction = InputSystem.actions.FindAction("Cancel");
+        CancelAction.performed += OnCancel;
+    }
+
+    void OnDestroy()
+    {
+        CancelAction.Dispose();
+    }
+
     void Awake()
     {
         if (instance == null)
@@ -54,6 +69,11 @@ public class LayerManager : MonoBehaviour
         {
             Destroy(this);
         }
+    }
+
+    private void OnCancel(InputAction.CallbackContext context)
+    {
+        DeselectCurrentUIArtLayer();
     }
 
     /// <summary>
@@ -103,11 +123,7 @@ public class LayerManager : MonoBehaviour
     public void SelectUIArtLayer(int id)
     {
         // deselect previous layer
-        if (SelectedUILayer != null)
-        {
-            SelectedUILayer.GetComponentInChildren<LayerInteractionController>().SetSelected(false);
-            SelectedArtMesh.SetSelected(false);
-        }
+        DeselectCurrentUIArtLayer();
 
         // select the new layer
         _selectedLayer = id;
@@ -118,6 +134,15 @@ public class LayerManager : MonoBehaviour
 
         ParameterManager.instance.HighlightCreatedCurves(SelectedArtMesh.MeshID);
 
+    }
+
+    public void DeselectCurrentUIArtLayer()
+    {
+        if (SelectedUILayer != null)
+        {
+            SelectedUILayer.GetComponentInChildren<LayerInteractionController>().SetSelected(false);
+            SelectedArtMesh.SetSelected(false);
+        }
     }
 
     public void MoveUIArtLayerUp()

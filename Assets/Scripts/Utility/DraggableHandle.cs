@@ -30,8 +30,7 @@ abstract public class DraggableHandle : Clickable
 
     protected void OnDestroy()
     {
-        clickAndDragAction.started -= OnClickStarted;
-        clickAndDragAction.performed -= OnDragFinished;
+        clickAndDragAction.Dispose();
     }
 
     /// <summary>
