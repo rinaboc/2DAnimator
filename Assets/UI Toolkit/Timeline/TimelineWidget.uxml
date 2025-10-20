@@ -1,0 +1,6 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/UI%20Toolkit/Timeline/timeline.uss?fileID=7433441132597879392&amp;guid=d36d78f2cfd06b544ab0900029c00752&amp;type=3#timeline" />
+    <ui:VisualElement name="Timeline" style="width: 790px; height: 200px; background-color: rgb(34, 34, 34); right: 0; bottom: 0; position: absolute;">
+        <TimelineSlider />
+    </ui:VisualElement>
+</ui:UXML>

@@ -573,10 +573,6 @@ MonoBehaviour:
   onScaleChange:
     m_PersistentCalls:
       m_Calls: []
-  MaxScale: 1000
-  MinScale: 20
-  ScaleSpeed: 0.15
-  OriginalScale: 100
 --- !u!1 &146342146
 GameObject:
   m_ObjectHideFlags: 0
