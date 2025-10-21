@@ -1,12 +1,14 @@
 using System;
-using UnityEditor.UIElements;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 [UxmlElement]
 public partial class TimelineSlider : VisualElement
 {
-    private int m_maxFrames = 20;
+    private float _sliderContainerWidth;
+    private float _sliderWidth;
+    private int m_maxFrames = 24;
     [UxmlAttribute]
     public int MaxFrames
     {
@@ -27,14 +29,15 @@ public partial class TimelineSlider : VisualElement
             {
                 newValue = m_maxFrames;
             }
-            else if (newValue < 0)
+            else if (newValue <= 0)
             {
-                newValue = 0;
+                newValue = 1;
             }
 
             m_currentFrame = newValue;
             UpdateHandlePosition();
             UpdateFrameField();
+            HighlightBarAt(m_currentFrame);
         }
     }
 
@@ -43,18 +46,76 @@ public partial class TimelineSlider : VisualElement
     Label m_Label;
     VisualElement m_sliderContainer;
     VisualElement m_sliderHandle;
+    VisualElement m_topSection;
+
+    List<VisualElement>[] m_frameBars;
 
     public TimelineSlider()
     {
+        m_topSection = new();
+        m_topSection.AddToClassList("top-section");
+        Add(m_topSection);
+
+        m_frameBars = new List<VisualElement>[m_maxFrames];
+        for (int i = 0; i < m_maxFrames; i++)
+        {
+            m_frameBars[i] = new List<VisualElement>();
+        }
+
         CreateHeader();
         CreateSlider();
         CreateKeyframeContainers();
     }
 
+    int previousHighlightIdx = 0;
+    private void HighlightBarAt(int frame)
+    {
+        foreach (var key in m_frameBars[previousHighlightIdx])
+        {
+            key.RemoveFromClassList("highlight-cell");
+        }
+
+        foreach (var key in m_frameBars[frame - 1])
+        {
+            key.AddToClassList("highlight-cell");
+        }
+
+        previousHighlightIdx = frame - 1;
+    }
+
+
     private void CreateKeyframeContainers()
     {
         ScrollView keyframeContainer = new();
         keyframeContainer.AddToClassList("keyframe-container");
+        keyframeContainer.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+
+        for (int i = 0; i < 10; i++)
+        {
+            VisualElement keyframeLine = new();
+            keyframeLine.AddToClassList("parameter-keys-container");
+            keyframeLine.Add(new Label("parameter name"));
+
+            for (int j = 1; j < MaxFrames; j++)
+            {
+                VisualElement key = new();
+                key.AddToClassList("parameter-key");
+                keyframeLine.Add(key);
+
+                if (j == 1) key.AddToClassList("highlight-cell");
+
+                m_frameBars[j - 1].Add(key);
+
+                m_sliderHandle.RegisterCallbackOnce<GeometryChangedEvent>(
+                (evt) =>
+                {
+                    key.style.width = _sliderWidth;
+                }
+                );
+            }
+
+            keyframeContainer.Add(keyframeLine);
+        }
 
         this.Add(keyframeContainer);
     }
@@ -66,15 +127,24 @@ public partial class TimelineSlider : VisualElement
 
         m_sliderHandle = new();
         m_sliderHandle.AddToClassList("slider-handle");
+        m_sliderHandle.RegisterCallbackOnce<GeometryChangedEvent>(
+            (evt) =>
+            {
+                _sliderContainerWidth = m_sliderContainer.resolvedStyle.width;
+                _sliderWidth = _sliderContainerWidth / MaxFrames;
+                m_sliderHandle.style.width = _sliderWidth;
+            }
+        );
 
-        m_sliderHandle.RegisterCallback<PointerUpEvent>(OnDropHandle);
-        m_sliderHandle.RegisterCallback<PointerDownEvent>(OnGrabHandle);
+        m_sliderContainer.RegisterCallback<PointerUpEvent>(OnDropHandle);
+        m_sliderContainer.RegisterCallback<PointerDownEvent>(OnGrabHandle);
 
-        this.RegisterCallback<PointerMoveEvent>(OnMoveHandle);
+
+        m_sliderContainer.RegisterCallback<PointerMoveEvent>(OnMoveHandle);
 
         m_sliderContainer.Add(m_sliderHandle);
 
-        this.Add(m_sliderContainer);
+        m_topSection.Add(m_sliderContainer);
     }
 
     private void OnMoveHandle(PointerMoveEvent evt)
@@ -93,18 +163,15 @@ public partial class TimelineSlider : VisualElement
     private void OnGrabHandle(PointerDownEvent evt)
     {
         m_sliderGrabbed = true;
-
         FrameFromPointer(evt.localPosition.x);
-
-        evt.StopPropagation();
     }
 
     private void FrameFromPointer(float x)
     {
-        float width = m_sliderContainer.resolvedStyle.width;
+        float width = _sliderContainerWidth;
         if (width <= 0) return;
 
-        int newFrame = (int)Math.Round(x / width * m_maxFrames);
+        int newFrame = (int)Math.Round(x / width * (MaxFrames + 1));
         if (CurrentFrame != newFrame)
         {
             CurrentFrame = newFrame;
@@ -113,13 +180,10 @@ public partial class TimelineSlider : VisualElement
 
     private void UpdateHandlePosition()
     {
-        float width = m_sliderContainer.resolvedStyle.width;
-        float handleWidth = m_sliderHandle.resolvedStyle.width;
+        float width = _sliderContainerWidth;
 
-        float x = (float)CurrentFrame / m_maxFrames * width - handleWidth * 0.5f;
-        m_sliderHandle.style.left = Mathf.Clamp(x, 0, width - handleWidth);
-
-        m_sliderHandle.MarkDirtyRepaint();
+        float x = (CurrentFrame - 1) * _sliderWidth;
+        m_sliderHandle.style.left = Mathf.Clamp(x, 0, width - _sliderWidth);
     }
 
     private void CreateHeader()
@@ -129,18 +193,30 @@ public partial class TimelineSlider : VisualElement
         m_Label = new Label("Timeline");
         m_currentFrameField = new IntegerField();
         m_currentFrameField.AddToClassList("slider-inputfield");
+        m_currentFrameField.value = 1;
 
         header.Add(m_Label);
         header.Add(m_currentFrameField);
 
-        Add(header);
+        m_topSection.Add(header);
 
-        m_currentFrameField.RegisterValueChangedCallback(OnFrameChanged);
+        m_currentFrameField.RegisterCallback<FocusOutEvent>(OnFrameChanged);
     }
 
-    private void OnFrameChanged(ChangeEvent<int> evt)
+    private void OnFrameChanged(FocusOutEvent evt)
     {
-        CurrentFrame = evt.newValue;
+        if (m_currentFrameField.value <= 0)
+        {
+            m_currentFrameField.value = 0;
+            return;
+        }
+        else if (m_currentFrameField.value > MaxFrames)
+        {
+            m_currentFrameField.value = MaxFrames;
+            return;
+        }
+
+        CurrentFrame = m_currentFrameField.value;
     }
 
     private void UpdateFrameField()

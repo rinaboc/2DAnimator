@@ -1,18 +1,38 @@
+.top-section {
+    height: 60%;
+    width: 80%;
+    align-self: flex-end;
+}
+
 .header {
     flex-direction: row;
     align-items: stretch;
     justify-content: space-between;
     color: rgb(169, 169, 168);
+    height: 100%;
 }
 
 .slider-container {
     background-color: rgb(51, 51, 51);
+    height: 60%;
+    border-bottom-width: 1px;
+    border-left-color: rgb(22, 22, 22);
+    border-right-color: rgb(22, 22, 22);
+    border-top-color: rgb(22, 22, 22);
+    border-bottom-color: rgb(22, 22, 22);
 }
 
 .slider-handle {
-    width: 20px;
-    height: 20px;
+    height: 100%;
     background-color: rgb(169, 169, 168);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-left-color: rgb(0, 0, 0);
+    border-right-color: rgb(0, 0, 0);
+    border-top-color: rgb(0, 0, 0);
+    border-bottom-color: rgb(0, 0, 0);
 }
 
 .slider-inputfield {
@@ -34,4 +54,45 @@
 }
 
 .keyframe-container {
+}
+
+.parameter-keys-container {
+    background-color: rgb(51, 51, 51);
+    height: 30px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(0, 0, 0);
+    border-right-color: rgb(0, 0, 0);
+    border-top-color: rgb(0, 0, 0);
+    border-bottom-color: rgb(0, 0, 0);
+    flex-direction: row;
+}
+
+.parameter-keys-container > .unity-label {
+    color: rgb(169, 169, 168);
+    width: 20%;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-right: 8px;
+    padding-left: 8px;
+    border-right-width: 1px;
+    border-left-color: rgb(0, 0, 0);
+    border-right-color: rgb(0, 0, 0);
+    border-top-color: rgb(0, 0, 0);
+    border-bottom-color: rgb(0, 0, 0);
+}
+
+.parameter-key {
+    width: 20px;
+    height: 100%;
+    border-right-width: 1px;
+    border-left-color: rgb(43, 43, 43);
+    border-right-color: rgb(43, 43, 43);
+    border-top-color: rgb(43, 43, 43);
+    border-bottom-color: rgb(43, 43, 43);
+}
+
+.highlight-cell {
+    background-color: rgb(72, 72, 72);
 }
