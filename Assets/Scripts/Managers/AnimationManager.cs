@@ -23,7 +23,7 @@ public class AnimationManager : MonoBehaviour
     /// </summary>
     public void InterpolateParameter(float value, ushort paramID)
     {
-        ParameterRegistry parameterRegistry = ParameterRegistry.instance;
+        ParameterRegistry parameterRegistry = ParameterRegistry.Instance;
         Parameter parameter = parameterRegistry.GetParameter(paramID);
         List<ParamCurve> paramCurves = parameterRegistry.GetParamCurve(parameter.ParamCurves);
 
@@ -49,8 +49,8 @@ public class AnimationManager : MonoBehaviour
 
             ParamPoint maxPoint = orderedPoints[maxP];
 
-            GameObject artMeshObject = MeshRegistry.instance.GetArtMesh(paramCurve.MeshID);
-            MeshData meshData = MeshRegistry.instance.GetMeshData(paramCurve.MeshID);
+            GameObject artMeshObject = MeshRegistry.Instance.GetArtMesh(paramCurve.MeshID);
+            MeshData meshData = MeshRegistry.Instance.GetMeshData(paramCurve.MeshID);
             ArtMesh artMesh = artMeshObject.GetComponent<ArtMesh>();
 
             ParamPoint minPoint = orderedPoints[minP];

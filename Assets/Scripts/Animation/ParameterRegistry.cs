@@ -2,23 +2,32 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class ParameterRegistry : MonoBehaviour
+[CreateAssetMenu(fileName = "ParameterRegistry", menuName = "Global/Parameter Registry")]
+public class ParameterRegistry : ScriptableObject
 {
-    private readonly Dictionary<ushort, Parameter> Parameters = new();
-    private readonly Dictionary<ushort, ParamCurve> ParamCurves = new();
-    private readonly Dictionary<ushort, ParamPoint> ParamPoints = new();
+    [SerializeField, HideInInspector]
+    private Dictionary<ushort, Parameter> Parameters = new();
+    [SerializeField, HideInInspector]
+    private Dictionary<ushort, ParamCurve> ParamCurves = new();
+    [SerializeField, HideInInspector]
+    private Dictionary<ushort, ParamPoint> ParamPoints = new();
 
-    public static ParameterRegistry instance;
-
-    void Awake()
+    private static ParameterRegistry _instance;
+    public static ParameterRegistry Instance
     {
-        if (instance == null)
+        get
         {
-            instance = this;
-        }
-        else if (instance != this)
-        {
-            Destroy(this);
+            if (_instance == null)
+            {
+                _instance = Resources.Load<ParameterRegistry>("ParameterRegistry");
+
+                if (_instance == null)
+                {
+                    Debug.LogError("ParameterRegistry asset not found in Resources!");
+                }
+            }
+
+            return _instance;
         }
     }
 

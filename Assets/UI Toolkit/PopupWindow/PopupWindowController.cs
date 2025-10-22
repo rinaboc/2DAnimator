@@ -82,7 +82,7 @@ public class PopupWindowController : MonoBehaviour
 
         try
         {
-            Parameter parameter = ParameterRegistry.instance.GetParameter(_editedParamID);
+            Parameter parameter = ParameterRegistry.Instance.GetParameter(_editedParamID);
 
             parameter.MinValue = m_minValue;
             parameter.MaxValue = m_maxValue;

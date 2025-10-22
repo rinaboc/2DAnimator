@@ -16,7 +16,7 @@ public class ArtMesh : MonoBehaviour, ISelectable
 
     void Start()
     {
-        SetDrawOrder(MeshRegistry.instance.GetMeshData(MeshID).drawOrder);
+        SetDrawOrder(MeshRegistry.Instance.GetMeshData(MeshID).drawOrder);
     }
 
     public ArtMesh SetMeshID(ushort id)
@@ -48,8 +48,8 @@ public class ArtMesh : MonoBehaviour, ISelectable
 
     public void SwapDrawOrder(ArtMesh swap)
     {
-        ushort newDrawOrder = MeshRegistry.instance.GetMeshData(swap.MeshID).drawOrder;
-        swap.SetDrawOrder(MeshRegistry.instance.GetMeshData(MeshID).drawOrder);
+        ushort newDrawOrder = MeshRegistry.Instance.GetMeshData(swap.MeshID).drawOrder;
+        swap.SetDrawOrder(MeshRegistry.Instance.GetMeshData(MeshID).drawOrder);
         this.SetDrawOrder(newDrawOrder);
 
     }
@@ -58,7 +58,7 @@ public class ArtMesh : MonoBehaviour, ISelectable
     {
         try
         {
-            MeshData meshData = MeshRegistry.instance.GetMeshData(MeshID);
+            MeshData meshData = MeshRegistry.Instance.GetMeshData(MeshID);
             meshData.drawOrder = newDrawOrder;
 
             Material _meshMaterial = ArtMeshObject.GetComponent<MeshRenderer>().material;
@@ -89,7 +89,7 @@ public class ArtMesh : MonoBehaviour, ISelectable
 
     public void LoadTransformationFromMeshData()
     {
-        MeshData meshData = MeshRegistry.instance.GetMeshData(MeshID);
+        MeshData meshData = MeshRegistry.Instance.GetMeshData(MeshID);
 
         this.transform.position = meshData.Position;
         ArtMeshObject.transform.localScale = meshData.Scale;
@@ -149,9 +149,9 @@ public class ArtMesh : MonoBehaviour, ISelectable
     /// <param name="value">transformation's value</param>
     public void SaveTransform(TransformType type)
     {
-        MeshData meshData = MeshRegistry.instance.GetMeshData(MeshID);
+        MeshData meshData = MeshRegistry.Instance.GetMeshData(MeshID);
 
-        bool areParametersAssigned = ParameterRegistry.instance.GetAssignedParamIDsOfMesh(meshData.ID).Count > 0;
+        bool areParametersAssigned = ParameterRegistry.Instance.GetAssignedParamIDsOfMesh(meshData.ID).Count > 0;
 
         object updatedAnimationData = null;
         switch (type)

@@ -28,7 +28,7 @@ public class LayerManager : MonoBehaviour
         {
             if (_selectedLayer >= 0)
             {
-                return MeshRegistry.instance.GetUILayer((ushort)_selectedLayer).ParentObj;
+                return MeshRegistry.Instance.GetUILayer((ushort)_selectedLayer).ParentObj;
             }
             else return null;
         }
@@ -40,7 +40,7 @@ public class LayerManager : MonoBehaviour
         {
             if (_selectedLayer >= 0)
             {
-                return MeshRegistry.instance.GetArtMesh((ushort)_selectedLayer).GetComponent<ArtMesh>();
+                return MeshRegistry.Instance.GetArtMesh((ushort)_selectedLayer).GetComponent<ArtMesh>();
             }
             else return null;
         }
@@ -82,7 +82,7 @@ public class LayerManager : MonoBehaviour
     public void CreateArtMesh(Texture2D texture, string path)
     {
         MeshData newMesh = new(path);
-        MeshRegistry.instance.RegisterMeshData(newMesh);
+        MeshRegistry.Instance.RegisterMeshData(newMesh);
 
         // create ArtObject inside viewport and assign the image to its sprite
         GameObject newArtObject = Instantiate(ArtObjectPrefab, ViewportScale.transform, false);
@@ -92,7 +92,7 @@ public class LayerManager : MonoBehaviour
             .SetMeshID(newMesh.ID)
             .SetSelected(false);
 
-        MeshRegistry.instance.RegisterArtMeshObj(newMesh.ID, newArtObject);
+        MeshRegistry.Instance.RegisterArtMeshObj(newMesh.ID, newArtObject);
 
         CreateUIArtLayer(newMesh);
         SelectUIArtLayer(newMesh.ID);
@@ -117,7 +117,7 @@ public class LayerManager : MonoBehaviour
             SelectUIArtLayer(meshData.ID);
         });
 
-        MeshRegistry.instance.RegisterUILayer(meshData.ID, newArtLayer.GetComponentInChildren<LayerInteractionController>());
+        MeshRegistry.Instance.RegisterUILayer(meshData.ID, newArtLayer.GetComponentInChildren<LayerInteractionController>());
     }
 
     public void SelectUIArtLayer(int id)
@@ -155,7 +155,7 @@ public class LayerManager : MonoBehaviour
         if (artLayerIndex > 0)
         {
             int swappedID = UILayersContent.transform.GetChild(artLayerIndex - 1).gameObject.GetComponentInChildren<LayerInteractionController>().LayerID;
-            ArtMesh swappedMesh = MeshRegistry.instance.GetArtMesh((ushort)swappedID).GetComponent<ArtMesh>();
+            ArtMesh swappedMesh = MeshRegistry.Instance.GetArtMesh((ushort)swappedID).GetComponent<ArtMesh>();
             SelectedArtMesh.SwapDrawOrder(swappedMesh);
 
             selectedArtLayer.SetSiblingIndex(artLayerIndex - 1);
@@ -173,7 +173,7 @@ public class LayerManager : MonoBehaviour
         if (artLayerIndex < UILayersContent.transform.childCount - 1)
         {
             int swappedID = UILayersContent.transform.GetChild(artLayerIndex + 1).gameObject.GetComponentInChildren<LayerInteractionController>().LayerID;
-            ArtMesh swappedMesh = MeshRegistry.instance.GetArtMesh((ushort)swappedID).GetComponent<ArtMesh>();
+            ArtMesh swappedMesh = MeshRegistry.Instance.GetArtMesh((ushort)swappedID).GetComponent<ArtMesh>();
             SelectedArtMesh.SwapDrawOrder(swappedMesh);
 
             selectedArtLayer.SetSiblingIndex(artLayerIndex + 1);
@@ -186,9 +186,9 @@ public class LayerManager : MonoBehaviour
 
         ParameterManager.instance.DeleteParamPointsOfMesh(SelectedArtMesh.MeshID);
 
-        MeshRegistry.instance.DeleteArtMeshObj((ushort)_selectedLayer);
-        MeshRegistry.instance.DeleteUILayer((ushort)_selectedLayer);
-        MeshRegistry.instance.DeleteMeshData((ushort)_selectedLayer);
+        MeshRegistry.Instance.DeleteArtMeshObj((ushort)_selectedLayer);
+        MeshRegistry.Instance.DeleteUILayer((ushort)_selectedLayer);
+        MeshRegistry.Instance.DeleteMeshData((ushort)_selectedLayer);
 
         // deselect
         _selectedLayer = -1;

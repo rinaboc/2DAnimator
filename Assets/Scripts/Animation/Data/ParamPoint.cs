@@ -23,7 +23,7 @@ public class ParamPoint
 
     public void Register()
     {
-        ParameterRegistry.instance.RegisterParamPoint(this);
+        ParameterRegistry.Instance.RegisterParamPoint(this);
     }
 
     public override string ToString() => $"{ID}: paramValue {ParamValue}, position {Position}, rotation {Rotation}, scale {Scale}";

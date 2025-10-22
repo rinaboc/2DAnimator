@@ -59,7 +59,7 @@ public class LayerInteractionController : Clickable, ISelectable
     {
         try
         {
-            MeshData meshData = MeshRegistry.instance.GetMeshData(LayerID);
+            MeshData meshData = MeshRegistry.Instance.GetMeshData(LayerID);
             meshData.name = LayerInput.text;
             Debug.Log(meshData.ToString());
         }

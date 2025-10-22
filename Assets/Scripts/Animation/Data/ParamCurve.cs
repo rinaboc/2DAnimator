@@ -23,6 +23,6 @@ public class ParamCurve
 
     public void Register()
     {
-        ParameterRegistry.instance.RegisterParamCurve(this);
+        ParameterRegistry.Instance.RegisterParamCurve(this);
     }
 }

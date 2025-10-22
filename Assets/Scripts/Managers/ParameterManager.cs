@@ -64,7 +64,7 @@ public class ParameterManager : MonoBehaviour
     /// </summary>
     public void StartParameterEditing(ushort paramID)
     {
-        Parameter parameter = ParameterRegistry.instance.GetParameter(paramID);
+        Parameter parameter = ParameterRegistry.Instance.GetParameter(paramID);
         popupWindow.EditParameter(parameter);
     }
 
@@ -81,7 +81,7 @@ public class ParameterManager : MonoBehaviour
 
     public void CreateParamPoints(ushort parameterID, ushort meshID)
     {
-        Parameter parameter = ParameterRegistry.instance.GetParameter(parameterID);
+        Parameter parameter = ParameterRegistry.Instance.GetParameter(parameterID);
         ParamCurve paramCurve = new(meshID, parameter.ID);
         ParamPoint minPoint = new(parameter.MinValue);
         ParamPoint maxPoint = new(parameter.MaxValue);
@@ -112,7 +112,7 @@ public class ParameterManager : MonoBehaviour
 
     public void DeleteParamPointsOfMesh(ushort meshID)
     {
-        ParameterRegistry.instance.DeleteAnimationDataOfMesh(meshID);
+        ParameterRegistry.Instance.DeleteAnimationDataOfMesh(meshID);
         HighlightCreatedCurves(meshID);
     }
 
@@ -129,7 +129,7 @@ public class ParameterManager : MonoBehaviour
 
     public void HighlightCreatedCurves(ushort meshID)
     {
-        List<ushort> assignedParams = ParameterRegistry.instance.GetAssignedParamIDsOfMesh(meshID);
+        List<ushort> assignedParams = ParameterRegistry.Instance.GetAssignedParamIDsOfMesh(meshID);
 
         foreach (var item in paramSliders)
         {
@@ -141,7 +141,7 @@ public class ParameterManager : MonoBehaviour
     {
         if (_selectedParamID < 0) return;
 
-        ParameterRegistry parameterRegistry = ParameterRegistry.instance;
+        ParameterRegistry parameterRegistry = ParameterRegistry.Instance;
 
         Parameter currentParam = parameterRegistry.GetParameter((ushort)_selectedParamID);
         List<ParamCurve> currentParamCurves = parameterRegistry.GetParamCurve(currentParam.ParamCurves);

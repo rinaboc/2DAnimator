@@ -51,7 +51,7 @@ public class Parameter
 
         if (autoRegister)
         {
-            ParameterRegistry.instance.RegisterParameter(this);
+            ParameterRegistry.Instance.RegisterParameter(this);
         }
     }
 }

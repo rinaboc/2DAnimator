@@ -2,23 +2,33 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MeshRegistry : MonoBehaviour
+[CreateAssetMenu(fileName = "MeshRegistry", menuName = "Global/Mesh Registry")]
+
+public class MeshRegistry : ScriptableObject
 {
-    private readonly Dictionary<ushort, GameObject> ArtMeshes = new();
-    private readonly Dictionary<ushort, LayerInteractionController> UILayers = new();
-    private readonly Dictionary<ushort, MeshData> MeshDataEntries = new();
+    [SerializeField, HideInInspector]
+    private Dictionary<ushort, GameObject> ArtMeshes = new();
+    [SerializeField, HideInInspector]
+    private Dictionary<ushort, LayerInteractionController> UILayers = new();
+    [SerializeField, HideInInspector]
+    private Dictionary<ushort, MeshData> MeshDataEntries = new();
 
-    public static MeshRegistry instance;
-
-    void Awake()
+    private static MeshRegistry _instance;
+    public static MeshRegistry Instance
     {
-        if (instance == null)
+        get
         {
-            instance = this;
-        }
-        else if (instance != this)
-        {
-            Destroy(this);
+            if (_instance == null)
+            {
+                _instance = Resources.Load<MeshRegistry>("MeshRegistry");
+
+                if (_instance == null)
+                {
+                    Debug.LogError("MeshRegistry asset not found in Resources!");
+                }
+            }
+
+            return _instance;
         }
     }
 
