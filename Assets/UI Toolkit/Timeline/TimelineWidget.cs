@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -8,6 +9,7 @@ public class TimelineWidget : MonoBehaviour
 
     private VisualElement m_TimelineDrawer;
     private VisualElement m_Timeline;
+    private TimelineSlider m_TimelineSlider;
     private Button m_OpenButton;
 
     private bool m_widgetOpen = false;
@@ -20,11 +22,15 @@ public class TimelineWidget : MonoBehaviour
         m_TimelineDrawer = ui.Q<VisualElement>("TimelineDrawer");
         m_Timeline = ui.Q<VisualElement>("Timeline");
         m_OpenButton = ui.Q<Button>("TimelineOpenButton");
+
+        m_TimelineSlider = ui.Q<TimelineSlider>("TimelineSlider");
     }
 
     void Start()
     {
         m_OpenButton.RegisterCallback<ClickEvent>(OnButtonClick);
+        m_TimelineDrawer.AddToClassList("close-timeline");
+        m_TimelineDrawer.RemoveFromClassList("open-timeline");
     }
 
     private void OnButtonClick(ClickEvent evt)
@@ -43,5 +49,17 @@ public class TimelineWidget : MonoBehaviour
         m_widgetOpen = !m_widgetOpen;
 
         m_Timeline.style.display = m_widgetOpen ? DisplayStyle.Flex : DisplayStyle.None;
+
+        ParameterManager.instance.ParameterWidgetVisibility = !m_widgetOpen;
+        if (m_widgetOpen)
+        {
+            SendParametersToTimeline();
+        }
+    }
+
+    private void SendParametersToTimeline()
+    {
+        List<Parameter> parameters = ParameterRegistry.Instance.GetAllParameters;
+        m_TimelineSlider.LoadParameters(parameters);
     }
 }

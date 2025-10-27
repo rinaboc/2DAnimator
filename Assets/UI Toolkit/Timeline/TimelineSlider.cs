@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.UIElements;
 
 [UxmlElement]
@@ -8,7 +9,7 @@ public partial class TimelineSlider : VisualElement
 {
     private float _sliderContainerWidth;
     private float _sliderWidth;
-    private int m_maxFrames = 24;
+    private int m_maxFrames = 24; // TODO: custom max frame at runtime
     [UxmlAttribute]
     public int MaxFrames
     {
@@ -47,6 +48,7 @@ public partial class TimelineSlider : VisualElement
     VisualElement m_sliderContainer;
     VisualElement m_sliderHandle;
     VisualElement m_topSection;
+    ScrollView m_keyframeContainer;
 
     List<VisualElement>[] m_frameBars;
 
@@ -86,40 +88,49 @@ public partial class TimelineSlider : VisualElement
 
     private void CreateKeyframeContainers()
     {
-        ScrollView keyframeContainer = new();
-        keyframeContainer.AddToClassList("keyframe-container");
-        keyframeContainer.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+        m_keyframeContainer = new();
+        m_keyframeContainer.AddToClassList("keyframe-container");
+        m_keyframeContainer.verticalScrollerVisibility = ScrollerVisibility.Hidden;
 
-        for (int i = 0; i < 10; i++)
-        {
-            VisualElement keyframeLine = new();
-            keyframeLine.AddToClassList("parameter-keys-container");
-            keyframeLine.Add(new Label("parameter name"));
-
-            for (int j = 1; j < MaxFrames; j++)
-            {
-                VisualElement key = new();
-                key.AddToClassList("parameter-key");
-                keyframeLine.Add(key);
-
-                if (j == 1) key.AddToClassList("highlight-cell");
-
-                m_frameBars[j - 1].Add(key);
-
-                m_sliderHandle.RegisterCallbackOnce<GeometryChangedEvent>(
-                (evt) =>
-                {
-                    key.style.width = _sliderWidth;
-                }
-                );
-            }
-
-            keyframeContainer.Add(keyframeLine);
-        }
-
-        this.Add(keyframeContainer);
+        this.Add(m_keyframeContainer);
     }
 
+    public void LoadParameters(List<Parameter> parameters)
+    {
+        m_keyframeContainer.Clear();
+        ClearFrameBarLists();
+
+        foreach (Parameter parameter in parameters)
+        {
+            KeyframeLineElement keyframeLine = new(MaxFrames, m_frameBars, parameter);
+            m_keyframeContainer.Add(keyframeLine);
+        }
+
+        UpdateKeyWidth();
+    }
+
+    private void UpdateKeyWidth()
+    {
+        foreach (List<VisualElement> bars in m_frameBars)
+        {
+            foreach (VisualElement key in bars)
+            {
+                key.style.width = _sliderWidth;
+            }
+        }
+    }
+
+    private void ClearFrameBarLists()
+    {
+        foreach (var bar in m_frameBars)
+        {
+            bar.Clear();
+        }
+    }
+
+    /// <summary>
+    /// Create slider element and register input callbacks.
+    /// </summary>
     private void CreateSlider()
     {
         m_sliderContainer = new();
@@ -133,6 +144,8 @@ public partial class TimelineSlider : VisualElement
                 _sliderContainerWidth = m_sliderContainer.resolvedStyle.width;
                 _sliderWidth = _sliderContainerWidth / MaxFrames;
                 m_sliderHandle.style.width = _sliderWidth;
+
+                UpdateKeyWidth();
             }
         );
 
@@ -166,24 +179,28 @@ public partial class TimelineSlider : VisualElement
         FrameFromPointer(evt.localPosition.x);
     }
 
+    /// <summary>
+    /// Determine currently selected frame from the position of the cursor.
+    /// </summary>
+    /// <param name="x">Cursor's x position</param>
     private void FrameFromPointer(float x)
     {
-        float width = _sliderContainerWidth;
-        if (width <= 0) return;
+        if (_sliderContainerWidth <= 0) return;
 
-        int newFrame = (int)Math.Round(x / width * (MaxFrames + 1));
+        int newFrame = (int)Math.Round(x / _sliderContainerWidth * (MaxFrames + 1));
         if (CurrentFrame != newFrame)
         {
             CurrentFrame = newFrame;
         }
     }
 
+    /// <summary>
+    /// Position the handle in the slider according to the current frame value.
+    /// </summary>
     private void UpdateHandlePosition()
     {
-        float width = _sliderContainerWidth;
-
         float x = (CurrentFrame - 1) * _sliderWidth;
-        m_sliderHandle.style.left = Mathf.Clamp(x, 0, width - _sliderWidth);
+        m_sliderHandle.style.left = Mathf.Clamp(x, 0, _sliderContainerWidth - _sliderWidth);
     }
 
     private void CreateHeader()

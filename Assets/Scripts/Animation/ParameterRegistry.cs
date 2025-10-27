@@ -44,6 +44,8 @@ public class ParameterRegistry : ScriptableObject
         }
     }
 
+    public List<Parameter> GetAllParameters => Parameters.Select(p => p.Value).ToList();
+
     public void RegisterParameter(Parameter parameter)
     {
         if (Parameters.ContainsKey(parameter.ID))

@@ -1,0 +1,4 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/Timeline/parameterSliderStylesheet.uss?fileID=7433441132597879392&amp;guid=665bf18004ca0d04c94dd739cd30ce7b&amp;type=3#parameterSliderStylesheet" />
+    <ParameterSliderElement />
+</ui:UXML>

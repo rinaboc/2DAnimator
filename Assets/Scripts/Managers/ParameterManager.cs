@@ -35,6 +35,14 @@ public class ParameterManager : MonoBehaviour
         }
     }
 
+    public bool ParameterWidgetVisibility
+    {
+        set
+        {
+            ParamWidgetContent.gameObject.SetActive(value);
+        }
+    }
+
     public void CreateDebugParam()
     {
         CreateParameter(0, 1, 0);
