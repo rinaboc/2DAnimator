@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,11 +7,12 @@ using UnityEngine;
 public class ParameterRegistry : ScriptableObject
 {
     [SerializeField, HideInInspector]
-    private Dictionary<ushort, Parameter> Parameters = new();
+    private Dictionary<Guid, Parameter> Parameters = new();
     [SerializeField, HideInInspector]
-    private Dictionary<ushort, ParamCurve> ParamCurves = new();
+    private Dictionary<Guid, ParamCurve> ParamCurves = new();
+    public Dictionary<Guid, ParamCurve> GetAllParamCurves => ParamCurves;
     [SerializeField, HideInInspector]
-    private Dictionary<ushort, ParamPoint> ParamPoints = new();
+    private Dictionary<Guid, ParamPoint> ParamPoints = new();
 
     private static ParameterRegistry _instance;
     public static ParameterRegistry Instance
@@ -31,7 +33,7 @@ public class ParameterRegistry : ScriptableObject
         }
     }
 
-    public Parameter GetParameter(ushort id)
+    public Parameter GetParameter(Guid id)
     {
         if (Parameters.ContainsKey(id))
         {
@@ -56,12 +58,7 @@ public class ParameterRegistry : ScriptableObject
         Parameters.Add(parameter.ID, parameter);
     }
 
-    public Dictionary<ushort, ParamCurve> GetAllParamCurves()
-    {
-        return ParamCurves;
-    }
-
-    public ParamCurve GetParamCurve(ushort id)
+    public ParamCurve GetParamCurve(Guid id)
     {
         if (ParamCurves.ContainsKey(id))
         {
@@ -74,13 +71,13 @@ public class ParameterRegistry : ScriptableObject
         }
     }
 
-    public List<ParamCurve> GetParamCurve(List<ushort> ids)
+    public List<ParamCurve> GetParamCurve(List<Guid> ids)
     {
         List<ParamCurve> retCurves = new();
 
         for (int i = 0; i < ids.Count; i++)
         {
-            ushort id = ids[i];
+            Guid id = ids[i];
             if (ParamCurves.ContainsKey(id))
             {
                 retCurves.Add(ParamCurves[id]);
@@ -90,15 +87,15 @@ public class ParameterRegistry : ScriptableObject
         return retCurves;
     }
 
-    public List<ushort> GetAssignedParamIDsOfMesh(ushort meshID)
+    public List<Guid> GetAssignedParamIDsOfMesh(Guid meshID)
     {
-        List<ushort> retIDs = new();
+        List<Guid> retIDs = new();
 
-        for (int i = 0; i < ParamCurves.Count; i++)
+        foreach ((_, ParamCurve paramCurve) in ParamCurves)
         {
-            if (ParamCurves.ContainsKey((ushort)i) && ParamCurves[(ushort)i].MeshID == meshID)
+            if (paramCurve.MeshID.Equals(meshID))
             {
-                retIDs.Add(ParamCurves[(ushort)i].ParamID);
+                retIDs.Add(paramCurve.ParamID);
             }
         }
 
@@ -115,7 +112,7 @@ public class ParameterRegistry : ScriptableObject
         ParamCurves.Add(paramCurve.ID, paramCurve);
     }
 
-    public ParamPoint GetParamPoint(ushort id)
+    public ParamPoint GetParamPoint(Guid id)
     {
         if (ParamPoints.ContainsKey(id))
         {
@@ -128,13 +125,13 @@ public class ParameterRegistry : ScriptableObject
         }
     }
 
-    public List<ParamPoint> GetParamPoint(List<ushort> ids)
+    public List<ParamPoint> GetParamPoint(List<Guid> ids)
     {
         List<ParamPoint> retCurves = new();
 
         for (int i = 0; i < ids.Count; i++)
         {
-            ushort id = ids[i];
+            Guid id = ids[i];
             if (ParamPoints.ContainsKey(id))
             {
                 retCurves.Add(ParamPoints[id]);
@@ -154,13 +151,13 @@ public class ParameterRegistry : ScriptableObject
         ParamPoints.Add(paramPoint.ID, paramPoint);
     }
 
-    public void DeleteAnimationDataOfMesh(ushort id)
+    public void DeleteAnimationDataOfMesh(Guid id)
     {
         List<ParamCurve> paramCurves = GetParamCurve(GetAssignedParamIDsOfMesh(id));
         for (int i = 0; i < paramCurves.Count; i++)
         {
             ParamCurve paramCurve = paramCurves[i];
-            foreach (ushort pointID in paramCurve.ParamPoints)
+            foreach (Guid pointID in paramCurve.ParamPoints)
             {
                 ParamPoints.Remove(pointID);
             }

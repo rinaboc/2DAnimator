@@ -20,15 +20,16 @@ public class LayerManager : MonoBehaviour
     /// <summary>
     /// Currently selected mesh data's id
     /// </summary>
-    private int _selectedLayer = -1;
+    private bool _isLayerSelected = false;
+    private Guid _selectedLayerID;
 
     private GameObject SelectedUILayer
     {
         get
         {
-            if (_selectedLayer >= 0)
+            if (_isLayerSelected)
             {
-                return MeshRegistry.Instance.GetUILayer((ushort)_selectedLayer).ParentObj;
+                return MeshRegistry.Instance.GetUILayer(_selectedLayerID).ParentObj;
             }
             else return null;
         }
@@ -38,9 +39,9 @@ public class LayerManager : MonoBehaviour
     {
         get
         {
-            if (_selectedLayer >= 0)
+            if (_isLayerSelected)
             {
-                return MeshRegistry.Instance.GetArtMesh((ushort)_selectedLayer).GetComponent<ArtMesh>();
+                return MeshRegistry.Instance.GetArtMesh(_selectedLayerID).GetComponent<ArtMesh>();
             }
             else return null;
         }
@@ -120,13 +121,14 @@ public class LayerManager : MonoBehaviour
         MeshRegistry.Instance.RegisterUILayer(meshData.ID, newArtLayer.GetComponentInChildren<LayerInteractionController>());
     }
 
-    public void SelectUIArtLayer(int id)
+    public void SelectUIArtLayer(Guid id)
     {
         // deselect previous layer
         DeselectCurrentUIArtLayer();
 
         // select the new layer
-        _selectedLayer = id;
+        _selectedLayerID = id;
+        _isLayerSelected = true;
         SelectedUILayer
             .GetComponentInChildren<LayerInteractionController>()
             .SetSelected(true);
@@ -147,15 +149,15 @@ public class LayerManager : MonoBehaviour
 
     public void MoveUIArtLayerUp()
     {
-        if (_selectedLayer < 0) return; // nothing is selected
+        if (!_isLayerSelected) return; // nothing is selected
 
         Transform selectedArtLayer = SelectedUILayer.transform;
         int artLayerIndex = selectedArtLayer.GetSiblingIndex();
 
         if (artLayerIndex > 0)
         {
-            int swappedID = UILayersContent.transform.GetChild(artLayerIndex - 1).gameObject.GetComponentInChildren<LayerInteractionController>().LayerID;
-            ArtMesh swappedMesh = MeshRegistry.Instance.GetArtMesh((ushort)swappedID).GetComponent<ArtMesh>();
+            Guid swappedID = UILayersContent.transform.GetChild(artLayerIndex - 1).gameObject.GetComponentInChildren<LayerInteractionController>().LayerID;
+            ArtMesh swappedMesh = MeshRegistry.Instance.GetArtMesh(swappedID).GetComponent<ArtMesh>();
             SelectedArtMesh.SwapDrawOrder(swappedMesh);
 
             selectedArtLayer.SetSiblingIndex(artLayerIndex - 1);
@@ -165,15 +167,15 @@ public class LayerManager : MonoBehaviour
 
     public void MoveUIArtLayerDown()
     {
-        if (_selectedLayer < 0) return;
+        if (!_isLayerSelected) return;
 
         Transform selectedArtLayer = SelectedUILayer.transform;
         int artLayerIndex = selectedArtLayer.GetSiblingIndex();
 
         if (artLayerIndex < UILayersContent.transform.childCount - 1)
         {
-            int swappedID = UILayersContent.transform.GetChild(artLayerIndex + 1).gameObject.GetComponentInChildren<LayerInteractionController>().LayerID;
-            ArtMesh swappedMesh = MeshRegistry.Instance.GetArtMesh((ushort)swappedID).GetComponent<ArtMesh>();
+            Guid swappedID = UILayersContent.transform.GetChild(artLayerIndex + 1).gameObject.GetComponentInChildren<LayerInteractionController>().LayerID;
+            ArtMesh swappedMesh = MeshRegistry.Instance.GetArtMesh(swappedID).GetComponent<ArtMesh>();
             SelectedArtMesh.SwapDrawOrder(swappedMesh);
 
             selectedArtLayer.SetSiblingIndex(artLayerIndex + 1);
@@ -182,15 +184,15 @@ public class LayerManager : MonoBehaviour
 
     public void DeleteSelectedArtObject()
     {
-        if (_selectedLayer < 0) return;
+        if (!_isLayerSelected) return;
 
         ParameterManager.instance.DeleteParamPointsOfMesh(SelectedArtMesh.MeshID);
 
-        MeshRegistry.Instance.DeleteArtMeshObj((ushort)_selectedLayer);
-        MeshRegistry.Instance.DeleteUILayer((ushort)_selectedLayer);
-        MeshRegistry.Instance.DeleteMeshData((ushort)_selectedLayer);
+        MeshRegistry.Instance.DeleteArtMeshObj(_selectedLayerID);
+        MeshRegistry.Instance.DeleteUILayer(_selectedLayerID);
+        MeshRegistry.Instance.DeleteMeshData(_selectedLayerID);
 
         // deselect
-        _selectedLayer = -1;
+        _isLayerSelected = false;
     }
 }

@@ -12,14 +12,17 @@ public class ParameterManager : MonoBehaviour
     [SerializeField] private GameObject ParamSliderPrefab;
     [SerializeField] private Transform ParamWidgetContent;
 
-    private readonly Dictionary<ushort, GameObject> paramSliders = new();
+    private readonly Dictionary<Guid, GameObject> paramSliders = new();
 
-    private int _selectedParamID = -1;
-    public ushort SelectedParamID
+    private ParameterSlider GetParamSlider(Guid id) => paramSliders[id].GetComponent<ParameterSlider>();
+
+    private bool _isParamSelected = false;
+    private Guid _selectedParamID;
+    public Guid SelectedParamID
     {
         get
         {
-            return _selectedParamID >= 0 ? (ushort)_selectedParamID : throw new Exception("No parameters are selected");
+            return _isParamSelected ? _selectedParamID : throw new Exception("No parameters are selected");
         }
     }
 
@@ -51,9 +54,9 @@ public class ParameterManager : MonoBehaviour
     public void CreatePointsForCurrentMesh()
     {
         ArtMesh selectedArtMesh = LayerManager.instance.SelectedArtMesh;
-        if (_selectedParamID >= 0 && selectedArtMesh != null)
+        if (_isParamSelected && selectedArtMesh != null)
         {
-            CreateParamPoints((ushort)_selectedParamID, selectedArtMesh.MeshID);
+            CreateParamPoints(SelectedParamID, selectedArtMesh.MeshID);
             HighlightCreatedCurves(selectedArtMesh.MeshID);
         }
     }
@@ -70,7 +73,7 @@ public class ParameterManager : MonoBehaviour
     /// <summary>
     /// Call popup window to edit parameter details.
     /// </summary>
-    public void StartParameterEditing(ushort paramID)
+    public void StartParameterEditing(Guid paramID)
     {
         Parameter parameter = ParameterRegistry.Instance.GetParameter(paramID);
         popupWindow.EditParameter(parameter);
@@ -87,7 +90,7 @@ public class ParameterManager : MonoBehaviour
         paramSliders.Add(parameter.ID, paramSlider);
     }
 
-    public void CreateParamPoints(ushort parameterID, ushort meshID)
+    public void CreateParamPoints(Guid parameterID, Guid meshID)
     {
         Parameter parameter = ParameterRegistry.Instance.GetParameter(parameterID);
         ParamCurve paramCurve = new(meshID, parameter.ID);
@@ -113,31 +116,33 @@ public class ParameterManager : MonoBehaviour
             paramValues.Add(midPoint.ParamValue);
         }
 
-        paramSliders[parameterID].GetComponent<ParameterSlider>().CreateParamPointHandles(paramValues);
+        // paramSliders[parameterID].GetComponent<ParameterSlider>()
+        GetParamSlider(parameterID).CreateParamPointHandles(paramValues);
 
         Debug.Log("created parampoints");
     }
 
-    public void DeleteParamPointsOfMesh(ushort meshID)
+    public void DeleteParamPointsOfMesh(Guid meshID)
     {
         ParameterRegistry.Instance.DeleteAnimationDataOfMesh(meshID);
         HighlightCreatedCurves(meshID);
     }
 
-    public void SelectParameter(ushort id)
+    public void SelectParameter(Guid id)
     {
-        if (_selectedParamID >= 0)
+        if (_isParamSelected)
         {
-            paramSliders[(ushort)_selectedParamID].GetComponent<ParameterSlider>().SetSelected(false);
+            GetParamSlider(SelectedParamID).SetSelected(false);
         }
 
-        paramSliders[id].GetComponent<ParameterSlider>().SetSelected(true);
+        GetParamSlider(id).SetSelected(true);
         _selectedParamID = id;
+        _isParamSelected = true;
     }
 
-    public void HighlightCreatedCurves(ushort meshID)
+    public void HighlightCreatedCurves(Guid meshID)
     {
-        List<ushort> assignedParams = ParameterRegistry.Instance.GetAssignedParamIDsOfMesh(meshID);
+        List<Guid> assignedParams = ParameterRegistry.Instance.GetAssignedParamIDsOfMesh(meshID);
 
         foreach (var item in paramSliders)
         {
@@ -145,13 +150,13 @@ public class ParameterManager : MonoBehaviour
         }
     }
 
-    public void UpdateAnimationData(object data, TransformType transformType, ushort meshID)
+    public void UpdateAnimationData(object data, TransformType transformType, Guid meshID)
     {
-        if (_selectedParamID < 0) return;
+        if (!_isParamSelected) return;
 
         ParameterRegistry parameterRegistry = ParameterRegistry.Instance;
 
-        Parameter currentParam = parameterRegistry.GetParameter((ushort)_selectedParamID);
+        Parameter currentParam = parameterRegistry.GetParameter(SelectedParamID);
         List<ParamCurve> currentParamCurves = parameterRegistry.GetParamCurve(currentParam.ParamCurves);
 
         float sliderValue = paramSliders[currentParam.ID].GetComponent<ParameterSlider>().GetValue();
@@ -197,7 +202,7 @@ public class ParameterManager : MonoBehaviour
             {
                 Debug.Log("no point was updated");
                 int minIndex = Array.IndexOf(distFromPointValues, distFromPointValues.Min());
-                paramSliders[paramCurve.ParamID].GetComponent<ParameterSlider>().SetValue(paramPoints[minIndex].ParamValue);
+                GetParamSlider(paramCurve.ParamID).SetValue(paramPoints[minIndex].ParamValue);
                 AnimationManager.instance.InterpolateParameter(paramPoints[minIndex].ParamValue, paramCurve.ParamID);
             }
         }

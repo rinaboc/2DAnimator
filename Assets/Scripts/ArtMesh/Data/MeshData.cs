@@ -1,9 +1,10 @@
+using System;
 using UnityEngine;
 
 public class MeshData
 {
     private static ushort _objCounter = 0;
-    public readonly ushort ID;
+    public readonly Guid ID;
     public ushort drawOrder;
     public string sourcePath;
     public string name;
@@ -14,8 +15,8 @@ public class MeshData
 
     public MeshData(string sourcePath)
     {
-        ID = ++_objCounter;
-        drawOrder = ID;
+        ID = Guid.NewGuid();
+        drawOrder = ++_objCounter;
         this.sourcePath = sourcePath;
         name = "ArtObject" + ID;
 

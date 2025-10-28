@@ -1,10 +1,9 @@
+using System;
 using System.Collections.Generic;
 
 public class Parameter
 {
-    private static ushort _paramCounter = 0;
-
-    public readonly ushort ID;
+    public readonly Guid ID;
     private float minValue;
     private float maxValue;
     private float defaultValue;
@@ -37,11 +36,11 @@ public class Parameter
         }
     }
 
-    public readonly List<ushort> ParamCurves;
+    public readonly List<Guid> ParamCurves;
 
     public Parameter(float min, float max, float defaultValue, string name = "parameter", bool autoRegister = true)
     {
-        ID = _paramCounter++;
+        ID = Guid.NewGuid();
         MinValue = min;
         MaxValue = max;
         DefaultValue = defaultValue;

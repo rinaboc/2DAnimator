@@ -1,19 +1,18 @@
 
+using System;
 using System.Collections.Generic;
 
 public class ParamCurve
 {
-    private static ushort _paramCurveCounter = 0;
+    public Guid ID;
+    public Guid MeshID;
+    public Guid ParamID;
 
-    public ushort ID;
-    public ushort MeshID;
-    public ushort ParamID;
+    public readonly List<Guid> ParamPoints;
 
-    public readonly List<ushort> ParamPoints;
-
-    public ParamCurve(ushort meshID, ushort paramID, bool autoRegister = true)
+    public ParamCurve(Guid meshID, Guid paramID, bool autoRegister = true)
     {
-        ID = _paramCurveCounter++;
+        ID = Guid.NewGuid();
         MeshID = meshID;
         ParamID = paramID;
         ParamPoints = new();

@@ -16,7 +16,7 @@ public class PopupWindowController : MonoBehaviour
     [SerializeField, CreateProperty]
     private string m_errorMessage = "";
 
-    private ushort _editedParamID;
+    private Guid _editedParamID;
 
     void Awake()
     {

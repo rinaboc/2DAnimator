@@ -3,9 +3,7 @@ using UnityEngine;
 
 public class ParamPoint
 {
-    private static ushort _paramPtCounter = 0;
-
-    public readonly ushort ID;
+    public readonly Guid ID;
     public float ParamValue;
 
     public Vector3 Position { get; set; }
@@ -14,7 +12,7 @@ public class ParamPoint
 
     public ParamPoint(float paramValue, bool autoRegister = true)
     {
-        ID = _paramPtCounter++;
+        ID = Guid.NewGuid();
         this.ParamValue = paramValue;
         Rotation = Quaternion.identity;
 

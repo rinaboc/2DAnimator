@@ -9,7 +9,7 @@ public class LayerInteractionController : Clickable, ISelectable
     public GameObject ParentObj;
     [SerializeField] private Color SelectedColor;
 
-    public ushort LayerID { get; private set; }
+    public Guid LayerID { get; private set; }
     [SerializeField] private TMP_InputField LayerInput;
 
     private InputAction DoubleClickAction;
@@ -35,7 +35,7 @@ public class LayerInteractionController : Clickable, ISelectable
         LayerInput.enabled = isSelected;
     }
 
-    public LayerInteractionController SetID(ushort id)
+    public LayerInteractionController SetID(Guid id)
     {
         LayerID = id;
         return this;

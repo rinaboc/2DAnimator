@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 public class ParameterSlider : Clickable, ISelectable
 {
-    private ushort paramID;
+    private Guid paramID;
 
     private InputAction clickAction;
 
@@ -67,7 +67,7 @@ public class ParameterSlider : Clickable, ISelectable
         ParameterNameText.text = paramName;
     }
 
-    public void SetParamID(ushort paramID)
+    public void SetParamID(Guid paramID)
     {
         this.paramID = paramID;
     }

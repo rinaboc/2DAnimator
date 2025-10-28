@@ -7,11 +7,11 @@ using UnityEngine;
 public class MeshRegistry : ScriptableObject
 {
     [SerializeField, HideInInspector]
-    private Dictionary<ushort, GameObject> ArtMeshes = new();
+    private Dictionary<Guid, GameObject> ArtMeshes = new();
     [SerializeField, HideInInspector]
-    private Dictionary<ushort, LayerInteractionController> UILayers = new();
+    private Dictionary<Guid, LayerInteractionController> UILayers = new();
     [SerializeField, HideInInspector]
-    private Dictionary<ushort, MeshData> MeshDataEntries = new();
+    private Dictionary<Guid, MeshData> MeshDataEntries = new();
 
     private static MeshRegistry _instance;
     public static MeshRegistry Instance
@@ -32,7 +32,7 @@ public class MeshRegistry : ScriptableObject
         }
     }
 
-    public GameObject GetArtMesh(ushort id)
+    public GameObject GetArtMesh(Guid id)
     {
         if (ArtMeshes.ContainsKey(id))
         {
@@ -45,7 +45,7 @@ public class MeshRegistry : ScriptableObject
         }
     }
 
-    public void RegisterArtMeshObj(ushort id, GameObject artMeshObj)
+    public void RegisterArtMeshObj(Guid id, GameObject artMeshObj)
     {
         if (ArtMeshes.ContainsKey(id))
         {
@@ -55,14 +55,14 @@ public class MeshRegistry : ScriptableObject
         ArtMeshes.Add(id, artMeshObj);
     }
 
-    public void DeleteArtMeshObj(ushort id)
+    public void DeleteArtMeshObj(Guid id)
     {
         GameObject artMesh = ArtMeshes[id];
         ArtMeshes.Remove(id);
         Destroy(artMesh);
     }
 
-    public LayerInteractionController GetUILayer(ushort id)
+    public LayerInteractionController GetUILayer(Guid id)
     {
         if (UILayers.ContainsKey(id))
         {
@@ -75,7 +75,7 @@ public class MeshRegistry : ScriptableObject
         }
     }
 
-    public void RegisterUILayer(ushort id, LayerInteractionController controller)
+    public void RegisterUILayer(Guid id, LayerInteractionController controller)
     {
         if (UILayers.ContainsKey(id))
         {
@@ -85,14 +85,14 @@ public class MeshRegistry : ScriptableObject
         UILayers.Add(id, controller);
     }
 
-    public void DeleteUILayer(ushort id)
+    public void DeleteUILayer(Guid id)
     {
         GameObject uilayer = UILayers[id].ParentObj;
         UILayers.Remove(id);
         Destroy(uilayer);
     }
 
-    public MeshData GetMeshData(ushort id)
+    public MeshData GetMeshData(Guid id)
     {
         try
         {
@@ -105,10 +105,7 @@ public class MeshRegistry : ScriptableObject
         }
     }
 
-    public void UpdateMeshData(MeshData meshData)
-    {
-        MeshDataEntries[meshData.ID] = meshData;
-    }
+    public void UpdateMeshData(MeshData meshData) => MeshDataEntries[meshData.ID] = meshData;
 
     public void RegisterMeshData(MeshData meshData)
     {
@@ -120,8 +117,5 @@ public class MeshRegistry : ScriptableObject
         MeshDataEntries.Add(meshData.ID, meshData);
     }
 
-    public void DeleteMeshData(ushort id)
-    {
-        MeshDataEntries.Remove(id);
-    }
+    public void DeleteMeshData(Guid id) => MeshDataEntries.Remove(id);
 }

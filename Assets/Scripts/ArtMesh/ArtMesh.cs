@@ -6,7 +6,7 @@ public class ArtMesh : MonoBehaviour, ISelectable
     public GameObject ArtMeshObject { get; private set; }
     [SerializeField] private Material ArtMeshMaterial;
     [SerializeField] private BoundingBox BoundingBox;
-    public ushort MeshID { get; private set; }
+    public Guid MeshID { get; private set; }
 
     private void Awake()
     {
@@ -19,7 +19,7 @@ public class ArtMesh : MonoBehaviour, ISelectable
         SetDrawOrder(MeshRegistry.Instance.GetMeshData(MeshID).drawOrder);
     }
 
-    public ArtMesh SetMeshID(ushort id)
+    public ArtMesh SetMeshID(Guid id)
     {
         MeshID = id;
         return this;

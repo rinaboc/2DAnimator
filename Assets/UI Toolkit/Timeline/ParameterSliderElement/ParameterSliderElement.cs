@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -15,6 +16,7 @@ public partial class ParameterSliderElement : VisualElement
         Add(_label);
 
         _slider = new();
+        _slider.RegisterValueChangedCallback(OnSliderChange);
         Add(_slider);
 
         _slider.fill = true;
@@ -24,6 +26,12 @@ public partial class ParameterSliderElement : VisualElement
 
         _handle = _slider.Q<VisualElement>("unity-dragger");
         _handle.AddToClassList("param-slider-handle");
+    }
+
+    private void OnSliderChange(ChangeEvent<float> evt)
+    {
+
+        throw new NotImplementedException();
     }
 
     public ParameterSliderElement(Parameter parameter) : this()

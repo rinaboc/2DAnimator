@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -21,7 +22,7 @@ public class AnimationManager : MonoBehaviour
     /// <summary>
     /// Interpolate parameter point values assigned to the selected parameter and set the interpolated transformations on the meshes.
     /// </summary>
-    public void InterpolateParameter(float value, ushort paramID)
+    public void InterpolateParameter(float value, Guid paramID)
     {
         ParameterRegistry parameterRegistry = ParameterRegistry.Instance;
         Parameter parameter = parameterRegistry.GetParameter(paramID);
