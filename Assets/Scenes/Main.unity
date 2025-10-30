@@ -1009,6 +1009,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1adffd454500614cb26ec5c52108000, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _timelineWidget: {fileID: 1616220211}
 --- !u!1 &365910525
 GameObject:
   m_ObjectHideFlags: 0

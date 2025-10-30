@@ -6,14 +6,11 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ParameterRegistry", menuName = "Global/Parameter Registry")]
 public class ParameterRegistry : ScriptableObject
 {
-    [SerializeField, HideInInspector]
-    private Dictionary<Guid, Parameter> Parameters = new();
-    [SerializeField, HideInInspector]
-    private Dictionary<Guid, ParamCurve> ParamCurves = new();
-    public Dictionary<Guid, ParamCurve> GetAllParamCurves => ParamCurves;
-    [SerializeField, HideInInspector]
-    private Dictionary<Guid, ParamPoint> ParamPoints = new();
+    [SerializeField] private Dictionary<Guid, Parameter> Parameters = new();
+    [SerializeField] private Dictionary<Guid, ParamCurve> ParamCurves = new();
+    [SerializeField] private Dictionary<Guid, ParamPoint> ParamPoints = new();
 
+    public Dictionary<Guid, ParamCurve> GetAllParamCurves => ParamCurves;
     private static ParameterRegistry _instance;
     public static ParameterRegistry Instance
     {

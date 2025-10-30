@@ -5,10 +5,13 @@ using UnityEngine.UIElements;
 [UxmlElement]
 public partial class ParameterSliderElement : VisualElement
 {
+    private Guid _paramID;
     Slider _slider;
     Label _label;
     VisualElement _container;
     VisualElement _handle;
+
+    bool isDragging = false;
     public ParameterSliderElement()
     {
         _label = new("parameter name");
@@ -16,6 +19,8 @@ public partial class ParameterSliderElement : VisualElement
         Add(_label);
 
         _slider = new();
+        // _slider.RegisterCallback<PointerDownEvent>(OnSliderDrag);
+        // _slider.RegisterCallback<PointerUpEvent>(OnSliderChange);
         _slider.RegisterValueChangedCallback(OnSliderChange);
         Add(_slider);
 
@@ -30,12 +35,12 @@ public partial class ParameterSliderElement : VisualElement
 
     private void OnSliderChange(ChangeEvent<float> evt)
     {
-
-        throw new NotImplementedException();
+        TimelineWidget.KeyParamSliderChanged.Invoke(_paramID, evt.newValue);
     }
 
     public ParameterSliderElement(Parameter parameter) : this()
     {
+        _paramID = parameter.ID;
         _label.text = parameter.Name;
         _slider.lowValue = parameter.MinValue;
         _slider.highValue = parameter.MaxValue;

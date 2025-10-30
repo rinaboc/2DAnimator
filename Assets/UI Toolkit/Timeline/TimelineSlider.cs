@@ -19,7 +19,7 @@ public partial class TimelineSlider : VisualElement
             m_maxFrames = value;
         }
     }
-    private int m_currentFrame = 0;
+    private int m_currentFrame = 1;
     public int CurrentFrame
     {
         get => m_currentFrame;
@@ -49,6 +49,7 @@ public partial class TimelineSlider : VisualElement
     VisualElement m_sliderHandle;
     VisualElement m_topSection;
     ScrollView m_keyframeContainer;
+    Dictionary<Guid, KeyframeLineElement> m_keyframeLineElements = new();
 
     List<VisualElement>[] m_frameBars;
 
@@ -98,15 +99,22 @@ public partial class TimelineSlider : VisualElement
     public void LoadParameters(List<Parameter> parameters)
     {
         m_keyframeContainer.Clear();
+        m_keyframeLineElements.Clear();
         ClearFrameBarLists();
 
         foreach (Parameter parameter in parameters)
         {
             KeyframeLineElement keyframeLine = new(MaxFrames, m_frameBars, parameter);
             m_keyframeContainer.Add(keyframeLine);
+            m_keyframeLineElements.Add(parameter.ID, keyframeLine);
         }
 
         UpdateKeyWidth();
+    }
+
+    public void CreateKeyframeAtCurrentFrame(Guid paramID)
+    {
+        m_keyframeLineElements[paramID].InsertKeyframeAt(CurrentFrame);
     }
 
     private void UpdateKeyWidth()

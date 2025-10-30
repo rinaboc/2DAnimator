@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class AnimationManager : MonoBehaviour
 {
     public static AnimationManager instance;
+
+    [SerializeField] private TimelineWidget _timelineWidget;
     void Awake()
     {
         if (instance == null)
@@ -17,6 +18,15 @@ public class AnimationManager : MonoBehaviour
         {
             Destroy(this);
         }
+    }
+
+    public void CreateKeyframe(Guid paramID, float value)
+    {
+        Debug.Log("Creating new keyframe");
+        int CurrentFrame = _timelineWidget.Currentframe;
+
+        KeyFrame keyFrame = new(paramID, value, CurrentFrame);
+        Debug.Log(keyFrame);
     }
 
     /// <summary>
