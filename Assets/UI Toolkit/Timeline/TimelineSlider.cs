@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.UIElements;
 
 [UxmlElement]
@@ -39,6 +38,7 @@ public partial class TimelineSlider : VisualElement
             UpdateHandlePosition();
             UpdateFrameField();
             HighlightBarAt(m_currentFrame);
+            AnimationManager.TimelineChangeEvent.Invoke(CurrentFrame);
         }
     }
 
@@ -105,6 +105,10 @@ public partial class TimelineSlider : VisualElement
         foreach (Parameter parameter in parameters)
         {
             KeyframeLineElement keyframeLine = new(MaxFrames, m_frameBars, parameter);
+            if (AnimationManager.instance.GetParamCurValue(parameter.ID, out float paramValue))
+            {
+                keyframeLine.SetSliderValue(paramValue);
+            }
             m_keyframeContainer.Add(keyframeLine);
             m_keyframeLineElements.Add(parameter.ID, keyframeLine);
         }
@@ -112,9 +116,9 @@ public partial class TimelineSlider : VisualElement
         UpdateKeyWidth();
     }
 
-    public void CreateKeyframeAtCurrentFrame(Guid paramID)
+    public void CreateKeyframeAtCurrentFrame(Guid paramID, KeyFrame key)
     {
-        m_keyframeLineElements[paramID].InsertKeyframeAt(CurrentFrame);
+        m_keyframeLineElements[paramID].InsertKeyframeAt(CurrentFrame, key);
     }
 
     private void UpdateKeyWidth()
@@ -216,11 +220,20 @@ public partial class TimelineSlider : VisualElement
         VisualElement header = new();
         header.AddToClassList("header");
         m_Label = new Label("Timeline");
+
         m_currentFrameField = new IntegerField();
         m_currentFrameField.AddToClassList("slider-inputfield");
         m_currentFrameField.value = 1;
 
+        Button deleteKeyframeButton = new() { text = "Delete Keyframe" };
+        deleteKeyframeButton.AddToClassList("delete-keyframe-button");
+        deleteKeyframeButton.clicked += () =>
+        {
+            AnimationManager.DeleteSelectedKeyframeEvent.Invoke();
+        };
+
         header.Add(m_Label);
+        header.Add(deleteKeyframeButton);
         header.Add(m_currentFrameField);
 
         m_topSection.Add(header);

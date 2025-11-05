@@ -8,9 +8,9 @@
 .header {
     flex-direction: row;
     align-items: stretch;
-    justify-content: space-between;
     color: rgb(169, 169, 168);
     height: 100%;
+    padding-right: 10px;
 }
 
 .slider-container {
@@ -60,10 +60,25 @@
 }
 
 .open-timeline {
-    height: 50%;
+    height: 49%;
     width: 100%;
 }
 
 .keyframe-container {
     min-height: 200px;
+}
+
+.delete-keyframe-button {
+    background-color: rgb(140, 140, 140);
+    color: rgb(43, 43, 43);
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.header > .unity-label {
+    flex-grow: 1;
+}
+
+.rotate {
+    rotate: 180deg;
 }

@@ -31,6 +31,7 @@ public class TimelineWidget : MonoBehaviour
     void Start()
     {
         m_OpenButton.RegisterCallback<ClickEvent>(OnButtonClick);
+        m_OpenButton.RemoveFromClassList("rotate");
         m_TimelineDrawer.AddToClassList("close-timeline");
         m_TimelineDrawer.RemoveFromClassList("open-timeline");
 
@@ -39,21 +40,27 @@ public class TimelineWidget : MonoBehaviour
 
     private void OnKeySliderChanged(Guid id, float value)
     {
-        AnimationManager.instance.CreateKeyframe(id, value);
-        m_TimelineSlider.CreateKeyframeAtCurrentFrame(id);
+        AnimationManager.instance.InterpolateParameter(value, id);
+        KeyFrame newKeyframe = AnimationManager.instance.CreateKeyframe(id, value);
+        m_TimelineSlider.CreateKeyframeAtCurrentFrame(id, newKeyframe);
     }
 
+    /// <summary>
+    /// Opening and closing logic of the widget.
+    /// </summary>
     private void OnButtonClick(ClickEvent evt)
     {
         if (m_widgetOpen)
         {
             m_TimelineDrawer.AddToClassList("close-timeline");
             m_TimelineDrawer.RemoveFromClassList("open-timeline");
+            m_OpenButton.RemoveFromClassList("rotate");
         }
         else
         {
             m_TimelineDrawer.RemoveFromClassList("close-timeline");
             m_TimelineDrawer.AddToClassList("open-timeline");
+            m_OpenButton.AddToClassList("rotate");
         }
 
         m_widgetOpen = !m_widgetOpen;
@@ -67,6 +74,10 @@ public class TimelineWidget : MonoBehaviour
         }
     }
 
+
+    /// <summary>
+    /// Populate the timeline with the available parameters.
+    /// </summary>
     private void SendParametersToTimeline()
     {
         List<Parameter> parameters = ParameterRegistry.Instance.GetAllParameters;

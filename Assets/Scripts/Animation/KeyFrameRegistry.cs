@@ -36,20 +36,53 @@ public class KeyFrameRegistry : ScriptableObject
             return false;
         }
 
+        KeyFrame duplicateKey = null;
         foreach ((_, KeyFrame item) in _keyframes)
         {
             if (item.IsSameCell(keyframe)) // should update
             {
-                item.ParamValue = keyframe.ParamValue;
-                return true;
+                duplicateKey = item;
+                break;
             }
+        }
+
+        if (duplicateKey != null)
+        {
+            RemoveKeyframe(duplicateKey.ID);
         }
 
         _keyframes.Add(keyframe.ID, keyframe);
         return true;
     }
 
-    public bool RemoveKeyframe(Guid id) => _keyframes.Remove(id);
+    public bool RemoveKeyframe(Guid id)
+    {
+        bool success = _keyframes.Remove(id);
+        if (!success)
+            Debug.LogError($"Couldn't remove keyframe with id: {id}");
+
+        return success;
+
+    }
 
     public KeyFrame GetKeyFrame(Guid id) => _keyframes[id];
+
+    public List<KeyFrame> GetKeyFramesOfParam(Guid paramID)
+    {
+        List<KeyFrame> ret = new();
+
+        foreach (var item in _keyframes)
+        {
+            if (item.Value.ParamID.Equals(paramID))
+            {
+                ret.Add(item.Value);
+            }
+        }
+
+        if (ret.Count > 1)
+        {
+            ret.Sort((x, y) => x.Frame.CompareTo(y.Frame));
+        }
+        return ret;
+    }
 }

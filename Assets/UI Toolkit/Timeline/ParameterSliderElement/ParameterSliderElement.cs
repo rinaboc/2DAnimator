@@ -93,4 +93,9 @@ public partial class ParameterSliderElement : VisualElement
         paramKey.style.left = left;
         paramKey.style.top = 0;
     }
+
+    public void SetSliderValue(float value)
+    {
+        _slider.SetValueWithoutNotify(value);
+    }
 }

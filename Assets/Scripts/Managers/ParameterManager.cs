@@ -36,6 +36,8 @@ public class ParameterManager : MonoBehaviour
         {
             Destroy(this);
         }
+
+        CreateDebugParam();
     }
 
     public bool ParameterWidgetVisibility

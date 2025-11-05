@@ -2,12 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class AnimationManager : MonoBehaviour
 {
+    public static UnityEvent<int> TimelineChangeEvent = new();
     public static AnimationManager instance;
+    private Dictionary<Guid, float> _ParamCurValues = new();
+    public bool GetParamCurValue(Guid id, out float value) => _ParamCurValues.TryGetValue(id, out value);
 
     [SerializeField] private TimelineWidget _timelineWidget;
+
+    public static UnityEvent<Guid> SelectKeyframeEvent = new();
+    public static UnityEvent DeleteSelectedKeyframeEvent = new();
+
     void Awake()
     {
         if (instance == null)
@@ -20,13 +28,69 @@ public class AnimationManager : MonoBehaviour
         }
     }
 
-    public void CreateKeyframe(Guid paramID, float value)
+    void Start()
+    {
+        TimelineChangeEvent.AddListener(AnimateTimeline);
+    }
+
+    private void AnimateTimeline(int currentFrame)
+    {
+        List<Parameter> parameters = ParameterRegistry.Instance.GetAllParameters;
+
+        foreach (Parameter parameter in parameters)
+        {
+            List<KeyFrame> parameterKeys = KeyFrameRegistry.Instance.GetKeyFramesOfParam(parameter.ID);
+            if (parameterKeys.Count < 2) continue;
+
+            KeyFrame minFrame = null, maxFrame = null;
+
+            foreach (KeyFrame key in parameterKeys)
+            {
+                if (currentFrame == key.Frame)
+                {
+                    Debug.Log("matching frame");
+                    minFrame = maxFrame = key;
+                    break;
+                }
+
+                if (currentFrame > key.Frame)
+                {
+                    minFrame = key;
+                    Debug.Log($"min frame: {minFrame}");
+                    continue;
+                }
+
+                if (currentFrame < key.Frame)
+                {
+                    maxFrame = key;
+                    Debug.Log($"max frame: {maxFrame}");
+                    break;
+                }
+            }
+
+            if (minFrame != null && maxFrame == null) maxFrame = minFrame;
+            else if (maxFrame != null && minFrame == null) minFrame = maxFrame;
+
+            float delta = minFrame == maxFrame ? 0f : (minFrame.ParamValue - maxFrame.ParamValue) / (minFrame.Frame - maxFrame.Frame);
+            // if (minFrame.ParamValue > maxFrame.ParamValue) delta *= -1f;
+            float t = (currentFrame - minFrame.Frame) * delta + minFrame.ParamValue;
+
+            InterpolateParameter(t, parameter.ID);
+        }
+    }
+
+    public KeyFrame CreateKeyframe(Guid paramID, float value)
     {
         Debug.Log("Creating new keyframe");
         int CurrentFrame = _timelineWidget.Currentframe;
 
         KeyFrame keyFrame = new(paramID, value, CurrentFrame);
-        Debug.Log(keyFrame);
+        return keyFrame;
+    }
+
+    public void RemoveKeyFrame(Guid id)
+    {
+        KeyFrameRegistry.Instance.RemoveKeyframe(id);
     }
 
     /// <summary>
@@ -37,6 +101,11 @@ public class AnimationManager : MonoBehaviour
         ParameterRegistry parameterRegistry = ParameterRegistry.Instance;
         Parameter parameter = parameterRegistry.GetParameter(paramID);
         List<ParamCurve> paramCurves = parameterRegistry.GetParamCurve(parameter.ParamCurves);
+
+        if (paramCurves.Count > 0)
+        {
+            _ParamCurValues[paramID] = value;
+        }
 
         foreach (ParamCurve paramCurve in paramCurves)
         {
