@@ -80,10 +80,8 @@ public class PopupWindowController : MonoBehaviour
     {
         if (!ValidateInput()) return;
 
-        try
+        if (ParameterRegistry.Instance.GetParameter(_editedParamID, out Parameter parameter))
         {
-            Parameter parameter = ParameterRegistry.Instance.GetParameter(_editedParamID);
-
             parameter.MinValue = m_minValue;
             parameter.MaxValue = m_maxValue;
             parameter.DefaultValue = m_defaultValue;
@@ -91,7 +89,7 @@ public class PopupWindowController : MonoBehaviour
 
             ParameterManager.instance.UpdateParameter(parameter);
         }
-        catch (Exception)
+        else
         {
             Debug.LogError("Couldn't fetch parameter.");
         }

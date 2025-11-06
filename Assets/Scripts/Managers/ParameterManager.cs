@@ -77,8 +77,10 @@ public class ParameterManager : MonoBehaviour
     /// </summary>
     public void StartParameterEditing(Guid paramID)
     {
-        Parameter parameter = ParameterRegistry.Instance.GetParameter(paramID);
-        popupWindow.EditParameter(parameter);
+        if (ParameterRegistry.Instance.GetParameter(paramID, out Parameter parameter))
+        {
+            popupWindow.EditParameter(parameter);
+        }
     }
 
     public void CreateParameter(float min, float max, float defaultValue, string name = "parameter")
@@ -94,7 +96,7 @@ public class ParameterManager : MonoBehaviour
 
     public void CreateParamPoints(Guid parameterID, Guid meshID)
     {
-        Parameter parameter = ParameterRegistry.Instance.GetParameter(parameterID);
+        ParameterRegistry.Instance.GetParameter(parameterID, out Parameter parameter);
         ParamCurve paramCurve = new(meshID, parameter.ID);
         ParamPoint minPoint = new(parameter.MinValue);
         ParamPoint maxPoint = new(parameter.MaxValue);
@@ -118,7 +120,6 @@ public class ParameterManager : MonoBehaviour
             paramValues.Add(midPoint.ParamValue);
         }
 
-        // paramSliders[parameterID].GetComponent<ParameterSlider>()
         GetParamSlider(parameterID).CreateParamPointHandles(paramValues);
 
         Debug.Log("created parampoints");
@@ -158,7 +159,7 @@ public class ParameterManager : MonoBehaviour
 
         ParameterRegistry parameterRegistry = ParameterRegistry.Instance;
 
-        Parameter currentParam = parameterRegistry.GetParameter(SelectedParamID);
+        parameterRegistry.GetParameter(SelectedParamID, out Parameter currentParam);
         List<ParamCurve> currentParamCurves = parameterRegistry.GetParamCurve(currentParam.ParamCurves);
 
         float sliderValue = paramSliders[currentParam.ID].GetComponent<ParameterSlider>().GetValue();

@@ -6,11 +6,10 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ParameterRegistry", menuName = "Global/Parameter Registry")]
 public class ParameterRegistry : ScriptableObject
 {
-    [SerializeField] private Dictionary<Guid, Parameter> Parameters = new();
-    [SerializeField] private Dictionary<Guid, ParamCurve> ParamCurves = new();
-    [SerializeField] private Dictionary<Guid, ParamPoint> ParamPoints = new();
+    [SerializeField] private Dictionary<Guid, Parameter> _parameters = new();
+    [SerializeField] private Dictionary<Guid, ParamCurve> _paramCurves = new();
+    [SerializeField] private Dictionary<Guid, ParamPoint> _paramPoints = new();
 
-    public Dictionary<Guid, ParamCurve> GetAllParamCurves => ParamCurves;
     private static ParameterRegistry _instance;
     public static ParameterRegistry Instance
     {
@@ -30,43 +29,14 @@ public class ParameterRegistry : ScriptableObject
         }
     }
 
-    public Parameter GetParameter(Guid id)
-    {
-        if (Parameters.ContainsKey(id))
-        {
-            return Parameters[id];
-        }
-        else
-        {
-            Debug.LogError("no such id in registry");
-            throw new System.Exception();
-        }
-    }
+    public bool GetParameter(Guid id, out Parameter parameter) => _parameters.TryGetValue(id, out parameter);
+    public bool RegisterParameter(Parameter parameter) => _parameters.TryAdd(parameter.ID, parameter);
 
-    public List<Parameter> GetAllParameters => Parameters.Select(p => p.Value).ToList();
+    public List<Parameter> GetAllParameters => _parameters.Select(p => p.Value).ToList();
 
-    public void RegisterParameter(Parameter parameter)
-    {
-        if (Parameters.ContainsKey(parameter.ID))
-        {
-            Debug.LogError("duplicate id in registry");
-        }
 
-        Parameters.Add(parameter.ID, parameter);
-    }
-
-    public ParamCurve GetParamCurve(Guid id)
-    {
-        if (ParamCurves.ContainsKey(id))
-        {
-            return ParamCurves[id];
-        }
-        else
-        {
-            Debug.LogError("no such id in registry");
-            throw new System.Exception();
-        }
-    }
+    public bool GetParamCurve(Guid id, out ParamCurve paramCurve) => _paramCurves.TryGetValue(id, out paramCurve);
+    public bool RegisterParamCurve(ParamCurve paramCurve) => _paramCurves.TryAdd(paramCurve.ID, paramCurve);
 
     public List<ParamCurve> GetParamCurve(List<Guid> ids)
     {
@@ -74,11 +44,8 @@ public class ParameterRegistry : ScriptableObject
 
         for (int i = 0; i < ids.Count; i++)
         {
-            Guid id = ids[i];
-            if (ParamCurves.ContainsKey(id))
-            {
-                retCurves.Add(ParamCurves[id]);
-            }
+            if (GetParamCurve(ids[i], out ParamCurve curve))
+                retCurves.Add(curve);
         }
 
         return retCurves;
@@ -88,7 +55,7 @@ public class ParameterRegistry : ScriptableObject
     {
         List<Guid> retIDs = new();
 
-        foreach ((_, ParamCurve paramCurve) in ParamCurves)
+        foreach ((_, ParamCurve paramCurve) in _paramCurves)
         {
             if (paramCurve.MeshID.Equals(meshID))
             {
@@ -99,28 +66,9 @@ public class ParameterRegistry : ScriptableObject
         return retIDs;
     }
 
-    public void RegisterParamCurve(ParamCurve paramCurve)
-    {
-        if (ParamCurves.ContainsKey(paramCurve.ID))
-        {
-            Debug.LogError("duplicate id in registry");
-        }
 
-        ParamCurves.Add(paramCurve.ID, paramCurve);
-    }
-
-    public ParamPoint GetParamPoint(Guid id)
-    {
-        if (ParamPoints.ContainsKey(id))
-        {
-            return ParamPoints[id];
-        }
-        else
-        {
-            Debug.LogError("no such id in registry");
-            throw new System.Exception();
-        }
-    }
+    public bool RegisterParamPoint(ParamPoint paramPoint) => _paramPoints.TryAdd(paramPoint.ID, paramPoint);
+    public bool GetParamPoint(Guid id, out ParamPoint paramPoint) => _paramPoints.TryGetValue(id, out paramPoint);
 
     public List<ParamPoint> GetParamPoint(List<Guid> ids)
     {
@@ -128,24 +76,11 @@ public class ParameterRegistry : ScriptableObject
 
         for (int i = 0; i < ids.Count; i++)
         {
-            Guid id = ids[i];
-            if (ParamPoints.ContainsKey(id))
-            {
-                retCurves.Add(ParamPoints[id]);
-            }
+            if (GetParamPoint(ids[i], out ParamPoint point))
+                retCurves.Add(point);
         }
 
         return retCurves;
-    }
-
-    public void RegisterParamPoint(ParamPoint paramPoint)
-    {
-        if (ParamPoints.ContainsKey(paramPoint.ID))
-        {
-            Debug.LogError("duplicate id in registry");
-        }
-
-        ParamPoints.Add(paramPoint.ID, paramPoint);
     }
 
     public void DeleteAnimationDataOfMesh(Guid id)
@@ -156,9 +91,9 @@ public class ParameterRegistry : ScriptableObject
             ParamCurve paramCurve = paramCurves[i];
             foreach (Guid pointID in paramCurve.ParamPoints)
             {
-                ParamPoints.Remove(pointID);
+                _paramPoints.Remove(pointID);
             }
-            ParamCurves.Remove(paramCurve.ID);
+            _paramCurves.Remove(paramCurve.ID);
         }
     }
 }

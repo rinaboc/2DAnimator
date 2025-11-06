@@ -101,7 +101,7 @@ public class AnimationManager : MonoBehaviour
     public void InterpolateParameter(float value, Guid paramID)
     {
         ParameterRegistry parameterRegistry = ParameterRegistry.Instance;
-        Parameter parameter = parameterRegistry.GetParameter(paramID);
+        parameterRegistry.GetParameter(paramID, out Parameter parameter);
         List<ParamCurve> paramCurves = parameterRegistry.GetParamCurve(parameter.ParamCurves);
 
         if (paramCurves.Count > 0)
