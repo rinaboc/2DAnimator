@@ -37,9 +37,12 @@ public class TimelineWidget : MonoBehaviour
     void Start()
     {
         m_OpenButton.RegisterCallback<ClickEvent>(OnButtonClick);
+
+        // close timeline widget
         m_OpenButton.RemoveFromClassList("rotate");
         m_TimelineDrawer.AddToClassList("close-timeline");
         m_TimelineDrawer.RemoveFromClassList("open-timeline");
+        m_Timeline.AddToClassList("hide");
 
         m_PlayButton.clicked += OnPlayButtonClicked;
 
@@ -68,17 +71,17 @@ public class TimelineWidget : MonoBehaviour
             m_TimelineDrawer.AddToClassList("close-timeline");
             m_TimelineDrawer.RemoveFromClassList("open-timeline");
             m_OpenButton.RemoveFromClassList("rotate");
+            m_Timeline.AddToClassList("hide");
         }
         else
         {
             m_TimelineDrawer.RemoveFromClassList("close-timeline");
             m_TimelineDrawer.AddToClassList("open-timeline");
             m_OpenButton.AddToClassList("rotate");
+            m_Timeline.RemoveFromClassList("hide");
         }
 
         m_widgetOpen = !m_widgetOpen;
-
-        m_Timeline.style.display = m_widgetOpen ? DisplayStyle.Flex : DisplayStyle.None;
 
         ParameterManager.instance.ParameterWidgetVisibility = !m_widgetOpen;
         if (m_widgetOpen)

@@ -128,6 +128,12 @@ public partial class TimelineSlider : VisualElement
             }
             m_keyframeContainer.Add(keyframeLine);
             m_keyframeLineElements.Add(parameter.ID, keyframeLine);
+
+            List<KeyFrame> keyFrames = KeyFrameRegistry.Instance.GetKeyFramesOfParam(parameter.ID);
+            foreach (var key in keyFrames)
+            {
+                keyframeLine.InsertKeyframeAt(key.Frame, key);
+            }
         }
 
         UpdateKeyWidth();

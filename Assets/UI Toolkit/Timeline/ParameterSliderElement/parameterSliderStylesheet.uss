@@ -1,6 +1,6 @@
 .param-slider-handle {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
@@ -22,7 +22,7 @@
 }
 
 .param-name {
-    font-size: 10px;
+    font-size: 24px;
     padding-top: 0;
     padding-right: 0;
     padding-bottom: 0;
@@ -34,8 +34,8 @@
 }
 
 .key-param-slider-handle {
-    width: 16px;
-    height: 16px;
+    width: 22px;
+    height: 22px;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;

@@ -1,7 +1,7 @@
 .top-section {
-    height: 60%;
-    min-height: 65px;
     flex-direction: row;
+    flex-grow: 0.1;
+    margin-bottom: 5px;
 }
 
 .top-section-right {
@@ -12,16 +12,18 @@
 
 .top-section-left {
     width: 20%;
-    align-items: center;
+    align-items: flex-end;
     justify-content: flex-end;
+    padding-right: 10px;
 }
 
 .header {
     flex-direction: row;
-    align-items: stretch;
     color: rgb(169, 169, 168);
     height: 100%;
     padding-right: 10px;
+    -unity-text-align: middle-left;
+    font-size: 32px;
 }
 
 .slider-container {
@@ -48,7 +50,7 @@
 }
 
 .slider-inputfield {
-    width: 50px;
+    width: 5%;
     color: rgb(34, 34, 34);
     margin-top: 5px;
     margin-right: 5px;
@@ -66,17 +68,25 @@
 }
 
 .close-timeline {
-    height: 40px;
+    height: 48px;
     width: 100%;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    transition-property: height;
+    transition-duration: 0.2s;
 }
 
 .open-timeline {
-    height: 49%;
+    height: 41%;
     width: 100%;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    transition-property: height;
+    transition-duration: 0.2s;
 }
 
 .keyframe-container {
-    min-height: 200px;
+    flex-grow: 1;
 }
 
 .delete-keyframe-button {
@@ -95,10 +105,17 @@
 }
 
 .play-button {
-    width: 42px;
-    height: 42px;
+    width: 48px;
+    height: 48px;
     background-image: resource('UI/play');
     background-color: rgb(140, 140, 140);
-    background-size: 60% 60%;
     -unity-background-image-tint-color: rgb(43, 43, 43);
+    background-size: 60% 60%;
+}
+
+.hide {
+    display: none;
+    visibility: hidden;
+    transition-property: display;
+    transition-delay: 0.2s;
 }
