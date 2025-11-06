@@ -15,6 +15,7 @@ public class AnimationManager : MonoBehaviour
 
     public static UnityEvent<Guid> SelectKeyframeEvent = new();
     public static UnityEvent DeleteSelectedKeyframeEvent = new();
+    public static UnityEvent<Guid, float> ParamInterpolatedEvent = new();
 
     void Awake()
     {
@@ -76,6 +77,7 @@ public class AnimationManager : MonoBehaviour
             float t = (currentFrame - minFrame.Frame) * delta + minFrame.ParamValue;
 
             InterpolateParameter(t, parameter.ID);
+            ParamInterpolatedEvent.Invoke(parameter.ID, t);
         }
     }
 

@@ -32,6 +32,20 @@ public partial class KeyframeLineElement : VisualElement
 
             frameBars[j - 1].Add(cell);
         }
+
+        AnimationManager.ParamInterpolatedEvent.AddListener(OnParamInterpolated);
+    }
+
+    ~KeyframeLineElement()
+    {
+        AnimationManager.ParamInterpolatedEvent.RemoveListener(OnParamInterpolated);
+    }
+
+    private void OnParamInterpolated(Guid paramID, float value)
+    {
+        if (!ParamID.Equals(paramID)) return;
+
+        SetSliderValue(value);
     }
 
     public void SetSliderValue(float value)

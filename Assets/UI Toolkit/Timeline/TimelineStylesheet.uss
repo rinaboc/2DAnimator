@@ -1,8 +1,19 @@
 .top-section {
     height: 60%;
-    width: 80%;
-    align-self: flex-end;
     min-height: 65px;
+    flex-direction: row;
+}
+
+.top-section-right {
+    align-self: flex-end;
+    height: 100%;
+    width: 80%;
+}
+
+.top-section-left {
+    width: 20%;
+    align-items: center;
+    justify-content: flex-end;
 }
 
 .header {
@@ -81,4 +92,13 @@
 
 .rotate {
     rotate: 180deg;
+}
+
+.play-button {
+    width: 42px;
+    height: 42px;
+    background-image: resource('UI/play');
+    background-color: rgb(140, 140, 140);
+    background-size: 60% 60%;
+    -unity-background-image-tint-color: rgb(43, 43, 43);
 }

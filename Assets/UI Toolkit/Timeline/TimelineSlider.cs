@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -8,7 +9,9 @@ public partial class TimelineSlider : VisualElement
 {
     private float _sliderContainerWidth;
     private float _sliderWidth;
-    private int m_maxFrames = 24; // TODO: custom max frame at runtime
+    public int m_maxFrames = 24; // TODO: custom max frame at runtime
+    public readonly int m_framePerSec = 12;
+
     [UxmlAttribute]
     public int MaxFrames
     {
@@ -47,17 +50,31 @@ public partial class TimelineSlider : VisualElement
     Label m_Label;
     VisualElement m_sliderContainer;
     VisualElement m_sliderHandle;
-    VisualElement m_topSection;
+    VisualElement m_topSectionRight;
     ScrollView m_keyframeContainer;
     Dictionary<Guid, KeyframeLineElement> m_keyframeLineElements = new();
 
     List<VisualElement>[] m_frameBars;
 
+
     public TimelineSlider()
     {
-        m_topSection = new();
-        m_topSection.AddToClassList("top-section");
-        Add(m_topSection);
+        m_topSectionRight = new();
+        m_topSectionRight.AddToClassList("top-section-right");
+
+        VisualElement topSectionLeft = new();
+        topSectionLeft.AddToClassList("top-section-left");
+
+        Button playButton = new();
+        playButton.name = "PlayBtn";
+        playButton.AddToClassList("play-button");
+        topSectionLeft.Add(playButton);
+
+        VisualElement topSection = new();
+        topSection.AddToClassList("top-section");
+        topSection.Add(topSectionLeft);
+        topSection.Add(m_topSectionRight);
+        Add(topSection);
 
         m_frameBars = new List<VisualElement>[m_maxFrames];
         for (int i = 0; i < m_maxFrames; i++)
@@ -169,7 +186,7 @@ public partial class TimelineSlider : VisualElement
 
         m_sliderContainer.Add(m_sliderHandle);
 
-        m_topSection.Add(m_sliderContainer);
+        m_topSectionRight.Add(m_sliderContainer);
     }
 
     private void OnMoveHandle(PointerMoveEvent evt)
@@ -236,7 +253,7 @@ public partial class TimelineSlider : VisualElement
         header.Add(deleteKeyframeButton);
         header.Add(m_currentFrameField);
 
-        m_topSection.Add(header);
+        m_topSectionRight.Add(header);
 
         m_currentFrameField.RegisterCallback<FocusOutEvent>(OnFrameChanged);
     }

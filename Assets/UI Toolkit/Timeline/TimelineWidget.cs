@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -16,6 +17,9 @@ public class TimelineWidget : MonoBehaviour
 
     private bool m_widgetOpen = false;
 
+    private Button m_PlayButton;
+    bool isPlaybackRunning = false;
+
     void Awake()
     {
         ui = GetComponent<UIDocument>().rootVisualElement;
@@ -24,6 +28,8 @@ public class TimelineWidget : MonoBehaviour
         m_TimelineDrawer = ui.Q<VisualElement>("TimelineDrawer");
         m_Timeline = ui.Q<VisualElement>("Timeline");
         m_OpenButton = ui.Q<Button>("TimelineOpenButton");
+
+        m_PlayButton = ui.Q<Button>("PlayBtn");
 
         m_TimelineSlider = ui.Q<TimelineSlider>("TimelineSlider");
     }
@@ -35,9 +41,16 @@ public class TimelineWidget : MonoBehaviour
         m_TimelineDrawer.AddToClassList("close-timeline");
         m_TimelineDrawer.RemoveFromClassList("open-timeline");
 
+        m_PlayButton.clicked += OnPlayButtonClicked;
+
         KeyParamSliderChanged.AddListener(OnKeySliderChanged);
     }
 
+    /// <summary>
+    /// When any of the slider of each parameter is changed, a keyframe is placed at the current frame and interpolates the meshes accordingly.
+    /// </summary>
+    /// <param name="id">Which parameter the slider is connected to</param>
+    /// <param name="value">Slider value</param>
     private void OnKeySliderChanged(Guid id, float value)
     {
         AnimationManager.instance.InterpolateParameter(value, id);
@@ -85,4 +98,30 @@ public class TimelineWidget : MonoBehaviour
     }
 
     public int Currentframe => m_TimelineSlider.CurrentFrame;
+
+    /// <summary>
+    /// Handle play function of the timeline.
+    /// </summary>
+    private void OnPlayButtonClicked()
+    {
+        if (isPlaybackRunning)
+        {
+            StopCoroutine(Playback());
+            isPlaybackRunning = false;
+        }
+        else
+        {
+            StartCoroutine(Playback());
+            isPlaybackRunning = true;
+        }
+    }
+
+    IEnumerator Playback()
+    {
+        do
+        {
+            m_TimelineSlider.CurrentFrame = Currentframe >= m_TimelineSlider.m_maxFrames ? 1 : Currentframe + 1;
+            yield return new WaitForSecondsRealtime(1f / m_TimelineSlider.m_framePerSec);
+        } while (isPlaybackRunning);
+    }
 }
