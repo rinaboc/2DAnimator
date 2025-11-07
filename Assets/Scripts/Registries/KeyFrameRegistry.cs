@@ -5,10 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "KeyFrameRegistry", menuName = "Global/KeyFrame Registry")]
 public class KeyFrameRegistry : ScriptableObject
 {
-
     [SerializeField] private Dictionary<Guid, KeyFrame> _keyframes = new();
-
-    public Dictionary<Guid, KeyFrame> GetAllKeyFrames => _keyframes;
 
     private static KeyFrameRegistry _instance;
     public static KeyFrameRegistry Instance
@@ -55,17 +52,9 @@ public class KeyFrameRegistry : ScriptableObject
         return true;
     }
 
-    public bool RemoveKeyframe(Guid id)
-    {
-        bool success = _keyframes.Remove(id);
-        if (!success)
-            Debug.LogError($"Couldn't remove keyframe with id: {id}");
+    public bool RemoveKeyframe(Guid id) => _keyframes.Remove(id);
 
-        return success;
-
-    }
-
-    public KeyFrame GetKeyFrame(Guid id) => _keyframes[id];
+    public bool GetKeyFrame(Guid id, out KeyFrame keyFrame) => _keyframes.TryGetValue(id, out keyFrame);
 
     public List<KeyFrame> GetKeyFramesOfParam(Guid paramID)
     {

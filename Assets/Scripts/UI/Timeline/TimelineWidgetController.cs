@@ -5,14 +5,13 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UIElements;
 
-public class TimelineWidget : MonoBehaviour
+public class TimelineWidgetController : BaseUIController
 {
     public static UnityEvent<Guid, float> KeyParamSliderChanged = new();
-    private VisualElement ui;
 
     private VisualElement m_TimelineDrawer;
     private VisualElement m_Timeline;
-    private TimelineSlider m_TimelineSlider;
+    private TimelineSliderElement m_TimelineSlider;
     private Button m_OpenButton;
 
     private bool m_widgetOpen = false;
@@ -20,18 +19,15 @@ public class TimelineWidget : MonoBehaviour
     private Button m_PlayButton;
     bool isPlaybackRunning = false;
 
-    void Awake()
+    protected override void Awake()
     {
-        ui = GetComponent<UIDocument>().rootVisualElement;
-        ui.dataSource = this;
+        base.Awake();
 
         m_TimelineDrawer = ui.Q<VisualElement>("TimelineDrawer");
         m_Timeline = ui.Q<VisualElement>("Timeline");
         m_OpenButton = ui.Q<Button>("TimelineOpenButton");
-
         m_PlayButton = ui.Q<Button>("PlayBtn");
-
-        m_TimelineSlider = ui.Q<TimelineSlider>("TimelineSlider");
+        m_TimelineSlider = ui.Q<TimelineSliderElement>("TimelineSlider");
     }
 
     void Start()

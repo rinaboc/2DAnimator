@@ -11,7 +11,6 @@ public partial class ParameterSliderElement : VisualElement
     VisualElement _container;
     VisualElement _handle;
 
-    bool isDragging = false;
     public ParameterSliderElement()
     {
         _label = new("parameter name");
@@ -19,8 +18,6 @@ public partial class ParameterSliderElement : VisualElement
         Add(_label);
 
         _slider = new();
-        // _slider.RegisterCallback<PointerDownEvent>(OnSliderDrag);
-        // _slider.RegisterCallback<PointerUpEvent>(OnSliderChange);
         _slider.RegisterValueChangedCallback(OnSliderChange);
         Add(_slider);
 
@@ -35,7 +32,7 @@ public partial class ParameterSliderElement : VisualElement
 
     private void OnSliderChange(ChangeEvent<float> evt)
     {
-        TimelineWidget.KeyParamSliderChanged.Invoke(_paramID, evt.newValue);
+        TimelineWidgetController.KeyParamSliderChanged.Invoke(_paramID, evt.newValue);
     }
 
     public ParameterSliderElement(Parameter parameter) : this()

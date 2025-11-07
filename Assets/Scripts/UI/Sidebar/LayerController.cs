@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-public class LayerInteractionController : Clickable, ISelectable
+public class LayerController : Clickable, ISelectable
 {
     public GameObject ParentObj;
     [SerializeField] private Color SelectedColor;
@@ -35,13 +35,13 @@ public class LayerInteractionController : Clickable, ISelectable
         LayerInput.enabled = isSelected;
     }
 
-    public LayerInteractionController SetID(Guid id)
+    public LayerController SetID(Guid id)
     {
         LayerID = id;
         return this;
     }
 
-    public LayerInteractionController SetText(string text)
+    public LayerController SetText(string text)
     {
         LayerInput.text = text;
         return this;

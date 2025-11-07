@@ -6,12 +6,9 @@ using UnityEngine;
 
 public class MeshRegistry : ScriptableObject
 {
-    [SerializeField, HideInInspector]
-    private Dictionary<Guid, GameObject> ArtMeshes = new();
-    [SerializeField, HideInInspector]
-    private Dictionary<Guid, LayerInteractionController> UILayers = new();
-    [SerializeField, HideInInspector]
-    private Dictionary<Guid, MeshData> MeshDataEntries = new();
+    [SerializeField] private Dictionary<Guid, GameObject> _artMeshes = new();
+    [SerializeField] private Dictionary<Guid, LayerController> _layerControllers = new();
+    [SerializeField] private Dictionary<Guid, MeshData> _meshDataEntries = new();
 
     private static MeshRegistry _instance;
     public static MeshRegistry Instance
@@ -34,9 +31,9 @@ public class MeshRegistry : ScriptableObject
 
     public GameObject GetArtMesh(Guid id)
     {
-        if (ArtMeshes.ContainsKey(id))
+        if (_artMeshes.ContainsKey(id))
         {
-            return ArtMeshes[id];
+            return _artMeshes[id];
         }
         else
         {
@@ -47,26 +44,26 @@ public class MeshRegistry : ScriptableObject
 
     public void RegisterArtMeshObj(Guid id, GameObject artMeshObj)
     {
-        if (ArtMeshes.ContainsKey(id))
+        if (_artMeshes.ContainsKey(id))
         {
             Debug.LogError("duplicate id in registry");
         }
 
-        ArtMeshes.Add(id, artMeshObj);
+        _artMeshes.Add(id, artMeshObj);
     }
 
     public void DeleteArtMeshObj(Guid id)
     {
-        GameObject artMesh = ArtMeshes[id];
-        ArtMeshes.Remove(id);
+        GameObject artMesh = _artMeshes[id];
+        _artMeshes.Remove(id);
         Destroy(artMesh);
     }
 
-    public LayerInteractionController GetUILayer(Guid id)
+    public LayerController GetUILayer(Guid id)
     {
-        if (UILayers.ContainsKey(id))
+        if (_layerControllers.ContainsKey(id))
         {
-            return UILayers[id];
+            return _layerControllers[id];
         }
         else
         {
@@ -75,20 +72,20 @@ public class MeshRegistry : ScriptableObject
         }
     }
 
-    public void RegisterUILayer(Guid id, LayerInteractionController controller)
+    public void RegisterUILayer(Guid id, LayerController controller)
     {
-        if (UILayers.ContainsKey(id))
+        if (_layerControllers.ContainsKey(id))
         {
             Debug.LogError("duplicate id in registry");
         }
 
-        UILayers.Add(id, controller);
+        _layerControllers.Add(id, controller);
     }
 
     public void DeleteUILayer(Guid id)
     {
-        GameObject uilayer = UILayers[id].ParentObj;
-        UILayers.Remove(id);
+        GameObject uilayer = _layerControllers[id].ParentObj;
+        _layerControllers.Remove(id);
         Destroy(uilayer);
     }
 
@@ -96,7 +93,7 @@ public class MeshRegistry : ScriptableObject
     {
         try
         {
-            return MeshDataEntries[id];
+            return _meshDataEntries[id];
         }
         catch (Exception e)
         {
@@ -105,17 +102,17 @@ public class MeshRegistry : ScriptableObject
         }
     }
 
-    public void UpdateMeshData(MeshData meshData) => MeshDataEntries[meshData.ID] = meshData;
+    public void UpdateMeshData(MeshData meshData) => _meshDataEntries[meshData.ID] = meshData;
 
     public void RegisterMeshData(MeshData meshData)
     {
-        if (MeshDataEntries.ContainsKey(meshData.ID))
+        if (_meshDataEntries.ContainsKey(meshData.ID))
         {
             Debug.LogError("duplicate id in registry");
         }
 
-        MeshDataEntries.Add(meshData.ID, meshData);
+        _meshDataEntries.Add(meshData.ID, meshData);
     }
 
-    public void DeleteMeshData(Guid id) => MeshDataEntries.Remove(id);
+    public void DeleteMeshData(Guid id) => _meshDataEntries.Remove(id);
 }

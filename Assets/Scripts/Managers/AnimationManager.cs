@@ -11,7 +11,7 @@ public class AnimationManager : MonoBehaviour
     private Dictionary<Guid, float> _ParamCurValues = new();
     public bool GetParamCurValue(Guid id, out float value) => _ParamCurValues.TryGetValue(id, out value);
 
-    [SerializeField] private TimelineWidget _timelineWidget;
+    [SerializeField] private TimelineWidgetController _timelineWidget;
 
     public static UnityEvent<Guid> SelectKeyframeEvent = new();
     public static UnityEvent DeleteSelectedKeyframeEvent = new();

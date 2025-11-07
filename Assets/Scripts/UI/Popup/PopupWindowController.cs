@@ -3,10 +3,8 @@ using Unity.Properties;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-[RequireComponent(typeof(UIDocument))]
-public class PopupWindowController : MonoBehaviour
+public class PopupWindowController : BaseUIController
 {
-    private VisualElement ui;
     private Button createButton;
 
     [SerializeField, CreateProperty]
@@ -18,17 +16,11 @@ public class PopupWindowController : MonoBehaviour
 
     private Guid _editedParamID;
 
-    void Awake()
-    {
-        ui = GetComponent<UIDocument>().rootVisualElement;
-        ui.dataSource = this;
-    }
-
     void OnEnable()
     {
         createButton = ui.Q<Button>("CreateButton");
 
-        HidePanel();
+        ShowPanel(false);
 
         Debug.Log($"{m_minValue}, {m_maxValue}, {m_defaultValue}");
     }
@@ -46,7 +38,7 @@ public class PopupWindowController : MonoBehaviour
 
     public void EditParameter(Parameter parameter)
     {
-        ShowPanel();
+        ShowPanel(true);
         RemoveButtonListeners();
         _editedParamID = parameter.ID;
         m_minValue = parameter.MinValue;
@@ -60,7 +52,7 @@ public class PopupWindowController : MonoBehaviour
 
     public void CreateParameter()
     {
-        ShowPanel();
+        ShowPanel(true);
         RemoveButtonListeners();
 
         createButton.text = "Create";
@@ -73,7 +65,7 @@ public class PopupWindowController : MonoBehaviour
         if (!ValidateInput()) return;
 
         ParameterManager.instance.CreateParameter(m_minValue, m_maxValue, m_defaultValue, m_paramName);
-        HidePanel();
+        ShowPanel(false);
     }
 
     private void OnEditButtonClicked()
@@ -94,7 +86,7 @@ public class PopupWindowController : MonoBehaviour
             Debug.LogError("Couldn't fetch parameter.");
         }
 
-        HidePanel();
+        ShowPanel(false);
     }
 
     private bool ValidateInput()
@@ -119,23 +111,5 @@ public class PopupWindowController : MonoBehaviour
     private void HideErrorMessage()
     {
         ui.Q<Label>("ErrorMessage").visible = false;
-    }
-
-    private void SetVisible(string elementID, bool isVisible)
-    {
-        if (isVisible)
-            ui.Q<VisualElement>(elementID).RemoveFromClassList("hide");
-        else
-            ui.Q<VisualElement>(elementID).AddToClassList("hide");
-    }
-
-    private void ShowPanel()
-    {
-        SetVisible("MainPanel", true);
-    }
-
-    private void HidePanel()
-    {
-        SetVisible("MainPanel", false);
     }
 }

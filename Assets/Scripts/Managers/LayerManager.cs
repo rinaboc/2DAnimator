@@ -108,7 +108,7 @@ public class LayerManager : MonoBehaviour
         newArtLayer.name = "ArtLayer" + meshData.ID;
         newArtLayer.transform.SetSiblingIndex(0);
 
-        newArtLayer.GetComponentInChildren<LayerInteractionController>()
+        newArtLayer.GetComponentInChildren<LayerController>()
             .SetID(meshData.ID)
             .SetText(meshData.name)
             .SetSelected(false);
@@ -118,7 +118,7 @@ public class LayerManager : MonoBehaviour
             SelectUIArtLayer(meshData.ID);
         });
 
-        MeshRegistry.Instance.RegisterUILayer(meshData.ID, newArtLayer.GetComponentInChildren<LayerInteractionController>());
+        MeshRegistry.Instance.RegisterUILayer(meshData.ID, newArtLayer.GetComponentInChildren<LayerController>());
     }
 
     public void SelectUIArtLayer(Guid id)
@@ -130,7 +130,7 @@ public class LayerManager : MonoBehaviour
         _selectedLayerID = id;
         _isLayerSelected = true;
         SelectedUILayer
-            .GetComponentInChildren<LayerInteractionController>()
+            .GetComponentInChildren<LayerController>()
             .SetSelected(true);
         SelectedArtMesh.SetSelected(true);
 
@@ -142,7 +142,7 @@ public class LayerManager : MonoBehaviour
     {
         if (SelectedUILayer != null)
         {
-            SelectedUILayer.GetComponentInChildren<LayerInteractionController>().SetSelected(false);
+            SelectedUILayer.GetComponentInChildren<LayerController>().SetSelected(false);
             SelectedArtMesh.SetSelected(false);
         }
     }
@@ -156,7 +156,7 @@ public class LayerManager : MonoBehaviour
 
         if (artLayerIndex > 0)
         {
-            Guid swappedID = UILayersContent.transform.GetChild(artLayerIndex - 1).gameObject.GetComponentInChildren<LayerInteractionController>().LayerID;
+            Guid swappedID = UILayersContent.transform.GetChild(artLayerIndex - 1).gameObject.GetComponentInChildren<LayerController>().LayerID;
             ArtMesh swappedMesh = MeshRegistry.Instance.GetArtMesh(swappedID).GetComponent<ArtMesh>();
             SelectedArtMesh.SwapDrawOrder(swappedMesh);
 
@@ -174,7 +174,7 @@ public class LayerManager : MonoBehaviour
 
         if (artLayerIndex < UILayersContent.transform.childCount - 1)
         {
-            Guid swappedID = UILayersContent.transform.GetChild(artLayerIndex + 1).gameObject.GetComponentInChildren<LayerInteractionController>().LayerID;
+            Guid swappedID = UILayersContent.transform.GetChild(artLayerIndex + 1).gameObject.GetComponentInChildren<LayerController>().LayerID;
             ArtMesh swappedMesh = MeshRegistry.Instance.GetArtMesh(swappedID).GetComponent<ArtMesh>();
             SelectedArtMesh.SwapDrawOrder(swappedMesh);
 

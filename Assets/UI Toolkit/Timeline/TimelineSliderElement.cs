@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class TimelineSlider : VisualElement
+public partial class TimelineSliderElement : VisualElement
 {
     private float _sliderContainerWidth;
     private float _sliderWidth;
@@ -57,7 +57,7 @@ public partial class TimelineSlider : VisualElement
     List<VisualElement>[] m_frameBars;
 
 
-    public TimelineSlider()
+    public TimelineSliderElement()
     {
         m_topSectionRight = new();
         m_topSectionRight.AddToClassList("top-section-right");
