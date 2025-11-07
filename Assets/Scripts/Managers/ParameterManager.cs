@@ -77,7 +77,7 @@ public class ParameterManager : MonoBehaviour
     /// </summary>
     public void StartParameterEditing(Guid paramID)
     {
-        if (ParameterRegistry.Instance.GetParameter(paramID, out Parameter parameter))
+        if (ParameterRegistry.Instance.TryGet(paramID, out Parameter parameter))
         {
             popupWindow.EditParameter(parameter);
         }
@@ -96,7 +96,7 @@ public class ParameterManager : MonoBehaviour
 
     public void CreateParamPoints(Guid parameterID, Guid meshID)
     {
-        ParameterRegistry.Instance.GetParameter(parameterID, out Parameter parameter);
+        ParameterRegistry.Instance.TryGet(parameterID, out Parameter parameter);
         ParamCurve paramCurve = new(meshID, parameter.ID);
         ParamPoint minPoint = new(parameter.MinValue);
         ParamPoint maxPoint = new(parameter.MaxValue);
@@ -127,8 +127,24 @@ public class ParameterManager : MonoBehaviour
 
     public void DeleteParamPointsOfMesh(Guid meshID)
     {
-        ParameterRegistry.Instance.DeleteAnimationDataOfMesh(meshID);
+        DeleteAnimationDataOfMesh(meshID);
         HighlightCreatedCurves(meshID);
+    }
+
+    public void DeleteAnimationDataOfMesh(Guid id)
+    {
+        ParamCurveRegistry paramCurveRegistry = ParamCurveRegistry.Instance;
+        ParamPointRegistry paramPointRegistry = ParamPointRegistry.Instance;
+        List<ParamCurve> paramCurves = paramCurveRegistry.GetEntries(paramCurveRegistry.GetAssignedParamIDsOfMesh(id));
+        for (int i = 0; i < paramCurves.Count; i++)
+        {
+            ParamCurve paramCurve = paramCurves[i];
+            foreach (Guid pointID in paramCurve.ParamPoints)
+            {
+                paramPointRegistry.Remove(pointID);
+            }
+            paramCurveRegistry.Remove(paramCurve.ID);
+        }
     }
 
     public void SelectParameter(Guid id)
@@ -145,7 +161,7 @@ public class ParameterManager : MonoBehaviour
 
     public void HighlightCreatedCurves(Guid meshID)
     {
-        List<Guid> assignedParams = ParameterRegistry.Instance.GetAssignedParamIDsOfMesh(meshID);
+        List<Guid> assignedParams = ParamCurveRegistry.Instance.GetAssignedParamIDsOfMesh(meshID);
 
         foreach (var item in paramSliders)
         {
@@ -158,9 +174,10 @@ public class ParameterManager : MonoBehaviour
         if (!_isParamSelected) return;
 
         ParameterRegistry parameterRegistry = ParameterRegistry.Instance;
+        ParamPointRegistry paramPointRegistry = ParamPointRegistry.Instance;
 
-        parameterRegistry.GetParameter(SelectedParamID, out Parameter currentParam);
-        List<ParamCurve> currentParamCurves = parameterRegistry.GetParamCurve(currentParam.ParamCurves);
+        parameterRegistry.TryGet(SelectedParamID, out Parameter currentParam);
+        List<ParamCurve> currentParamCurves = ParamCurveRegistry.Instance.GetEntries(currentParam.ParamCurves);
 
         float sliderValue = paramSliders[currentParam.ID].GetComponent<ParameterSlider>().GetValue();
         for (int i = 0; i < currentParamCurves.Count; i++)
@@ -170,7 +187,7 @@ public class ParameterManager : MonoBehaviour
             if (paramCurve.MeshID != meshID) // filter by mesh id
                 continue;
 
-            List<ParamPoint> paramPoints = parameterRegistry.GetParamPoint(paramCurve.ParamPoints);
+            List<ParamPoint> paramPoints = paramPointRegistry.GetEntries(paramCurve.ParamPoints);
 
             bool isPointUpdated = false;
             float[] distFromPointValues = new float[paramPoints.Count];

@@ -16,7 +16,7 @@ public class ParamPoint : EntityBase
 
     protected override void Register()
     {
-        ParameterRegistry.Instance.RegisterParamPoint(this);
+        ParamPointRegistry.Instance.Register(this);
     }
 
     public override string ToString() => $"{ID}: paramValue {ParamValue}, position {Position}, rotation {Rotation}, scale {Scale}";

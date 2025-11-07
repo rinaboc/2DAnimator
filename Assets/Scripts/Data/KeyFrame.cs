@@ -15,7 +15,7 @@ public class KeyFrame : EntityBase
 
     protected override void Register()
     {
-        KeyFrameRegistry.Instance.AddKeyframe(this);
+        KeyFrameRegistry.Instance.Register(this);
     }
 
     public bool IsSameCell(KeyFrame kf) => this.ParamID.Equals(kf.ParamID) && this.Frame == kf.Frame;

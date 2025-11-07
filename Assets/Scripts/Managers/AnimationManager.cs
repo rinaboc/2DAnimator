@@ -36,7 +36,7 @@ public class AnimationManager : MonoBehaviour
 
     private void AnimateTimeline(int currentFrame)
     {
-        List<Parameter> parameters = ParameterRegistry.Instance.GetAllParameters;
+        List<Parameter> parameters = ParameterRegistry.Instance.GetAll().ToList();
 
         foreach (Parameter parameter in parameters)
         {
@@ -92,7 +92,7 @@ public class AnimationManager : MonoBehaviour
 
     public void RemoveKeyFrame(Guid id)
     {
-        KeyFrameRegistry.Instance.RemoveKeyframe(id);
+        KeyFrameRegistry.Instance.Remove(id);
     }
 
     /// <summary>
@@ -101,8 +101,9 @@ public class AnimationManager : MonoBehaviour
     public void InterpolateParameter(float value, Guid paramID)
     {
         ParameterRegistry parameterRegistry = ParameterRegistry.Instance;
-        parameterRegistry.GetParameter(paramID, out Parameter parameter);
-        List<ParamCurve> paramCurves = parameterRegistry.GetParamCurve(parameter.ParamCurves);
+        ParamPointRegistry paramPointRegistry = ParamPointRegistry.Instance;
+        parameterRegistry.TryGet(paramID, out Parameter parameter);
+        List<ParamCurve> paramCurves = ParamCurveRegistry.Instance.GetEntries(parameter.ParamCurves);
 
         if (paramCurves.Count > 0)
         {
@@ -111,7 +112,7 @@ public class AnimationManager : MonoBehaviour
 
         foreach (ParamCurve paramCurve in paramCurves)
         {
-            List<ParamPoint> paramPoints = parameterRegistry.GetParamPoint(paramCurve.ParamPoints);
+            List<ParamPoint> paramPoints = paramPointRegistry.GetEntries(paramCurve.ParamPoints);
             List<ParamPoint> orderedPoints = paramPoints.OrderBy(point => point.ParamValue).ToList();
             int minP = -1;
             int maxP = -1;

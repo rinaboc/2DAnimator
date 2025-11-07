@@ -72,7 +72,7 @@ public class PopupWindowController : BaseUIController
     {
         if (!ValidateInput()) return;
 
-        if (ParameterRegistry.Instance.GetParameter(_editedParamID, out Parameter parameter))
+        if (ParameterRegistry.Instance.TryGet(_editedParamID, out Parameter parameter))
         {
             parameter.MinValue = m_minValue;
             parameter.MaxValue = m_maxValue;

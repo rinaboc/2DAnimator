@@ -49,6 +49,6 @@ public class Parameter : EntityBase
 
     protected override void Register()
     {
-        ParameterRegistry.Instance.RegisterParameter(this);
+        ParameterRegistry.Instance.Register(this);
     }
 }

@@ -151,7 +151,7 @@ public class ArtMesh : MonoBehaviour, ISelectable
     {
         MeshData meshData = MeshRegistry.Instance.GetMeshData(MeshID);
 
-        bool areParametersAssigned = ParameterRegistry.Instance.GetAssignedParamIDsOfMesh(meshData.ID).Count > 0;
+        bool areParametersAssigned = ParamCurveRegistry.Instance.GetAssignedParamIDsOfMesh(meshData.ID).Count > 0;
 
         object updatedAnimationData = null;
         switch (type)

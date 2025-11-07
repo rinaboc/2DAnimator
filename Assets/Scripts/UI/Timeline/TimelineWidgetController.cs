@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UIElements;
@@ -92,7 +93,7 @@ public class TimelineWidgetController : BaseUIController
     /// </summary>
     private void SendParametersToTimeline()
     {
-        List<Parameter> parameters = ParameterRegistry.Instance.GetAllParameters;
+        List<Parameter> parameters = ParameterRegistry.Instance.GetAll().ToList();
         m_TimelineSlider.LoadParameters(parameters);
     }
 

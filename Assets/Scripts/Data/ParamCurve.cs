@@ -18,6 +18,6 @@ public class ParamCurve : EntityBase
 
     protected override void Register()
     {
-        ParameterRegistry.Instance.RegisterParamCurve(this);
+        ParamCurveRegistry.Instance.Register(this);
     }
 }
