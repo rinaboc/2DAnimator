@@ -2,25 +2,21 @@
 using System;
 using System.Collections.Generic;
 
-public class ParamCurve
+public class ParamCurve : EntityBase
 {
-    public Guid ID;
     public Guid MeshID;
     public Guid ParamID;
 
     public readonly List<Guid> ParamPoints;
 
-    public ParamCurve(Guid meshID, Guid paramID, bool autoRegister = true)
+    public ParamCurve(Guid meshID, Guid paramID) : base()
     {
-        ID = Guid.NewGuid();
         MeshID = meshID;
         ParamID = paramID;
         ParamPoints = new();
-
-        if (autoRegister) Register();
     }
 
-    public void Register()
+    protected override void Register()
     {
         ParameterRegistry.Instance.RegisterParamCurve(this);
     }

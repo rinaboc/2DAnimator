@@ -1,26 +1,19 @@
 using System;
 
-public class KeyFrame
+public class KeyFrame : EntityBase
 {
-    public Guid ID;
     public Guid ParamID;
     public float ParamValue;
     public int Frame;
 
-    public KeyFrame(Guid ParamID, float ParamValue, int Frame, bool autoRegister = true)
+    public KeyFrame(Guid ParamID, float ParamValue, int Frame) : base()
     {
-        ID = Guid.NewGuid();
         this.ParamID = ParamID;
         this.ParamValue = ParamValue;
         this.Frame = Frame;
-
-        if (autoRegister)
-        {
-            Register();
-        }
     }
 
-    private void Register()
+    protected override void Register()
     {
         KeyFrameRegistry.Instance.AddKeyframe(this);
     }

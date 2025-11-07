@@ -1,25 +1,20 @@
 using System;
 using UnityEngine;
 
-public class ParamPoint
+public class ParamPoint : EntityBase
 {
-    public readonly Guid ID;
     public float ParamValue;
-
     public Vector3 Position { get; set; }
     public Quaternion Rotation { get; set; }
     public Vector3 Scale { get; set; }
 
-    public ParamPoint(float paramValue, bool autoRegister = true)
+    public ParamPoint(float paramValue) : base()
     {
-        ID = Guid.NewGuid();
         this.ParamValue = paramValue;
         Rotation = Quaternion.identity;
-
-        if (autoRegister) Register();
     }
 
-    public void Register()
+    protected override void Register()
     {
         ParameterRegistry.Instance.RegisterParamPoint(this);
     }

@@ -83,7 +83,6 @@ public class LayerManager : MonoBehaviour
     public void CreateArtMesh(Texture2D texture, string path)
     {
         MeshData newMesh = new(path);
-        MeshRegistry.Instance.RegisterMeshData(newMesh);
 
         // create ArtObject inside viewport and assign the image to its sprite
         GameObject newArtObject = Instantiate(ArtObjectPrefab, ViewportScale.transform, false);
