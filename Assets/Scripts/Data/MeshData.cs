@@ -24,7 +24,7 @@ public class MeshData : EntityBase
 
     protected override void Register()
     {
-        MeshRegistry.Instance.RegisterMeshData(this);
+        MeshRegistry.Instance.Register(this);
     }
 
     public override string ToString() => $"{ID}: {name}, {drawOrder}, {sourcePath}";

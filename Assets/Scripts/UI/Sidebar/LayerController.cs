@@ -57,15 +57,10 @@ public class LayerController : Clickable, ISelectable
 
     public void TextChanged()
     {
-        try
+        if (MeshRegistry.Instance.TryGet(LayerID, out MeshData meshData))
         {
-            MeshData meshData = MeshRegistry.Instance.GetMeshData(LayerID);
             meshData.name = LayerInput.text;
             Debug.Log(meshData.ToString());
-        }
-        catch (Exception)
-        {
-            Debug.LogError("Couldn't change meshData name.");
         }
     }
 }

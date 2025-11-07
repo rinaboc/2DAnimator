@@ -18,6 +18,7 @@ public class PopupWindowController : BaseUIController
 
     void OnEnable()
     {
+        ParameterManager.ParameterEditEvent.AddListener(EditParameter);
         createButton = ui.Q<Button>("CreateButton");
 
         ShowPanel(false);
@@ -36,18 +37,21 @@ public class PopupWindowController : BaseUIController
         createButton.clicked -= OnEditButtonClicked;
     }
 
-    public void EditParameter(Parameter parameter)
+    public void EditParameter(Guid paramID)
     {
-        ShowPanel(true);
-        RemoveButtonListeners();
-        _editedParamID = parameter.ID;
-        m_minValue = parameter.MinValue;
-        m_maxValue = parameter.MaxValue;
-        m_defaultValue = parameter.DefaultValue;
-        m_paramName = parameter.Name;
+        if (ParameterRegistry.Instance.TryGet(paramID, out Parameter parameter))
+        {
+            ShowPanel(true);
+            RemoveButtonListeners();
+            _editedParamID = parameter.ID;
+            m_minValue = parameter.MinValue;
+            m_maxValue = parameter.MaxValue;
+            m_defaultValue = parameter.DefaultValue;
+            m_paramName = parameter.Name;
 
-        createButton.text = "Save";
-        createButton.clicked += OnEditButtonClicked;
+            createButton.text = "Save";
+            createButton.clicked += OnEditButtonClicked;
+        }
     }
 
     public void CreateParameter()

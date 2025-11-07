@@ -132,8 +132,8 @@ public class AnimationManager : MonoBehaviour
 
             ParamPoint maxPoint = orderedPoints[maxP];
 
-            GameObject artMeshObject = MeshRegistry.Instance.GetArtMesh(paramCurve.MeshID);
-            MeshData meshData = MeshRegistry.Instance.GetMeshData(paramCurve.MeshID);
+            GameObject artMeshObject = MeshManager.Instance.GetArtMesh(paramCurve.MeshID);
+            MeshRegistry.Instance.TryGet(paramCurve.MeshID, out MeshData meshData);
             ArtMesh artMesh = artMeshObject.GetComponent<ArtMesh>();
 
             ParamPoint minPoint = orderedPoints[minP];

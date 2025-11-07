@@ -2,19 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class ParameterManager : MonoBehaviour
 {
-    public static ParameterManager instance;
-
-    [SerializeField] private PopupWindowController popupWindow;
-
+    public static UnityEvent<Guid> ParameterEditEvent = new();
     [SerializeField] private GameObject ParamSliderPrefab;
     [SerializeField] private Transform ParamWidgetContent;
 
-    private readonly Dictionary<Guid, GameObject> paramSliders = new();
+    private readonly Dictionary<Guid, GameObject> _paramSliders = new();
 
-    private ParameterSlider GetParamSlider(Guid id) => paramSliders[id].GetComponent<ParameterSlider>();
+    private ParameterSlider GetParamSlider(Guid id) => _paramSliders[id].GetComponent<ParameterSlider>();
 
     private bool _isParamSelected = false;
     private Guid _selectedParamID;
@@ -25,6 +23,8 @@ public class ParameterManager : MonoBehaviour
             return _isParamSelected ? _selectedParamID : throw new Exception("No parameters are selected");
         }
     }
+
+    public static ParameterManager instance;
 
     void Awake()
     {
@@ -68,7 +68,7 @@ public class ParameterManager : MonoBehaviour
     /// </summary>
     public void UpdateParameter(Parameter parameter)
     {
-        ParameterSlider parameterSlider = paramSliders[parameter.ID].GetComponent<ParameterSlider>();
+        ParameterSlider parameterSlider = GetParamSlider(parameter.ID);
         parameterSlider.UpdateSlider(parameter);
     }
 
@@ -77,10 +77,7 @@ public class ParameterManager : MonoBehaviour
     /// </summary>
     public void StartParameterEditing(Guid paramID)
     {
-        if (ParameterRegistry.Instance.TryGet(paramID, out Parameter parameter))
-        {
-            popupWindow.EditParameter(parameter);
-        }
+        ParameterEditEvent.Invoke(paramID);
     }
 
     public void CreateParameter(float min, float max, float defaultValue, string name = "parameter")
@@ -91,7 +88,7 @@ public class ParameterManager : MonoBehaviour
         parameterSlider.SetParamID(parameter.ID);
         parameterSlider.UpdateSlider(parameter);
 
-        paramSliders.Add(parameter.ID, paramSlider);
+        _paramSliders.Add(parameter.ID, paramSlider);
     }
 
     public void CreateParamPoints(Guid parameterID, Guid meshID)
@@ -163,7 +160,7 @@ public class ParameterManager : MonoBehaviour
     {
         List<Guid> assignedParams = ParamCurveRegistry.Instance.GetAssignedParamIDsOfMesh(meshID);
 
-        foreach (var item in paramSliders)
+        foreach (var item in _paramSliders)
         {
             item.Value.GetComponent<ParameterSlider>().SetAssignedCurve(assignedParams.Contains(item.Key));
         }
@@ -179,7 +176,7 @@ public class ParameterManager : MonoBehaviour
         parameterRegistry.TryGet(SelectedParamID, out Parameter currentParam);
         List<ParamCurve> currentParamCurves = ParamCurveRegistry.Instance.GetEntries(currentParam.ParamCurves);
 
-        float sliderValue = paramSliders[currentParam.ID].GetComponent<ParameterSlider>().GetValue();
+        float sliderValue = GetParamSlider(currentParam.ID).GetValue();
         for (int i = 0; i < currentParamCurves.Count; i++)
         {
             ParamCurve paramCurve = currentParamCurves[i];

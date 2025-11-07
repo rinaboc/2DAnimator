@@ -16,7 +16,8 @@ public class ArtMesh : MonoBehaviour, ISelectable
 
     void Start()
     {
-        SetDrawOrder(MeshRegistry.Instance.GetMeshData(MeshID).drawOrder);
+        if (MeshRegistry.Instance.TryGet(MeshID, out MeshData meshData))
+            SetDrawOrder(meshData.drawOrder);
     }
 
     public ArtMesh SetMeshID(Guid id)
@@ -48,17 +49,18 @@ public class ArtMesh : MonoBehaviour, ISelectable
 
     public void SwapDrawOrder(ArtMesh swap)
     {
-        ushort newDrawOrder = MeshRegistry.Instance.GetMeshData(swap.MeshID).drawOrder;
-        swap.SetDrawOrder(MeshRegistry.Instance.GetMeshData(MeshID).drawOrder);
+        MeshRegistry.Instance.TryGet(swap.MeshID, out MeshData swapMeshData);
+        ushort newDrawOrder = swapMeshData.drawOrder;
+        MeshRegistry.Instance.TryGet(MeshID, out MeshData thisMeshData);
+        swap.SetDrawOrder(thisMeshData.drawOrder);
         this.SetDrawOrder(newDrawOrder);
 
     }
 
     public ArtMesh SetDrawOrder(ushort newDrawOrder)
     {
-        try
+        if (MeshRegistry.Instance.TryGet(MeshID, out MeshData meshData))
         {
-            MeshData meshData = MeshRegistry.Instance.GetMeshData(MeshID);
             meshData.drawOrder = newDrawOrder;
 
             Material _meshMaterial = ArtMeshObject.GetComponent<MeshRenderer>().material;
@@ -68,9 +70,9 @@ public class ArtMesh : MonoBehaviour, ISelectable
                 _meshMaterial.renderQueue = 2000 + meshData.drawOrder;
             }
         }
-        catch (Exception)
+        else
         {
-            Debug.LogError("Couldn't change draw order of mesh data.");
+            Debug.LogError("Couldn't find mesh data to change draw order.");
         }
 
         return this;
@@ -89,13 +91,13 @@ public class ArtMesh : MonoBehaviour, ISelectable
 
     public void LoadTransformationFromMeshData()
     {
-        MeshData meshData = MeshRegistry.Instance.GetMeshData(MeshID);
-
-        this.transform.position = meshData.Position;
-        ArtMeshObject.transform.localScale = meshData.Scale;
-        UpdateBoundingBox();
-        this.transform.localRotation = meshData.Rotation;
-
+        if (MeshRegistry.Instance.TryGet(MeshID, out MeshData meshData))
+        {
+            this.transform.position = meshData.Position;
+            ArtMeshObject.transform.localScale = meshData.Scale;
+            UpdateBoundingBox();
+            this.transform.localRotation = meshData.Rotation;
+        }
     }
 
     private void UpdateBoundingBox()
@@ -149,7 +151,7 @@ public class ArtMesh : MonoBehaviour, ISelectable
     /// <param name="value">transformation's value</param>
     public void SaveTransform(TransformType type)
     {
-        MeshData meshData = MeshRegistry.Instance.GetMeshData(MeshID);
+        MeshRegistry.Instance.TryGet(MeshID, out MeshData meshData);
 
         bool areParametersAssigned = ParamCurveRegistry.Instance.GetAssignedParamIDsOfMesh(meshData.ID).Count > 0;
 

@@ -1,10 +1,12 @@
 using UnityEngine;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using System;
 
+/// <summary>
+/// Manager for handling Art Mesh layers and their corresponding UI elements
+/// </summary>
 public class LayerManager : MonoBehaviour
 {
     [Header("Art Mesh creation")]
@@ -14,6 +16,8 @@ public class LayerManager : MonoBehaviour
     [Header("UI settings")]
     [SerializeField] private GameObject UIArtLayerPrefab;
     [SerializeField] private GameObject UILayersContent;
+
+    [SerializeField] private Dictionary<Guid, LayerController> _layerControllers = new();
 
     private InputAction CancelAction;
 
@@ -27,9 +31,9 @@ public class LayerManager : MonoBehaviour
     {
         get
         {
-            if (_isLayerSelected)
+            if (_isLayerSelected && GetUILayer(_selectedLayerID, out LayerController layer))
             {
-                return MeshRegistry.Instance.GetUILayer(_selectedLayerID).ParentObj;
+                return layer.ParentObj;
             }
             else return null;
         }
@@ -41,7 +45,7 @@ public class LayerManager : MonoBehaviour
         {
             if (_isLayerSelected)
             {
-                return MeshRegistry.Instance.GetArtMesh(_selectedLayerID).GetComponent<ArtMesh>();
+                return MeshManager.Instance.GetArtMesh(_selectedLayerID).GetComponent<ArtMesh>();
             }
             else return null;
         }
@@ -92,7 +96,7 @@ public class LayerManager : MonoBehaviour
             .SetMeshID(newMesh.ID)
             .SetSelected(false);
 
-        MeshRegistry.Instance.RegisterArtMeshObj(newMesh.ID, newArtObject);
+        MeshManager.Instance.RegisterArtMeshObj(newMesh.ID, newArtObject);
 
         CreateUIArtLayer(newMesh);
         SelectUIArtLayer(newMesh.ID);
@@ -117,7 +121,7 @@ public class LayerManager : MonoBehaviour
             SelectUIArtLayer(meshData.ID);
         });
 
-        MeshRegistry.Instance.RegisterUILayer(meshData.ID, newArtLayer.GetComponentInChildren<LayerController>());
+        RegisterUILayer(meshData.ID, newArtLayer.GetComponentInChildren<LayerController>());
     }
 
     public void SelectUIArtLayer(Guid id)
@@ -156,7 +160,7 @@ public class LayerManager : MonoBehaviour
         if (artLayerIndex > 0)
         {
             Guid swappedID = UILayersContent.transform.GetChild(artLayerIndex - 1).gameObject.GetComponentInChildren<LayerController>().LayerID;
-            ArtMesh swappedMesh = MeshRegistry.Instance.GetArtMesh(swappedID).GetComponent<ArtMesh>();
+            ArtMesh swappedMesh = MeshManager.Instance.GetArtMesh(swappedID).GetComponent<ArtMesh>();
             SelectedArtMesh.SwapDrawOrder(swappedMesh);
 
             selectedArtLayer.SetSiblingIndex(artLayerIndex - 1);
@@ -174,7 +178,7 @@ public class LayerManager : MonoBehaviour
         if (artLayerIndex < UILayersContent.transform.childCount - 1)
         {
             Guid swappedID = UILayersContent.transform.GetChild(artLayerIndex + 1).gameObject.GetComponentInChildren<LayerController>().LayerID;
-            ArtMesh swappedMesh = MeshRegistry.Instance.GetArtMesh(swappedID).GetComponent<ArtMesh>();
+            ArtMesh swappedMesh = MeshManager.Instance.GetArtMesh(swappedID).GetComponent<ArtMesh>();
             SelectedArtMesh.SwapDrawOrder(swappedMesh);
 
             selectedArtLayer.SetSiblingIndex(artLayerIndex + 1);
@@ -187,11 +191,18 @@ public class LayerManager : MonoBehaviour
 
         ParameterManager.instance.DeleteParamPointsOfMesh(SelectedArtMesh.MeshID);
 
-        MeshRegistry.Instance.DeleteArtMeshObj(_selectedLayerID);
-        MeshRegistry.Instance.DeleteUILayer(_selectedLayerID);
-        MeshRegistry.Instance.DeleteMeshData(_selectedLayerID);
+        MeshManager.Instance.DeleteArtMeshObj(_selectedLayerID);
+        DeleteUILayer(_selectedLayerID);
+        MeshRegistry.Instance.Remove(_selectedLayerID);
 
         // deselect
         _isLayerSelected = false;
     }
+
+    private bool GetUILayer(Guid id, out LayerController layer) => _layerControllers.TryGetValue(id, out layer);
+
+    private bool RegisterUILayer(Guid id, LayerController controller) => _layerControllers.TryAdd(id, controller);
+
+    private bool DeleteUILayer(Guid id) => _layerControllers.Remove(id);
+
 }
