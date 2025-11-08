@@ -38,4 +38,22 @@ public class ParamCurveRegistry : RegistryBase<ParamCurve>
 
         return retIDs;
     }
+
+    /// <summary>
+    /// Get the ParamCurve entries that are assigned to a given mesh.
+    /// </summary>
+    public List<ParamCurve> GetParamCurvesOfMesh(Guid meshID)
+    {
+        List<ParamCurve> ret = new();
+
+        foreach ((_, ParamCurve paramCurve) in _map)
+        {
+            if (paramCurve.MeshID.Equals(meshID))
+            {
+                ret.Add(paramCurve);
+            }
+        }
+
+        return ret;
+    }
 }

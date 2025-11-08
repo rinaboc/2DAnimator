@@ -25,7 +25,7 @@ public class LayerController : Clickable, ISelectable
 
     void OnDestroy()
     {
-        DoubleClickAction.Dispose();
+        DoubleClickAction.performed -= OnDoubleClick;
     }
 
     public void SetSelected(bool isSelected)

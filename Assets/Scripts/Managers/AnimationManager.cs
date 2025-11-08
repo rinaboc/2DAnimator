@@ -116,7 +116,11 @@ public class AnimationManager : ManagerBase<AnimationManager>
             MeshManager.Instance.GetMeshObject(paramCurve.MeshID, out MeshController artMesh);
             MeshRegistry.Instance.TryGet(paramCurve.MeshID, out MeshData meshData);
 
-            if (artMesh == null || meshData == null) break;
+            if (artMesh == null || meshData == null)
+            {
+                Debug.LogError("artmesh or meshdata null in interpolate parameter");
+                continue;
+            }
 
             ParamPoint minPoint = orderedPoints[minP];
 

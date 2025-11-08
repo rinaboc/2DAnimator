@@ -58,7 +58,8 @@ public class ParameterSlider : Clickable, ISelectable
 
     private void OnDestroy()
     {
-        DoubleClickAction.Dispose();
+        DoubleClickAction.performed -= OnDoubleClick;
+        clickAction.performed -= OnClick;
     }
 
     public void SetParamName(string name)

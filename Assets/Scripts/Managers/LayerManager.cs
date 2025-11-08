@@ -59,7 +59,7 @@ public class LayerManager : ManagerBase<LayerManager>
 
     void OnDestroy()
     {
-        CancelAction.Dispose();
+        CancelAction.performed -= OnCancel;
     }
 
 

@@ -120,7 +120,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
     {
         ParamCurveRegistry paramCurveRegistry = ParamCurveRegistry.Instance;
         ParamPointRegistry paramPointRegistry = ParamPointRegistry.Instance;
-        List<ParamCurve> paramCurves = paramCurveRegistry.GetEntries(paramCurveRegistry.GetAssignedParamIDsOfMesh(id));
+        List<ParamCurve> paramCurves = paramCurveRegistry.GetParamCurvesOfMesh(id);
         for (int i = 0; i < paramCurves.Count; i++)
         {
             ParamCurve paramCurve = paramCurves[i];
