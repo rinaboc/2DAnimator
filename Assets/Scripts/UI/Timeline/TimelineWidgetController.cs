@@ -50,8 +50,8 @@ public class TimelineWidgetController : BaseUIController
     /// <param name="value">Slider value</param>
     private void OnKeySliderChanged(Guid id, float value)
     {
-        AnimationManager.instance.InterpolateParameter(value, id);
-        KeyFrame newKeyframe = AnimationManager.instance.CreateKeyframe(id, value);
+        AnimationManager.Instance.InterpolateParameter(value, id);
+        KeyFrame newKeyframe = AnimationManager.Instance.CreateKeyframe(id, value);
         m_TimelineSlider.CreateKeyframeAtCurrentFrame(id, newKeyframe);
     }
 
@@ -77,7 +77,7 @@ public class TimelineWidgetController : BaseUIController
 
         m_widgetOpen = !m_widgetOpen;
 
-        ParameterManager.instance.ParameterWidgetVisibility = !m_widgetOpen;
+        ParameterManager.Instance.ParameterWidgetVisibility = !m_widgetOpen;
         if (m_widgetOpen)
         {
             SendParametersToTimeline();

@@ -40,7 +40,7 @@ public class NFPController : MonoBehaviour
                 texture.LoadImage(bytes);
 
                 // create new artmesh
-                LayerManager.instance.CreateArtMesh(texture, path);
+                LayerManager.Instance.CreateArtMesh(texture, path);
 
                 Debug.Log("Picked file: " + path);
             }

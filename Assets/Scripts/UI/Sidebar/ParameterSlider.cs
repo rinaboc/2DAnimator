@@ -52,7 +52,7 @@ public class ParameterSlider : Clickable, ISelectable
     {
         if (IsInsideCollider())
         {
-            ParameterManager.instance.StartParameterEditing(paramID);
+            ParameterManager.Instance.StartParameterEditing(paramID);
         }
     }
 
@@ -76,7 +76,7 @@ public class ParameterSlider : Clickable, ISelectable
     {
         if (IsInsideCollider())
         {
-            ParameterManager.instance.SelectParameter(paramID);
+            ParameterManager.Instance.SelectParameter(paramID);
         }
     }
 
@@ -126,7 +126,7 @@ public class ParameterSlider : Clickable, ISelectable
     {
         sliderValue = slider.value;
         ParameterValueField.text = sliderValue.ToString("F1");
-        AnimationManager.instance.InterpolateParameter(sliderValue, paramID);
+        AnimationManager.Instance.InterpolateParameter(sliderValue, paramID);
     }
 
     public void SetValue(float value)

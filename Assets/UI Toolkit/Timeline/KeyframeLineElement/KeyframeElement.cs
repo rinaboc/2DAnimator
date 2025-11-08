@@ -50,7 +50,7 @@ public partial class KeyframeElement : VisualElement
         if (!_isSelected) return;
 
         _parentElement.RemoveKeyframeFrom(_frame);
-        AnimationManager.instance.RemoveKeyFrame(_id);
+        AnimationManager.Instance.RemoveKeyFrame(_id);
     }
 
     private void OnClick(ClickEvent evt)

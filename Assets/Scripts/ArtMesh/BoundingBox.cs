@@ -41,7 +41,7 @@ public class BoundingBox : MonoBehaviour, ISelectable
     /// </summary>
     public void SetClipArea()
     {
-        ViewportManager viewportManager = ViewportManager.instance;
+        ViewportManager viewportManager = ViewportManager.Instance;
         Vector3 topLeft = viewportManager.TopLeftAnchor;
         Vector3 bottomRight = viewportManager.BottomRightAnchor;
 

@@ -122,7 +122,7 @@ public partial class TimelineSliderElement : VisualElement
         foreach (Parameter parameter in parameters)
         {
             KeyframeLineElement keyframeLine = new(MaxFrames, m_frameBars, parameter);
-            if (AnimationManager.instance.GetParamCurValue(parameter.ID, out float paramValue))
+            if (AnimationManager.Instance.GetParamCurValue(parameter.ID, out float paramValue))
             {
                 keyframeLine.SetSliderValue(paramValue);
             }

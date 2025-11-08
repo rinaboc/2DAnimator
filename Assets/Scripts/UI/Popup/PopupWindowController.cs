@@ -68,7 +68,7 @@ public class PopupWindowController : BaseUIController
     {
         if (!ValidateInput()) return;
 
-        ParameterManager.instance.CreateParameter(m_minValue, m_maxValue, m_defaultValue, m_paramName);
+        ParameterManager.Instance.CreateParameter(m_minValue, m_maxValue, m_defaultValue, m_paramName);
         ShowPanel(false);
     }
 
@@ -83,7 +83,7 @@ public class PopupWindowController : BaseUIController
             parameter.DefaultValue = m_defaultValue;
             parameter.Name = m_paramName;
 
-            ParameterManager.instance.UpdateParameter(parameter);
+            ParameterManager.Instance.UpdateParameter(parameter);
         }
         else
         {

@@ -3,25 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class AnimationManager : MonoBehaviour
+public class AnimationManager : ManagerBase<AnimationManager>
 {
-    public static AnimationManager instance;
     private Dictionary<Guid, float> _ParamCurValues = new();
     public bool GetParamCurValue(Guid id, out float value) => _ParamCurValues.TryGetValue(id, out value);
 
     [SerializeField] private TimelineWidgetController _timelineWidget;
-
-    void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else if (instance != this)
-        {
-            Destroy(this);
-        }
-    }
 
     void Start()
     {
@@ -128,6 +115,8 @@ public class AnimationManager : MonoBehaviour
 
             MeshManager.Instance.GetMeshObject(paramCurve.MeshID, out MeshController artMesh);
             MeshRegistry.Instance.TryGet(paramCurve.MeshID, out MeshData meshData);
+
+            if (artMesh == null || meshData == null) break;
 
             ParamPoint minPoint = orderedPoints[minP];
 

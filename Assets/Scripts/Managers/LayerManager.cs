@@ -7,7 +7,7 @@ using System;
 /// <summary>
 /// Manager for handling Art Mesh layers and their corresponding UI elements
 /// </summary>
-public class LayerManager : MonoBehaviour
+public class LayerManager : ManagerBase<LayerManager>
 {
     [Header("Art Mesh creation")]
     [SerializeField] private GameObject ArtObjectPrefab;
@@ -51,8 +51,6 @@ public class LayerManager : MonoBehaviour
         }
     }
 
-    public static LayerManager instance;
-
     void Start()
     {
         CancelAction = InputSystem.actions.FindAction("Cancel");
@@ -64,17 +62,6 @@ public class LayerManager : MonoBehaviour
         CancelAction.Dispose();
     }
 
-    void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else if (instance != this)
-        {
-            Destroy(this);
-        }
-    }
 
     private void OnCancel(InputAction.CallbackContext context)
     {
@@ -137,7 +124,7 @@ public class LayerManager : MonoBehaviour
             .SetSelected(true);
         SelectedArtMesh.SetSelected(true);
 
-        ParameterManager.instance.HighlightCreatedCurves(SelectedArtMesh.MeshID);
+        ParameterManager.Instance.HighlightCreatedCurves(SelectedArtMesh.MeshID);
 
     }
 
@@ -189,11 +176,12 @@ public class LayerManager : MonoBehaviour
     {
         if (!_isLayerSelected) return;
 
-        ParameterManager.instance.DeleteParamPointsOfMesh(SelectedArtMesh.MeshID);
+        Guid meshID = SelectedArtMesh.MeshID;
 
-        MeshManager.Instance.DeleteArtMeshObj(_selectedLayerID);
-        DeleteUILayer(_selectedLayerID);
-        MeshRegistry.Instance.Remove(_selectedLayerID);
+        DeleteUILayer(meshID);
+        ParameterManager.Instance.DeleteParamPointsOfMesh(meshID);
+        MeshManager.Instance.DeleteArtMeshObj(meshID);
+        MeshRegistry.Instance.Remove(meshID);
 
         // deselect
         _isLayerSelected = false;
@@ -203,6 +191,16 @@ public class LayerManager : MonoBehaviour
 
     private bool RegisterUILayer(Guid id, LayerController controller) => _layerControllers.TryAdd(id, controller);
 
-    private bool DeleteUILayer(Guid id) => _layerControllers.Remove(id);
+    private bool DeleteUILayer(Guid id)
+    {
+        if (_layerControllers.TryGetValue(id, out LayerController layer))
+        {
+            _layerControllers.Remove(id);
+            Destroy(layer.ParentObj);
+            return true;
+        }
+
+        return false;
+    }
 
 }

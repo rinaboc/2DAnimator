@@ -1,9 +1,7 @@
 using UnityEngine;
 
-public class ViewportManager : MonoBehaviour
+public class ViewportManager : ManagerBase<ViewportManager>
 {
-    public static ViewportManager instance;
-
     [SerializeField] private Transform _topLeftAnchor;
     public Vector3 TopLeftAnchor
     {
@@ -20,17 +18,4 @@ public class ViewportManager : MonoBehaviour
             return _bottomRightAnchor.position;
         }
     }
-
-    void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else if (instance != this)
-        {
-            Destroy(this);
-        }
-    }
-
 }

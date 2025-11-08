@@ -32,7 +32,7 @@ public class MeshController : MonoBehaviour, ISelectable
     /// <returns></returns>
     public MeshController UpdateClipAnchors()
     {
-        ViewportManager viewportManager = ViewportManager.instance;
+        ViewportManager viewportManager = ViewportManager.Instance;
 
         Material _meshMaterial = ArtMeshObject.GetComponent<MeshRenderer>().material;
 
@@ -180,7 +180,7 @@ public class MeshController : MonoBehaviour, ISelectable
 
         if (updatedAnimationData != null)
         {
-            ParameterManager.instance.UpdateAnimationData(updatedAnimationData, type, meshData.ID);
+            ParameterManager.Instance.UpdateAnimationData(updatedAnimationData, type, meshData.ID);
         }
         else
             Debug.Log("updated animation data is null");

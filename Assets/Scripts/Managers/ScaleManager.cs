@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class ScaleManager : MonoBehaviour
+public class ScaleManager : ManagerBase<ScaleManager>
 {
     [SerializeField] private RectTransform ViewportScaledTransform;
     public static readonly float MaxScale = 800f;
@@ -27,20 +27,6 @@ public class ScaleManager : MonoBehaviour
     {
         _currentScale = OriginalScale;
         CurrentScale = OriginalScale;
-    }
-
-    public static ScaleManager instance;
-
-    void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else if (instance != this)
-        {
-            Destroy(this);
-        }
     }
 
 }

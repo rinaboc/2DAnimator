@@ -2,21 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MeshManager : MonoBehaviour
+public class MeshManager : ManagerBase<MeshManager>
 {
     [SerializeField] private Dictionary<Guid, MeshController> _meshControllers = new();
-    public static MeshManager Instance;
-    void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else if (Instance != this)
-        {
-            Destroy(this);
-        }
-    }
 
     public bool GetMeshObject(Guid id, out MeshController artMesh) => _meshControllers.TryGetValue(id, out artMesh);
 

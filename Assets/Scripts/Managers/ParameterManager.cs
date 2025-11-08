@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class ParameterManager : MonoBehaviour
+public class ParameterManager : ManagerBase<ParameterManager>
 {
     [SerializeField] private GameObject ParamSliderPrefab;
     [SerializeField] private Transform ParamWidgetContent;
@@ -22,19 +22,9 @@ public class ParameterManager : MonoBehaviour
         }
     }
 
-    public static ParameterManager instance;
-
-    void Awake()
+    protected override void Awake()
     {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else if (instance != this)
-        {
-            Destroy(this);
-        }
-
+        base.Awake();
         CreateDebugParam();
     }
 
@@ -53,7 +43,7 @@ public class ParameterManager : MonoBehaviour
 
     public void CreatePointsForCurrentMesh()
     {
-        MeshController selectedArtMesh = LayerManager.instance.SelectedArtMesh;
+        MeshController selectedArtMesh = LayerManager.Instance.SelectedArtMesh;
         if (_isParamSelected && selectedArtMesh != null)
         {
             CreateParamPoints(SelectedParamID, selectedArtMesh.MeshID);
@@ -218,7 +208,7 @@ public class ParameterManager : MonoBehaviour
                 Debug.Log("no point was updated");
                 int minIndex = Array.IndexOf(distFromPointValues, distFromPointValues.Min());
                 GetParamSlider(paramCurve.ParamID).SetValue(paramPoints[minIndex].ParamValue);
-                AnimationManager.instance.InterpolateParameter(paramPoints[minIndex].ParamValue, paramCurve.ParamID);
+                AnimationManager.Instance.InterpolateParameter(paramPoints[minIndex].ParamValue, paramCurve.ParamID);
             }
         }
 
