@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MeshManager : MonoBehaviour
 {
-    [SerializeField] private Dictionary<Guid, GameObject> _artMeshes = new();
+    [SerializeField] private Dictionary<Guid, MeshController> _meshControllers = new();
     public static MeshManager Instance;
     void Awake()
     {
@@ -18,33 +18,14 @@ public class MeshManager : MonoBehaviour
         }
     }
 
-    public GameObject GetArtMesh(Guid id)
-    {
-        if (_artMeshes.ContainsKey(id))
-        {
-            return _artMeshes[id];
-        }
-        else
-        {
-            Debug.LogError("no such id in registry");
-            return null;
-        }
-    }
+    public bool GetMeshObject(Guid id, out MeshController artMesh) => _meshControllers.TryGetValue(id, out artMesh);
 
-    public void RegisterArtMeshObj(Guid id, GameObject artMeshObj)
-    {
-        if (_artMeshes.ContainsKey(id))
-        {
-            Debug.LogError("duplicate id in registry");
-        }
-
-        _artMeshes.Add(id, artMeshObj);
-    }
+    public bool RegisterArtMeshObj(Guid id, MeshController artMeshObj) => _meshControllers.TryAdd(id, artMeshObj);
 
     public void DeleteArtMeshObj(Guid id)
     {
-        GameObject artMesh = _artMeshes[id];
-        _artMeshes.Remove(id);
-        Destroy(artMesh);
+        MeshController artMesh = _meshControllers[id];
+        _meshControllers.Remove(id);
+        Destroy(artMesh.gameObject);
     }
 }

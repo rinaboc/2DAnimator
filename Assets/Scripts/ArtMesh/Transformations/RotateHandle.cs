@@ -20,7 +20,7 @@ public class RotateHandle : DraggableHandle
     {
         if (dragging)
         {
-            ParentTransform.gameObject.GetComponent<ArtMesh>().SaveTransform(TransformType.ROTATION);
+            ParentTransform.gameObject.GetComponent<MeshController>().SaveTransform(TransformType.ROTATION);
         }
         dragging = false;
     }
@@ -32,7 +32,7 @@ public class RotateHandle : DraggableHandle
             Vector3 rotatedVec = ClickWorldPosition - ParentTransform.position;
 
             Quaternion rotationQ = Quaternion.FromToRotation(startingVec, rotatedVec);
-            ParentTransform.gameObject.GetComponent<ArtMesh>().UpdateTransform(defaultRotation * rotationQ, TransformType.ROTATION);
+            ParentTransform.gameObject.GetComponent<MeshController>().UpdateTransform(defaultRotation * rotationQ, TransformType.ROTATION);
         }
     }
 }

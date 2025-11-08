@@ -39,13 +39,13 @@ public class LayerManager : MonoBehaviour
         }
     }
 
-    public ArtMesh SelectedArtMesh
+    public MeshController SelectedArtMesh
     {
         get
         {
-            if (_isLayerSelected)
+            if (_isLayerSelected && MeshManager.Instance.GetMeshObject(_selectedLayerID, out MeshController artMesh))
             {
-                return MeshManager.Instance.GetArtMesh(_selectedLayerID).GetComponent<ArtMesh>();
+                return artMesh;
             }
             else return null;
         }
@@ -91,12 +91,12 @@ public class LayerManager : MonoBehaviour
         // create ArtObject inside viewport and assign the image to its sprite
         GameObject newArtObject = Instantiate(ArtObjectPrefab, ViewportScale.transform, false);
         newArtObject.name = "ArtObject" + newMesh.ID;
-        newArtObject.GetComponent<ArtMesh>()
+        newArtObject.GetComponent<MeshController>()
             .LoadSprite(texture)
             .SetMeshID(newMesh.ID)
             .SetSelected(false);
 
-        MeshManager.Instance.RegisterArtMeshObj(newMesh.ID, newArtObject);
+        MeshManager.Instance.RegisterArtMeshObj(newMesh.ID, newArtObject.GetComponent<MeshController>());
 
         CreateUIArtLayer(newMesh);
         SelectUIArtLayer(newMesh.ID);
@@ -160,7 +160,7 @@ public class LayerManager : MonoBehaviour
         if (artLayerIndex > 0)
         {
             Guid swappedID = UILayersContent.transform.GetChild(artLayerIndex - 1).gameObject.GetComponentInChildren<LayerController>().LayerID;
-            ArtMesh swappedMesh = MeshManager.Instance.GetArtMesh(swappedID).GetComponent<ArtMesh>();
+            MeshManager.Instance.GetMeshObject(swappedID, out MeshController swappedMesh);
             SelectedArtMesh.SwapDrawOrder(swappedMesh);
 
             selectedArtLayer.SetSiblingIndex(artLayerIndex - 1);
@@ -178,7 +178,7 @@ public class LayerManager : MonoBehaviour
         if (artLayerIndex < UILayersContent.transform.childCount - 1)
         {
             Guid swappedID = UILayersContent.transform.GetChild(artLayerIndex + 1).gameObject.GetComponentInChildren<LayerController>().LayerID;
-            ArtMesh swappedMesh = MeshManager.Instance.GetArtMesh(swappedID).GetComponent<ArtMesh>();
+            MeshManager.Instance.GetMeshObject(swappedID, out MeshController swappedMesh);
             SelectedArtMesh.SwapDrawOrder(swappedMesh);
 
             selectedArtLayer.SetSiblingIndex(artLayerIndex + 1);

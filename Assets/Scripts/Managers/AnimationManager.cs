@@ -2,20 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class AnimationManager : MonoBehaviour
 {
-    public static UnityEvent<int> TimelineChangeEvent = new();
     public static AnimationManager instance;
     private Dictionary<Guid, float> _ParamCurValues = new();
     public bool GetParamCurValue(Guid id, out float value) => _ParamCurValues.TryGetValue(id, out value);
 
     [SerializeField] private TimelineWidgetController _timelineWidget;
-
-    public static UnityEvent<Guid> SelectKeyframeEvent = new();
-    public static UnityEvent DeleteSelectedKeyframeEvent = new();
-    public static UnityEvent<Guid, float> ParamInterpolatedEvent = new();
 
     void Awake()
     {
@@ -31,7 +25,7 @@ public class AnimationManager : MonoBehaviour
 
     void Start()
     {
-        TimelineChangeEvent.AddListener(AnimateTimeline);
+        UIEvents.TimelineChangeEvent.AddListener(AnimateTimeline);
     }
 
     private void AnimateTimeline(int currentFrame)
@@ -77,7 +71,7 @@ public class AnimationManager : MonoBehaviour
             float t = (currentFrame - minFrame.Frame) * delta + minFrame.ParamValue;
 
             InterpolateParameter(t, parameter.ID);
-            ParamInterpolatedEvent.Invoke(parameter.ID, t);
+            UIEvents.ParamInterpolatedEvent.Invoke(parameter.ID, t);
         }
     }
 
@@ -132,9 +126,8 @@ public class AnimationManager : MonoBehaviour
 
             ParamPoint maxPoint = orderedPoints[maxP];
 
-            GameObject artMeshObject = MeshManager.Instance.GetArtMesh(paramCurve.MeshID);
+            MeshManager.Instance.GetMeshObject(paramCurve.MeshID, out MeshController artMesh);
             MeshRegistry.Instance.TryGet(paramCurve.MeshID, out MeshData meshData);
-            ArtMesh artMesh = artMeshObject.GetComponent<ArtMesh>();
 
             ParamPoint minPoint = orderedPoints[minP];
 

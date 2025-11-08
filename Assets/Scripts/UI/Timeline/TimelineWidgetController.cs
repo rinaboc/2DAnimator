@@ -3,13 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UIElements;
 
 public class TimelineWidgetController : BaseUIController
 {
-    public static UnityEvent<Guid, float> KeyParamSliderChanged = new();
-
     private VisualElement m_TimelineDrawer;
     private VisualElement m_Timeline;
     private TimelineSliderElement m_TimelineSlider;
@@ -43,7 +40,7 @@ public class TimelineWidgetController : BaseUIController
 
         m_PlayButton.clicked += OnPlayButtonClicked;
 
-        KeyParamSliderChanged.AddListener(OnKeySliderChanged);
+        UIEvents.TimelineParameterSliderChanged.AddListener(OnKeySliderChanged);
     }
 
     /// <summary>

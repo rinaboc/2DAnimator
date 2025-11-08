@@ -33,12 +33,12 @@ public partial class KeyframeLineElement : VisualElement
             frameBars[j - 1].Add(cell);
         }
 
-        AnimationManager.ParamInterpolatedEvent.AddListener(OnParamInterpolated);
+        UIEvents.ParamInterpolatedEvent.AddListener(OnParamInterpolated);
     }
 
     ~KeyframeLineElement()
     {
-        AnimationManager.ParamInterpolatedEvent.RemoveListener(OnParamInterpolated);
+        UIEvents.ParamInterpolatedEvent.RemoveListener(OnParamInterpolated);
     }
 
     private void OnParamInterpolated(Guid paramID, float value)

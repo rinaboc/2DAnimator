@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class ArtMesh : MonoBehaviour, ISelectable
+public class MeshController : MonoBehaviour, ISelectable
 {
     public GameObject ArtMeshObject { get; private set; }
     [SerializeField] private Material ArtMeshMaterial;
@@ -20,7 +20,7 @@ public class ArtMesh : MonoBehaviour, ISelectable
             SetDrawOrder(meshData.drawOrder);
     }
 
-    public ArtMesh SetMeshID(Guid id)
+    public MeshController SetMeshID(Guid id)
     {
         MeshID = id;
         return this;
@@ -30,7 +30,7 @@ public class ArtMesh : MonoBehaviour, ISelectable
     /// Update the two corner points that define a rectangular clipping area for drawing the ArtMesh.
     /// </summary>
     /// <returns></returns>
-    public ArtMesh UpdateClipAnchors()
+    public MeshController UpdateClipAnchors()
     {
         ViewportManager viewportManager = ViewportManager.instance;
 
@@ -47,7 +47,7 @@ public class ArtMesh : MonoBehaviour, ISelectable
         return this;
     }
 
-    public void SwapDrawOrder(ArtMesh swap)
+    public void SwapDrawOrder(MeshController swap)
     {
         MeshRegistry.Instance.TryGet(swap.MeshID, out MeshData swapMeshData);
         ushort newDrawOrder = swapMeshData.drawOrder;
@@ -57,7 +57,7 @@ public class ArtMesh : MonoBehaviour, ISelectable
 
     }
 
-    public ArtMesh SetDrawOrder(ushort newDrawOrder)
+    public MeshController SetDrawOrder(ushort newDrawOrder)
     {
         if (MeshRegistry.Instance.TryGet(MeshID, out MeshData meshData))
         {
@@ -78,7 +78,7 @@ public class ArtMesh : MonoBehaviour, ISelectable
         return this;
     }
 
-    public ArtMesh LoadSprite(Texture2D texture)
+    public MeshController LoadSprite(Texture2D texture)
     {
         // art mesh creation
         ArtMeshObject = MeshBuilder.Build(BoundingBox.transform, ArtMeshMaterial, texture);

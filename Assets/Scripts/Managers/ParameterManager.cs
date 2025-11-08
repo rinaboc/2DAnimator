@@ -2,11 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class ParameterManager : MonoBehaviour
 {
-    public static UnityEvent<Guid> ParameterEditEvent = new();
     [SerializeField] private GameObject ParamSliderPrefab;
     [SerializeField] private Transform ParamWidgetContent;
 
@@ -55,7 +53,7 @@ public class ParameterManager : MonoBehaviour
 
     public void CreatePointsForCurrentMesh()
     {
-        ArtMesh selectedArtMesh = LayerManager.instance.SelectedArtMesh;
+        MeshController selectedArtMesh = LayerManager.instance.SelectedArtMesh;
         if (_isParamSelected && selectedArtMesh != null)
         {
             CreateParamPoints(SelectedParamID, selectedArtMesh.MeshID);
@@ -77,7 +75,7 @@ public class ParameterManager : MonoBehaviour
     /// </summary>
     public void StartParameterEditing(Guid paramID)
     {
-        ParameterEditEvent.Invoke(paramID);
+        UIEvents.EditParameterInfoEvent.Invoke(paramID);
     }
 
     public void CreateParameter(float min, float max, float defaultValue, string name = "parameter")

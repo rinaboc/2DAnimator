@@ -32,7 +32,7 @@ public partial class ParameterSliderElement : VisualElement
 
     private void OnSliderChange(ChangeEvent<float> evt)
     {
-        TimelineWidgetController.KeyParamSliderChanged.Invoke(_paramID, evt.newValue);
+        UIEvents.TimelineParameterSliderChanged.Invoke(_paramID, evt.newValue);
     }
 
     public ParameterSliderElement(Parameter parameter) : this()

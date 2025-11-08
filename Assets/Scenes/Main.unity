@@ -3241,7 +3241,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08746c52103917a448376573fb7d82de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  popupWindow: {fileID: 1803608291}
   ParamSliderPrefab: {fileID: 65736109725081048, guid: 9a65e218bcc716b4eba94aa7d406f534, type: 3}
   ParamWidgetContent: {fileID: 313228744}
 --- !u!4 &1368651308

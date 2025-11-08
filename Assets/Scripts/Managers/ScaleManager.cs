@@ -1,16 +1,13 @@
 using UnityEngine;
-using UnityEngine.Events;
 
 public class ScaleManager : MonoBehaviour
 {
     [SerializeField] private RectTransform ViewportScaledTransform;
-    public UnityEvent onScaleChange = new();
+    public static readonly float MaxScale = 800f;
+    public static readonly float MinScale = 50f;
+    public static readonly float ScaleSpeed = 0.15f;
 
-    public const float MaxScale = 800f;
-    public const float MinScale = 50f;
-    public const float ScaleSpeed = 0.15f;
-
-    public const float OriginalScale = 100f;
+    public static readonly float OriginalScale = 100f;
     private float _currentScale;
     public float CurrentScale
     {
@@ -21,13 +18,12 @@ public class ScaleManager : MonoBehaviour
             {
                 _currentScale = value;
                 ViewportScaledTransform.localScale = Vector3.one * value;
-                onScaleChange.Invoke();
+                ViewportEvents.ScaleChangeEvent.Invoke();
             }
         }
     }
 
-
-    void Start()
+    void OnEnable()
     {
         _currentScale = OriginalScale;
         CurrentScale = OriginalScale;

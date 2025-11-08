@@ -21,8 +21,8 @@ public partial class KeyframeElement : VisualElement
         _id = key.ID;
         _frame = key.Frame;
         RegisterCallback<ClickEvent>(OnClick);
-        AnimationManager.SelectKeyframeEvent.AddListener(OnKeyframeSelect);
-        AnimationManager.DeleteSelectedKeyframeEvent.AddListener(OnDeleteKeyframe);
+        UIEvents.SelectKeyframeEvent.AddListener(OnKeyframeSelect);
+        UIEvents.DeleteSelectedKeyframeEvent.AddListener(OnDeleteKeyframe);
     }
 
     private void OnKeyframeSelect(Guid id)
@@ -41,8 +41,8 @@ public partial class KeyframeElement : VisualElement
     ~KeyframeElement()
     {
         UnregisterCallback<ClickEvent>(OnClick);
-        AnimationManager.SelectKeyframeEvent.RemoveListener(OnKeyframeSelect);
-        AnimationManager.DeleteSelectedKeyframeEvent.RemoveListener(OnDeleteKeyframe);
+        UIEvents.SelectKeyframeEvent.RemoveListener(OnKeyframeSelect);
+        UIEvents.DeleteSelectedKeyframeEvent.RemoveListener(OnDeleteKeyframe);
     }
 
     private void OnDeleteKeyframe()
@@ -57,6 +57,6 @@ public partial class KeyframeElement : VisualElement
     {
         if (_isSelected) return;
 
-        AnimationManager.SelectKeyframeEvent.Invoke(_id);
+        UIEvents.SelectKeyframeEvent.Invoke(_id);
     }
 }

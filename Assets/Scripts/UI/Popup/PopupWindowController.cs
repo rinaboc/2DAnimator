@@ -18,7 +18,7 @@ public class PopupWindowController : BaseUIController
 
     void OnEnable()
     {
-        ParameterManager.ParameterEditEvent.AddListener(EditParameter);
+        UIEvents.EditParameterInfoEvent.AddListener(EditParameter);
         createButton = ui.Q<Button>("CreateButton");
 
         ShowPanel(false);
