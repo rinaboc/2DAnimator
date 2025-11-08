@@ -65,7 +65,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
     /// </summary>
     public void StartParameterEditing(Guid paramID)
     {
-        UIEvents.EditParameterInfoEvent.Invoke(paramID);
+        UIEvents.RaiseEditParameterInfo(paramID);
     }
 
     public void CreateParameter(float min, float max, float defaultValue, string name = "parameter")

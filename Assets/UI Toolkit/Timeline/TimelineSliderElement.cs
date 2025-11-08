@@ -41,7 +41,7 @@ public partial class TimelineSliderElement : VisualElement
             UpdateHandlePosition();
             UpdateFrameField();
             HighlightBarAt(m_currentFrame);
-            UIEvents.TimelineChangeEvent.Invoke(CurrentFrame);
+            UIEvents.RaiseTimelineChange(CurrentFrame);
         }
     }
 
@@ -252,7 +252,7 @@ public partial class TimelineSliderElement : VisualElement
         deleteKeyframeButton.AddToClassList("delete-keyframe-button");
         deleteKeyframeButton.clicked += () =>
         {
-            UIEvents.DeleteSelectedKeyframeEvent.Invoke();
+            UIEvents.RaiseDeleteSelectedKeyframe();
         };
 
         header.Add(m_Label);

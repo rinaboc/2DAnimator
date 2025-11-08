@@ -18,7 +18,7 @@ public class PopupWindowController : BaseUIController
 
     void OnEnable()
     {
-        UIEvents.EditParameterInfoEvent.AddListener(EditParameter);
+        UIEvents.EditParameterInfoEvent += EditParameter;
         createButton = ui.Q<Button>("CreateButton");
 
         ShowPanel(false);
@@ -29,6 +29,7 @@ public class PopupWindowController : BaseUIController
     void OnDisable()
     {
         RemoveButtonListeners();
+        UIEvents.EditParameterInfoEvent -= EditParameter;
     }
 
     private void RemoveButtonListeners()

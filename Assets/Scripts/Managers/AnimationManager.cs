@@ -12,7 +12,12 @@ public class AnimationManager : ManagerBase<AnimationManager>
 
     void Start()
     {
-        UIEvents.TimelineChangeEvent.AddListener(AnimateTimeline);
+        UIEvents.TimelineChangeEvent += AnimateTimeline;
+    }
+
+    void OnDisable()
+    {
+        UIEvents.TimelineChangeEvent -= AnimateTimeline;
     }
 
     private void AnimateTimeline(int currentFrame)
@@ -58,7 +63,7 @@ public class AnimationManager : ManagerBase<AnimationManager>
             float t = (currentFrame - minFrame.Frame) * delta + minFrame.ParamValue;
 
             InterpolateParameter(t, parameter.ID);
-            UIEvents.ParamInterpolatedEvent.Invoke(parameter.ID, t);
+            UIEvents.RaiseParamInterpolated(parameter.ID, t);
         }
     }
 

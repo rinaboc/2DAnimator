@@ -40,7 +40,12 @@ public class TimelineWidgetController : BaseUIController
 
         m_PlayButton.clicked += OnPlayButtonClicked;
 
-        UIEvents.TimelineParameterSliderChanged.AddListener(OnKeySliderChanged);
+        UIEvents.TimelineParameterSliderChanged += OnKeySliderChanged;
+    }
+
+    void OnDisable()
+    {
+        UIEvents.TimelineParameterSliderChanged -= OnKeySliderChanged;
     }
 
     /// <summary>
