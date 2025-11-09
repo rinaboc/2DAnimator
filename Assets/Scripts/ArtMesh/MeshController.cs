@@ -6,7 +6,7 @@ public class MeshController : MonoBehaviour, ISelectable
     public GameObject ArtMeshObject { get; private set; }
     [SerializeField] private Material ArtMeshMaterial;
     [SerializeField] private BoundingBox BoundingBox;
-    public Guid MeshID { get; private set; }
+    public Guid ID { get; private set; }
 
     private void Awake()
     {
@@ -16,13 +16,25 @@ public class MeshController : MonoBehaviour, ISelectable
 
     void Start()
     {
-        if (MeshRegistry.Instance.TryGet(MeshID, out MeshData meshData))
+        if (MeshRegistry.Instance.TryGet(ID, out MeshData meshData))
             SetDrawOrder(meshData.drawOrder);
+    }
+
+    void OnEnable()
+    {
+        UIEvents.LayerSelectEvent += OnSelect;
+        UIEvents.LayerDeselectEvent += OnDeselect;
+    }
+
+    void OnDestroy()
+    {
+        UIEvents.LayerSelectEvent -= OnSelect;
+        UIEvents.LayerDeselectEvent -= OnDeselect;
     }
 
     public MeshController SetMeshID(Guid id)
     {
-        MeshID = id;
+        ID = id;
         return this;
     }
 
@@ -49,9 +61,9 @@ public class MeshController : MonoBehaviour, ISelectable
 
     public void SwapDrawOrder(MeshController swap)
     {
-        MeshRegistry.Instance.TryGet(swap.MeshID, out MeshData swapMeshData);
+        MeshRegistry.Instance.TryGet(swap.ID, out MeshData swapMeshData);
         ushort newDrawOrder = swapMeshData.drawOrder;
-        MeshRegistry.Instance.TryGet(MeshID, out MeshData thisMeshData);
+        MeshRegistry.Instance.TryGet(ID, out MeshData thisMeshData);
         swap.SetDrawOrder(thisMeshData.drawOrder);
         this.SetDrawOrder(newDrawOrder);
 
@@ -59,7 +71,7 @@ public class MeshController : MonoBehaviour, ISelectable
 
     public MeshController SetDrawOrder(ushort newDrawOrder)
     {
-        if (MeshRegistry.Instance.TryGet(MeshID, out MeshData meshData))
+        if (MeshRegistry.Instance.TryGet(ID, out MeshData meshData))
         {
             meshData.drawOrder = newDrawOrder;
 
@@ -91,7 +103,7 @@ public class MeshController : MonoBehaviour, ISelectable
 
     public void LoadTransformationFromMeshData()
     {
-        if (MeshRegistry.Instance.TryGet(MeshID, out MeshData meshData))
+        if (MeshRegistry.Instance.TryGet(ID, out MeshData meshData))
         {
             this.transform.position = meshData.Position;
             ArtMeshObject.transform.localScale = meshData.Scale;
@@ -138,6 +150,16 @@ public class MeshController : MonoBehaviour, ISelectable
         }
     }
 
+    public void OnDeselect()
+    {
+        SetSelected(false);
+    }
+
+    public void OnSelect(Guid id)
+    {
+        SetSelected(id == ID);
+    }
+
     public void SetSelected(bool isSelected)
     {
         BoundingBox.SetSelected(isSelected);
@@ -151,7 +173,7 @@ public class MeshController : MonoBehaviour, ISelectable
     /// <param name="value">transformation's value</param>
     public void SaveTransform(TransformType type)
     {
-        MeshRegistry.Instance.TryGet(MeshID, out MeshData meshData);
+        MeshRegistry.Instance.TryGet(ID, out MeshData meshData);
 
         bool areParametersAssigned = ParamCurveRegistry.Instance.GetAssignedParamIDsOfMesh(meshData.ID).Count > 0;
 

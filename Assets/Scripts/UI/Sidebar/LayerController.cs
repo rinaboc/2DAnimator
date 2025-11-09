@@ -9,23 +9,40 @@ public class LayerController : Clickable, ISelectable
     public GameObject ParentObj;
     [SerializeField] private Color SelectedColor;
 
-    public Guid LayerID { get; private set; }
+    public Guid ID { get; private set; }
     [SerializeField] private TMP_InputField LayerInput;
 
     private InputAction DoubleClickAction;
     protected override void Start()
     {
         base.Start();
+        LayerInput.enabled = false;
+    }
 
+    void OnEnable()
+    {
         DoubleClickAction = InputSystem.actions.FindAction("DoubleClick");
         DoubleClickAction.performed += OnDoubleClick;
 
-        LayerInput.enabled = false;
+        UIEvents.LayerSelectEvent += OnSelect;
+        UIEvents.LayerDeselectEvent += OnDeselect;
     }
 
     void OnDestroy()
     {
         DoubleClickAction.performed -= OnDoubleClick;
+        UIEvents.LayerSelectEvent -= OnSelect;
+        UIEvents.LayerDeselectEvent -= OnDeselect;
+    }
+
+    public void OnDeselect()
+    {
+        SetSelected(false);
+    }
+
+    public void OnSelect(Guid id)
+    {
+        SetSelected(id == ID);
     }
 
     public void SetSelected(bool isSelected)
@@ -37,7 +54,7 @@ public class LayerController : Clickable, ISelectable
 
     public LayerController SetID(Guid id)
     {
-        LayerID = id;
+        ID = id;
         return this;
     }
 
@@ -57,7 +74,7 @@ public class LayerController : Clickable, ISelectable
 
     public void TextChanged()
     {
-        if (MeshRegistry.Instance.TryGet(LayerID, out MeshData meshData))
+        if (MeshRegistry.Instance.TryGet(ID, out MeshData meshData))
         {
             meshData.name = LayerInput.text;
             Debug.Log(meshData.ToString());

@@ -17,7 +17,7 @@ public class LayerManager : ManagerBase<LayerManager>
     [SerializeField] private GameObject UIArtLayerPrefab;
     [SerializeField] private GameObject UILayersContent;
 
-    [SerializeField] private Dictionary<Guid, LayerController> _layerControllers = new();
+    private Dictionary<Guid, LayerController> _layerControllers = new();
 
     private InputAction CancelAction;
 
@@ -51,7 +51,7 @@ public class LayerManager : ManagerBase<LayerManager>
         }
     }
 
-    void Start()
+    void OnEnable()
     {
         CancelAction = InputSystem.actions.FindAction("Cancel");
         CancelAction.performed += OnCancel;
@@ -119,20 +119,16 @@ public class LayerManager : ManagerBase<LayerManager>
         // select the new layer
         _selectedLayerID = id;
         _isLayerSelected = true;
-        SelectedUILayer
-            .GetComponentInChildren<LayerController>()
-            .SetSelected(true);
-        SelectedArtMesh.SetSelected(true);
 
-        ParameterManager.Instance.HighlightCreatedCurves(SelectedArtMesh.MeshID);
-
+        UIEvents.RaiseLayerSelect(id);
     }
 
     public void DeselectCurrentUIArtLayer()
     {
-        if (SelectedUILayer != null)
+        if (_isLayerSelected)
         {
-            SelectedUILayer.GetComponentInChildren<LayerController>().SetSelected(false);
+            UIEvents.RaiseLayerDeselect();
+            // SelectedUILayer.GetComponentInChildren<LayerController>().SetSelected(false);
             SelectedArtMesh.SetSelected(false);
         }
     }
@@ -146,7 +142,7 @@ public class LayerManager : ManagerBase<LayerManager>
 
         if (artLayerIndex > 0)
         {
-            Guid swappedID = UILayersContent.transform.GetChild(artLayerIndex - 1).gameObject.GetComponentInChildren<LayerController>().LayerID;
+            Guid swappedID = UILayersContent.transform.GetChild(artLayerIndex - 1).gameObject.GetComponentInChildren<LayerController>().ID;
             MeshManager.Instance.GetMeshObject(swappedID, out MeshController swappedMesh);
             SelectedArtMesh.SwapDrawOrder(swappedMesh);
 
@@ -164,7 +160,7 @@ public class LayerManager : ManagerBase<LayerManager>
 
         if (artLayerIndex < UILayersContent.transform.childCount - 1)
         {
-            Guid swappedID = UILayersContent.transform.GetChild(artLayerIndex + 1).gameObject.GetComponentInChildren<LayerController>().LayerID;
+            Guid swappedID = UILayersContent.transform.GetChild(artLayerIndex + 1).gameObject.GetComponentInChildren<LayerController>().ID;
             MeshManager.Instance.GetMeshObject(swappedID, out MeshController swappedMesh);
             SelectedArtMesh.SwapDrawOrder(swappedMesh);
 
@@ -176,12 +172,9 @@ public class LayerManager : ManagerBase<LayerManager>
     {
         if (!_isLayerSelected) return;
 
-        Guid meshID = SelectedArtMesh.MeshID;
+        Guid meshID = SelectedArtMesh.ID;
 
         DeleteUILayer(meshID);
-        ParameterManager.Instance.DeleteParamPointsOfMesh(meshID);
-        MeshManager.Instance.DeleteArtMeshObj(meshID);
-        MeshRegistry.Instance.Remove(meshID);
 
         // deselect
         _isLayerSelected = false;
@@ -197,6 +190,7 @@ public class LayerManager : ManagerBase<LayerManager>
         {
             _layerControllers.Remove(id);
             Destroy(layer.ParentObj);
+            UIEvents.RaiseLayerDelete(id);
             return true;
         }
 

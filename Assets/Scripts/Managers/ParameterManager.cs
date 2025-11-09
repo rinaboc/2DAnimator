@@ -28,6 +28,18 @@ public class ParameterManager : ManagerBase<ParameterManager>
         CreateDebugParam();
     }
 
+    void OnEnable()
+    {
+        UIEvents.LayerDeleteEvent += DeleteParamPointsOfMesh;
+        UIEvents.LayerSelectEvent += OnLayerSelect;
+    }
+
+    void OnDisable()
+    {
+        UIEvents.LayerDeleteEvent -= DeleteParamPointsOfMesh;
+        UIEvents.LayerSelectEvent -= OnLayerSelect;
+    }
+
     public bool ParameterWidgetVisibility
     {
         set
@@ -46,8 +58,8 @@ public class ParameterManager : ManagerBase<ParameterManager>
         MeshController selectedArtMesh = LayerManager.Instance.SelectedArtMesh;
         if (_isParamSelected && selectedArtMesh != null)
         {
-            CreateParamPoints(SelectedParamID, selectedArtMesh.MeshID);
-            HighlightCreatedCurves(selectedArtMesh.MeshID);
+            CreateParamPoints(SelectedParamID, selectedArtMesh.ID);
+            HighlightCreatedCurves(selectedArtMesh.ID);
         }
     }
 
@@ -134,14 +146,14 @@ public class ParameterManager : ManagerBase<ParameterManager>
 
     public void SelectParameter(Guid id)
     {
-        if (_isParamSelected)
-        {
-            GetParamSlider(SelectedParamID).SetSelected(false);
-        }
-
-        GetParamSlider(id).SetSelected(true);
+        UIEvents.RaiseParameterSelect(id);
         _selectedParamID = id;
         _isParamSelected = true;
+    }
+
+    private void OnLayerSelect(Guid id)
+    {
+        HighlightCreatedCurves(id);
     }
 
     public void HighlightCreatedCurves(Guid meshID)

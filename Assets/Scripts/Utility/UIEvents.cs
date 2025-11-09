@@ -3,6 +3,29 @@ using System;
 public static class UIEvents
 {
     /// <summary>
+    /// Event to notify when a parameter has been selected.
+    /// Passes the parameter ID.
+    /// </summary>
+    public static event Action<Guid> ParameterSelectEvent;
+
+    /// <summary>
+    /// Event to notify when a layer has been deselected.
+    /// </summary>
+    public static event Action LayerDeselectEvent;
+
+    /// <summary>
+    /// Event to notify when a layer has been selected.
+    /// Passes the mesh ID.
+    /// </summary>
+    public static event Action<Guid> LayerSelectEvent;
+
+    /// <summary>
+    /// Event to notify when a layer has been deleted.
+    /// Passes the mesh ID.
+    /// </summary>
+    public static event Action<Guid> LayerDeleteEvent;
+
+    /// <summary>
     /// Event to notify when the timeline frame has changed.
     /// Passes the current frame index.
     /// </summary>
@@ -37,6 +60,10 @@ public static class UIEvents
     /// </summary>
     public static event Action<Guid, float> TimelineParameterSliderChanged;
 
+    public static void RaiseParameterSelect(Guid id) => ParameterSelectEvent?.Invoke(id);
+    public static void RaiseLayerDeselect() => LayerDeselectEvent?.Invoke();
+    public static void RaiseLayerSelect(Guid id) => LayerSelectEvent?.Invoke(id);
+    public static void RaiseLayerDelete(Guid id) => LayerDeleteEvent?.Invoke(id);
     public static void RaiseTimelineChange(int frame) => TimelineChangeEvent?.Invoke(frame);
     public static void RaiseSelectKeyframe(Guid id) => SelectKeyframeEvent?.Invoke(id);
     public static void RaiseDeleteSelectedKeyframe() => DeleteSelectedKeyframeEvent?.Invoke();

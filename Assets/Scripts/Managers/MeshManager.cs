@@ -6,6 +6,16 @@ public class MeshManager : ManagerBase<MeshManager>
 {
     [SerializeField] private Dictionary<Guid, MeshController> _meshControllers = new();
 
+    void OnEnable()
+    {
+        UIEvents.LayerDeleteEvent += DeleteArtMeshObj;
+    }
+
+    void OnDisable()
+    {
+        UIEvents.LayerDeleteEvent -= DeleteArtMeshObj;
+    }
+
     public bool GetMeshObject(Guid id, out MeshController artMesh) => _meshControllers.TryGetValue(id, out artMesh);
 
     public bool RegisterArtMeshObj(Guid id, MeshController artMeshObj) => _meshControllers.TryAdd(id, artMeshObj);
@@ -15,5 +25,7 @@ public class MeshManager : ManagerBase<MeshManager>
         MeshController artMesh = _meshControllers[id];
         _meshControllers.Remove(id);
         Destroy(artMesh.gameObject);
+
+        MeshRegistry.Instance.Remove(id);
     }
 }

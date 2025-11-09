@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
-public class BoundingBox : MonoBehaviour, ISelectable
+public class BoundingBox : MonoBehaviour
 {
     [SerializeField] private GameObject Center;
     [SerializeField] private GameObject Corners;
