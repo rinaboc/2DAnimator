@@ -53,6 +53,11 @@ public partial class KeyframeElement : VisualElement
         AnimationManager.Instance.RemoveKeyFrame(_id);
     }
 
+    public void Delete()
+    {
+        AnimationManager.Instance.RemoveKeyFrame(_id);
+    }
+
     private void OnClick(ClickEvent evt)
     {
         if (_isSelected) return;

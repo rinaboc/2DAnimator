@@ -63,6 +63,11 @@ public partial class KeyframeLineElement : VisualElement
     public void RemoveKeyframeFrom(int frame)
     {
         VisualElement cell = _cells[frame - 1];
-        cell.Clear();
+        if (cell.childCount > 0)
+        {
+            KeyframeElement keyframe = cell.Q<KeyframeElement>();
+            keyframe.Delete();
+            cell.Clear();
+        }
     }
 }
