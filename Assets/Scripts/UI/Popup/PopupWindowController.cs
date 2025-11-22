@@ -3,10 +3,8 @@ using Unity.Properties;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-[RequireComponent(typeof(UIDocument))]
-public class PopupWindowController : MonoBehaviour
+public class PopupWindowController : BaseUIController
 {
-    private VisualElement ui;
     private Button createButton;
 
     [SerializeField, CreateProperty]
@@ -18,17 +16,12 @@ public class PopupWindowController : MonoBehaviour
 
     private Guid _editedParamID;
 
-    void Awake()
-    {
-        ui = GetComponent<UIDocument>().rootVisualElement;
-        ui.dataSource = this;
-    }
-
     void OnEnable()
     {
+        UIEvents.EditParameterInfoEvent += EditParameter;
         createButton = ui.Q<Button>("CreateButton");
 
-        HidePanel();
+        ShowPanel(false);
 
         Debug.Log($"{m_minValue}, {m_maxValue}, {m_defaultValue}");
     }
@@ -36,6 +29,7 @@ public class PopupWindowController : MonoBehaviour
     void OnDisable()
     {
         RemoveButtonListeners();
+        UIEvents.EditParameterInfoEvent -= EditParameter;
     }
 
     private void RemoveButtonListeners()
@@ -44,23 +38,26 @@ public class PopupWindowController : MonoBehaviour
         createButton.clicked -= OnEditButtonClicked;
     }
 
-    public void EditParameter(Parameter parameter)
+    public void EditParameter(Guid paramID)
     {
-        ShowPanel();
-        RemoveButtonListeners();
-        _editedParamID = parameter.ID;
-        m_minValue = parameter.MinValue;
-        m_maxValue = parameter.MaxValue;
-        m_defaultValue = parameter.DefaultValue;
-        m_paramName = parameter.Name;
+        if (ParameterRegistry.Instance.TryGet(paramID, out Parameter parameter))
+        {
+            ShowPanel(true);
+            RemoveButtonListeners();
+            _editedParamID = parameter.ID;
+            m_minValue = parameter.MinValue;
+            m_maxValue = parameter.MaxValue;
+            m_defaultValue = parameter.DefaultValue;
+            m_paramName = parameter.Name;
 
-        createButton.text = "Save";
-        createButton.clicked += OnEditButtonClicked;
+            createButton.text = "Save";
+            createButton.clicked += OnEditButtonClicked;
+        }
     }
 
     public void CreateParameter()
     {
-        ShowPanel();
+        ShowPanel(true);
         RemoveButtonListeners();
 
         createButton.text = "Create";
@@ -72,31 +69,29 @@ public class PopupWindowController : MonoBehaviour
     {
         if (!ValidateInput()) return;
 
-        ParameterManager.instance.CreateParameter(m_minValue, m_maxValue, m_defaultValue, m_paramName);
-        HidePanel();
+        ParameterManager.Instance.CreateParameter(m_minValue, m_maxValue, m_defaultValue, m_paramName);
+        ShowPanel(false);
     }
 
     private void OnEditButtonClicked()
     {
         if (!ValidateInput()) return;
 
-        try
+        if (ParameterRegistry.Instance.TryGet(_editedParamID, out Parameter parameter))
         {
-            Parameter parameter = ParameterRegistry.Instance.GetParameter(_editedParamID);
-
             parameter.MinValue = m_minValue;
             parameter.MaxValue = m_maxValue;
             parameter.DefaultValue = m_defaultValue;
             parameter.Name = m_paramName;
 
-            ParameterManager.instance.UpdateParameter(parameter);
+            ParameterManager.Instance.UpdateParameter(parameter);
         }
-        catch (Exception)
+        else
         {
             Debug.LogError("Couldn't fetch parameter.");
         }
 
-        HidePanel();
+        ShowPanel(false);
     }
 
     private bool ValidateInput()
@@ -121,23 +116,5 @@ public class PopupWindowController : MonoBehaviour
     private void HideErrorMessage()
     {
         ui.Q<Label>("ErrorMessage").visible = false;
-    }
-
-    private void SetVisible(string elementID, bool isVisible)
-    {
-        if (isVisible)
-            ui.Q<VisualElement>(elementID).RemoveFromClassList("hide");
-        else
-            ui.Q<VisualElement>(elementID).AddToClassList("hide");
-    }
-
-    private void ShowPanel()
-    {
-        SetVisible("MainPanel", true);
-    }
-
-    private void HidePanel()
-    {
-        SetVisible("MainPanel", false);
     }
 }

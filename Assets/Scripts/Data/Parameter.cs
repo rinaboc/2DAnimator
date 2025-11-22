@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-public class Parameter
+[Serializable]
+public class Parameter : EntityBase
 {
-    public readonly Guid ID;
     private float minValue;
     private float maxValue;
     private float defaultValue;
@@ -38,19 +38,18 @@ public class Parameter
 
     public readonly List<Guid> ParamCurves;
 
-    public Parameter(float min, float max, float defaultValue, string name = "parameter", bool autoRegister = true)
+    public Parameter(float min, float max, float defaultValue, string name = "parameter") : base()
     {
-        ID = Guid.NewGuid();
         MinValue = min;
         MaxValue = max;
         DefaultValue = defaultValue;
         Name = name;
 
         ParamCurves = new();
+    }
 
-        if (autoRegister)
-        {
-            ParameterRegistry.Instance.RegisterParameter(this);
-        }
+    protected override void Register()
+    {
+        ParameterRegistry.Instance.Register(this);
     }
 }

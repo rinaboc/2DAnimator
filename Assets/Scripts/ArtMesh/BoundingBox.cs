@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
-public class BoundingBox : MonoBehaviour, ISelectable
+public class BoundingBox : MonoBehaviour
 {
     [SerializeField] private GameObject Center;
     [SerializeField] private GameObject Corners;
@@ -41,7 +41,7 @@ public class BoundingBox : MonoBehaviour, ISelectable
     /// </summary>
     public void SetClipArea()
     {
-        ViewportManager viewportManager = ViewportManager.instance;
+        ViewportManager viewportManager = ViewportManager.Instance;
         Vector3 topLeft = viewportManager.TopLeftAnchor;
         Vector3 bottomRight = viewportManager.BottomRightAnchor;
 

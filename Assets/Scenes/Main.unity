@@ -570,9 +570,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ViewportScaledTransform: {fileID: 1653363159}
-  onScaleChange:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &146342146
 GameObject:
   m_ObjectHideFlags: 0
@@ -1883,6 +1880,50 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &790475261
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 790475262}
+  - component: {fileID: 790475263}
+  m_Layer: 0
+  m_Name: Mesh Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &790475262
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 790475261}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 994627439}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &790475263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 790475261}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd0d9ff3bf867204193e2e3519133eed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &823835057
 GameObject:
   m_ObjectHideFlags: 0
@@ -2506,6 +2547,7 @@ Transform:
   - {fileID: 858284474}
   - {fileID: 1368651308}
   - {fileID: 345948531}
+  - {fileID: 790475262}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1024601350
@@ -3196,7 +3238,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08746c52103917a448376573fb7d82de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  popupWindow: {fileID: 1803608291}
   ParamSliderPrefab: {fileID: 65736109725081048, guid: 9a65e218bcc716b4eba94aa7d406f534, type: 3}
   ParamWidgetContent: {fileID: 313228744}
 --- !u!4 &1368651308

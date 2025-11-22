@@ -1,18 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UIElements;
 
-public class TimelineWidget : MonoBehaviour
+public class TimelineWidgetController : BaseUIController
 {
-    public static UnityEvent<Guid, float> KeyParamSliderChanged = new();
-    private VisualElement ui;
-
     private VisualElement m_TimelineDrawer;
     private VisualElement m_Timeline;
-    private TimelineSlider m_TimelineSlider;
+    private TimelineSliderElement m_TimelineSlider;
     private Button m_OpenButton;
 
     private bool m_widgetOpen = false;
@@ -20,18 +17,15 @@ public class TimelineWidget : MonoBehaviour
     private Button m_PlayButton;
     bool isPlaybackRunning = false;
 
-    void Awake()
+    protected override void Awake()
     {
-        ui = GetComponent<UIDocument>().rootVisualElement;
-        ui.dataSource = this;
+        base.Awake();
 
         m_TimelineDrawer = ui.Q<VisualElement>("TimelineDrawer");
         m_Timeline = ui.Q<VisualElement>("Timeline");
         m_OpenButton = ui.Q<Button>("TimelineOpenButton");
-
         m_PlayButton = ui.Q<Button>("PlayBtn");
-
-        m_TimelineSlider = ui.Q<TimelineSlider>("TimelineSlider");
+        m_TimelineSlider = ui.Q<TimelineSliderElement>("TimelineSlider");
     }
 
     void Start()
@@ -46,7 +40,12 @@ public class TimelineWidget : MonoBehaviour
 
         m_PlayButton.clicked += OnPlayButtonClicked;
 
-        KeyParamSliderChanged.AddListener(OnKeySliderChanged);
+        UIEvents.TimelineParameterSliderChanged += OnKeySliderChanged;
+    }
+
+    void OnDisable()
+    {
+        UIEvents.TimelineParameterSliderChanged -= OnKeySliderChanged;
     }
 
     /// <summary>
@@ -56,8 +55,8 @@ public class TimelineWidget : MonoBehaviour
     /// <param name="value">Slider value</param>
     private void OnKeySliderChanged(Guid id, float value)
     {
-        AnimationManager.instance.InterpolateParameter(value, id);
-        KeyFrame newKeyframe = AnimationManager.instance.CreateKeyframe(id, value);
+        AnimationManager.Instance.InterpolateParameter(value, id);
+        KeyFrame newKeyframe = AnimationManager.Instance.CreateKeyframe(id, value);
         m_TimelineSlider.CreateKeyframeAtCurrentFrame(id, newKeyframe);
     }
 
@@ -83,7 +82,7 @@ public class TimelineWidget : MonoBehaviour
 
         m_widgetOpen = !m_widgetOpen;
 
-        ParameterManager.instance.ParameterWidgetVisibility = !m_widgetOpen;
+        ParameterManager.Instance.ParameterWidgetVisibility = !m_widgetOpen;
         if (m_widgetOpen)
         {
             SendParametersToTimeline();
@@ -96,7 +95,7 @@ public class TimelineWidget : MonoBehaviour
     /// </summary>
     private void SendParametersToTimeline()
     {
-        List<Parameter> parameters = ParameterRegistry.Instance.GetAllParameters;
+        List<Parameter> parameters = ParameterRegistry.Instance.GetAll().ToList();
         m_TimelineSlider.LoadParameters(parameters);
     }
 

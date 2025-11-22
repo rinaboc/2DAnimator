@@ -2,41 +2,27 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Events;
 
-public class AnimationManager : MonoBehaviour
+public class AnimationManager : ManagerBase<AnimationManager>
 {
-    public static UnityEvent<int> TimelineChangeEvent = new();
-    public static AnimationManager instance;
     private Dictionary<Guid, float> _ParamCurValues = new();
     public bool GetParamCurValue(Guid id, out float value) => _ParamCurValues.TryGetValue(id, out value);
 
-    [SerializeField] private TimelineWidget _timelineWidget;
-
-    public static UnityEvent<Guid> SelectKeyframeEvent = new();
-    public static UnityEvent DeleteSelectedKeyframeEvent = new();
-    public static UnityEvent<Guid, float> ParamInterpolatedEvent = new();
-
-    void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else if (instance != this)
-        {
-            Destroy(this);
-        }
-    }
+    [SerializeField] private TimelineWidgetController _timelineWidget;
 
     void Start()
     {
-        TimelineChangeEvent.AddListener(AnimateTimeline);
+        UIEvents.TimelineChangeEvent += AnimateTimeline;
+    }
+
+    void OnDisable()
+    {
+        UIEvents.TimelineChangeEvent -= AnimateTimeline;
     }
 
     private void AnimateTimeline(int currentFrame)
     {
-        List<Parameter> parameters = ParameterRegistry.Instance.GetAllParameters;
+        List<Parameter> parameters = ParameterRegistry.Instance.GetAll().ToList();
 
         foreach (Parameter parameter in parameters)
         {
@@ -77,7 +63,7 @@ public class AnimationManager : MonoBehaviour
             float t = (currentFrame - minFrame.Frame) * delta + minFrame.ParamValue;
 
             InterpolateParameter(t, parameter.ID);
-            ParamInterpolatedEvent.Invoke(parameter.ID, t);
+            UIEvents.RaiseParamInterpolated(parameter.ID, t);
         }
     }
 
@@ -92,7 +78,7 @@ public class AnimationManager : MonoBehaviour
 
     public void RemoveKeyFrame(Guid id)
     {
-        KeyFrameRegistry.Instance.RemoveKeyframe(id);
+        KeyFrameRegistry.Instance.Remove(id);
     }
 
     /// <summary>
@@ -101,8 +87,9 @@ public class AnimationManager : MonoBehaviour
     public void InterpolateParameter(float value, Guid paramID)
     {
         ParameterRegistry parameterRegistry = ParameterRegistry.Instance;
-        Parameter parameter = parameterRegistry.GetParameter(paramID);
-        List<ParamCurve> paramCurves = parameterRegistry.GetParamCurve(parameter.ParamCurves);
+        ParamPointRegistry paramPointRegistry = ParamPointRegistry.Instance;
+        parameterRegistry.TryGet(paramID, out Parameter parameter);
+        List<ParamCurve> paramCurves = ParamCurveRegistry.Instance.GetEntries(parameter.ParamCurves);
 
         if (paramCurves.Count > 0)
         {
@@ -111,7 +98,7 @@ public class AnimationManager : MonoBehaviour
 
         foreach (ParamCurve paramCurve in paramCurves)
         {
-            List<ParamPoint> paramPoints = parameterRegistry.GetParamPoint(paramCurve.ParamPoints);
+            List<ParamPoint> paramPoints = paramPointRegistry.GetEntries(paramCurve.ParamPoints);
             List<ParamPoint> orderedPoints = paramPoints.OrderBy(point => point.ParamValue).ToList();
             int minP = -1;
             int maxP = -1;
@@ -131,22 +118,27 @@ public class AnimationManager : MonoBehaviour
 
             ParamPoint maxPoint = orderedPoints[maxP];
 
-            GameObject artMeshObject = MeshRegistry.Instance.GetArtMesh(paramCurve.MeshID);
-            MeshData meshData = MeshRegistry.Instance.GetMeshData(paramCurve.MeshID);
-            ArtMesh artMesh = artMeshObject.GetComponent<ArtMesh>();
+            MeshManager.Instance.GetMeshObject(paramCurve.MeshID, out MeshController artMesh);
+            MeshRegistry.Instance.TryGet(paramCurve.MeshID, out MeshData meshData);
+
+            if (artMesh == null || meshData == null)
+            {
+                Debug.LogError("artmesh or meshdata null in interpolate parameter");
+                continue;
+            }
 
             ParamPoint minPoint = orderedPoints[minP];
 
             float t = maxP != minP ? // not left end of the slider
                 (value - minPoint.ParamValue) / (maxPoint.ParamValue - minPoint.ParamValue) : 0f;
 
-            Vector3 interpPos = Vector3.Lerp(minPoint.Position, maxPoint.Position, t);
-            Vector3 interpScale = Vector3.Lerp(minPoint.Scale, maxPoint.Scale, t);
-            Quaternion interpRotation = Quaternion.Lerp(minPoint.Rotation, maxPoint.Rotation, t);
+            Vector3 interpPos = Vector3.Lerp(minPoint.transform.Position, maxPoint.transform.Position, t);
+            Vector3 interpScale = Vector3.Lerp(minPoint.transform.Scale, maxPoint.transform.Scale, t);
+            Quaternion interpRotation = Quaternion.Lerp(minPoint.transform.Rotation, maxPoint.transform.Rotation, t);
 
-            artMesh.MoveArtMesh(meshData.Position + interpPos);
-            artMesh.ScaleArtMesh(meshData.Scale + interpScale);
-            artMesh.RotateArtMesh(meshData.Rotation * interpRotation);
+            artMesh.MoveArtMesh(meshData.transform.Position + interpPos);
+            artMesh.ScaleArtMesh(meshData.transform.Scale + interpScale);
+            artMesh.RotateArtMesh(meshData.transform.Rotation * interpRotation);
         }
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class TimelineSlider : VisualElement
+public partial class TimelineSliderElement : VisualElement
 {
     private float _sliderContainerWidth;
     private float _sliderWidth;
@@ -41,7 +41,7 @@ public partial class TimelineSlider : VisualElement
             UpdateHandlePosition();
             UpdateFrameField();
             HighlightBarAt(m_currentFrame);
-            AnimationManager.TimelineChangeEvent.Invoke(CurrentFrame);
+            UIEvents.RaiseTimelineChange(CurrentFrame);
         }
     }
 
@@ -57,7 +57,7 @@ public partial class TimelineSlider : VisualElement
     List<VisualElement>[] m_frameBars;
 
 
-    public TimelineSlider()
+    public TimelineSliderElement()
     {
         m_topSectionRight = new();
         m_topSectionRight.AddToClassList("top-section-right");
@@ -122,7 +122,7 @@ public partial class TimelineSlider : VisualElement
         foreach (Parameter parameter in parameters)
         {
             KeyframeLineElement keyframeLine = new(MaxFrames, m_frameBars, parameter);
-            if (AnimationManager.instance.GetParamCurValue(parameter.ID, out float paramValue))
+            if (AnimationManager.Instance.GetParamCurValue(parameter.ID, out float paramValue))
             {
                 keyframeLine.SetSliderValue(paramValue);
             }
@@ -252,7 +252,7 @@ public partial class TimelineSlider : VisualElement
         deleteKeyframeButton.AddToClassList("delete-keyframe-button");
         deleteKeyframeButton.clicked += () =>
         {
-            AnimationManager.DeleteSelectedKeyframeEvent.Invoke();
+            UIEvents.RaiseDeleteSelectedKeyframe();
         };
 
         header.Add(m_Label);

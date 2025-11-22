@@ -32,9 +32,8 @@ public class ParameterSlider : Clickable, ISelectable
     private float sliderValue;
     private string paramName;
 
-    protected override void Start()
+    void OnEnable()
     {
-        base.Start();
         clickAction = InputSystem.actions.FindAction("Click");
         clickAction.performed += OnClick;
 
@@ -46,19 +45,24 @@ public class ParameterSlider : Clickable, ISelectable
             if (float.TryParse(ParameterValueField.text, out float input))
                 SetValue(input);
         });
+
+        UIEvents.ParameterSelectEvent += OnSelect;
+    }
+
+    private void OnDestroy()
+    {
+        DoubleClickAction.performed -= OnDoubleClick;
+        clickAction.performed -= OnClick;
+
+        UIEvents.ParameterSelectEvent -= OnSelect;
     }
 
     private void OnDoubleClick(InputAction.CallbackContext context)
     {
         if (IsInsideCollider())
         {
-            ParameterManager.instance.StartParameterEditing(paramID);
+            ParameterManager.Instance.StartParameterEditing(paramID);
         }
-    }
-
-    private void OnDestroy()
-    {
-        DoubleClickAction.Dispose();
     }
 
     public void SetParamName(string name)
@@ -76,7 +80,7 @@ public class ParameterSlider : Clickable, ISelectable
     {
         if (IsInsideCollider())
         {
-            ParameterManager.instance.SelectParameter(paramID);
+            ParameterManager.Instance.SelectParameter(paramID);
         }
     }
 
@@ -125,8 +129,8 @@ public class ParameterSlider : Clickable, ISelectable
     public void OnValueChanged()
     {
         sliderValue = slider.value;
-        ParameterValueField.text = sliderValue.ToString("F1");
-        AnimationManager.instance.InterpolateParameter(sliderValue, paramID);
+        ParameterValueField.text = sliderValue.ToString("F2");
+        AnimationManager.Instance.InterpolateParameter(sliderValue, paramID);
     }
 
     public void SetValue(float value)
@@ -147,5 +151,15 @@ public class ParameterSlider : Clickable, ISelectable
         SetParamName(parameter.Name);
         SetMinMaxValues(parameter.MinValue, parameter.MaxValue);
         SetValue(parameter.DefaultValue);
+    }
+
+    public void OnSelect(Guid id)
+    {
+        SetSelected(id == paramID);
+    }
+
+    public void OnDeselect()
+    {
+        SetSelected(false);
     }
 }

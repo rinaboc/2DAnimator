@@ -1,12 +1,12 @@
 using System;
 using UnityEngine;
 
-public class ArtMesh : MonoBehaviour, ISelectable
+public class MeshController : MonoBehaviour, ISelectable
 {
     public GameObject ArtMeshObject { get; private set; }
     [SerializeField] private Material ArtMeshMaterial;
     [SerializeField] private BoundingBox BoundingBox;
-    public Guid MeshID { get; private set; }
+    public Guid ID { get; private set; }
 
     private void Awake()
     {
@@ -16,12 +16,25 @@ public class ArtMesh : MonoBehaviour, ISelectable
 
     void Start()
     {
-        SetDrawOrder(MeshRegistry.Instance.GetMeshData(MeshID).drawOrder);
+        if (MeshRegistry.Instance.TryGet(ID, out MeshData meshData))
+            SetDrawOrder(meshData.drawOrder);
     }
 
-    public ArtMesh SetMeshID(Guid id)
+    void OnEnable()
     {
-        MeshID = id;
+        UIEvents.LayerSelectEvent += OnSelect;
+        UIEvents.LayerDeselectEvent += OnDeselect;
+    }
+
+    void OnDestroy()
+    {
+        UIEvents.LayerSelectEvent -= OnSelect;
+        UIEvents.LayerDeselectEvent -= OnDeselect;
+    }
+
+    public MeshController SetMeshID(Guid id)
+    {
+        ID = id;
         return this;
     }
 
@@ -29,9 +42,9 @@ public class ArtMesh : MonoBehaviour, ISelectable
     /// Update the two corner points that define a rectangular clipping area for drawing the ArtMesh.
     /// </summary>
     /// <returns></returns>
-    public ArtMesh UpdateClipAnchors()
+    public MeshController UpdateClipAnchors()
     {
-        ViewportManager viewportManager = ViewportManager.instance;
+        ViewportManager viewportManager = ViewportManager.Instance;
 
         Material _meshMaterial = ArtMeshObject.GetComponent<MeshRenderer>().material;
 
@@ -46,19 +59,20 @@ public class ArtMesh : MonoBehaviour, ISelectable
         return this;
     }
 
-    public void SwapDrawOrder(ArtMesh swap)
+    public void SwapDrawOrder(MeshController swap)
     {
-        ushort newDrawOrder = MeshRegistry.Instance.GetMeshData(swap.MeshID).drawOrder;
-        swap.SetDrawOrder(MeshRegistry.Instance.GetMeshData(MeshID).drawOrder);
+        MeshRegistry.Instance.TryGet(swap.ID, out MeshData swapMeshData);
+        ushort newDrawOrder = swapMeshData.drawOrder;
+        MeshRegistry.Instance.TryGet(ID, out MeshData thisMeshData);
+        swap.SetDrawOrder(thisMeshData.drawOrder);
         this.SetDrawOrder(newDrawOrder);
 
     }
 
-    public ArtMesh SetDrawOrder(ushort newDrawOrder)
+    public MeshController SetDrawOrder(ushort newDrawOrder)
     {
-        try
+        if (MeshRegistry.Instance.TryGet(ID, out MeshData meshData))
         {
-            MeshData meshData = MeshRegistry.Instance.GetMeshData(MeshID);
             meshData.drawOrder = newDrawOrder;
 
             Material _meshMaterial = ArtMeshObject.GetComponent<MeshRenderer>().material;
@@ -68,15 +82,15 @@ public class ArtMesh : MonoBehaviour, ISelectable
                 _meshMaterial.renderQueue = 2000 + meshData.drawOrder;
             }
         }
-        catch (Exception)
+        else
         {
-            Debug.LogError("Couldn't change draw order of mesh data.");
+            Debug.LogError("Couldn't find mesh data to change draw order.");
         }
 
         return this;
     }
 
-    public ArtMesh LoadSprite(Texture2D texture)
+    public MeshController LoadSprite(Texture2D texture)
     {
         // art mesh creation
         ArtMeshObject = MeshBuilder.Build(BoundingBox.transform, ArtMeshMaterial, texture);
@@ -89,13 +103,13 @@ public class ArtMesh : MonoBehaviour, ISelectable
 
     public void LoadTransformationFromMeshData()
     {
-        MeshData meshData = MeshRegistry.Instance.GetMeshData(MeshID);
-
-        this.transform.position = meshData.Position;
-        ArtMeshObject.transform.localScale = meshData.Scale;
-        UpdateBoundingBox();
-        this.transform.localRotation = meshData.Rotation;
-
+        if (MeshRegistry.Instance.TryGet(ID, out MeshData meshData))
+        {
+            this.transform.position = meshData.transform.Position;
+            ArtMeshObject.transform.localScale = meshData.transform.Scale;
+            UpdateBoundingBox();
+            this.transform.localRotation = meshData.transform.Rotation;
+        }
     }
 
     private void UpdateBoundingBox()
@@ -136,6 +150,16 @@ public class ArtMesh : MonoBehaviour, ISelectable
         }
     }
 
+    public void OnDeselect()
+    {
+        SetSelected(false);
+    }
+
+    public void OnSelect(Guid id)
+    {
+        SetSelected(id == ID);
+    }
+
     public void SetSelected(bool isSelected)
     {
         BoundingBox.SetSelected(isSelected);
@@ -149,36 +173,36 @@ public class ArtMesh : MonoBehaviour, ISelectable
     /// <param name="value">transformation's value</param>
     public void SaveTransform(TransformType type)
     {
-        MeshData meshData = MeshRegistry.Instance.GetMeshData(MeshID);
+        MeshRegistry.Instance.TryGet(ID, out MeshData meshData);
 
-        bool areParametersAssigned = ParameterRegistry.Instance.GetAssignedParamIDsOfMesh(meshData.ID).Count > 0;
+        bool areParametersAssigned = ParamCurveRegistry.Instance.GetAssignedParamIDsOfMesh(meshData.ID).Count > 0;
 
         object updatedAnimationData = null;
         switch (type)
         {
             case TransformType.POSITION:
                 if (areParametersAssigned)
-                    updatedAnimationData = this.transform.localPosition - meshData.Position;
+                    updatedAnimationData = this.transform.localPosition - meshData.transform.Position;
                 else
-                    meshData.Position = this.transform.localPosition;
+                    meshData.transform.Position = this.transform.localPosition;
                 break;
             case TransformType.ROTATION:
                 if (areParametersAssigned)
-                    updatedAnimationData = Quaternion.Inverse(meshData.Rotation) * this.transform.localRotation;
+                    updatedAnimationData = Quaternion.Inverse(meshData.transform.Rotation) * this.transform.localRotation;
                 else
-                    meshData.Rotation = this.transform.localRotation;
+                    meshData.transform.Rotation = this.transform.localRotation;
                 break;
             case TransformType.SCALE:
                 if (areParametersAssigned)
-                    updatedAnimationData = ArtMeshObject.transform.localScale - meshData.Scale;
+                    updatedAnimationData = ArtMeshObject.transform.localScale - meshData.transform.Scale;
                 else
-                    meshData.Scale = ArtMeshObject.transform.localScale;
+                    meshData.transform.Scale = ArtMeshObject.transform.localScale;
                 break;
         }
 
         if (updatedAnimationData != null)
         {
-            ParameterManager.instance.UpdateAnimationData(updatedAnimationData, type, meshData.ID);
+            ParameterManager.Instance.UpdateAnimationData(updatedAnimationData, type, meshData.ID);
         }
         else
             Debug.Log("updated animation data is null");

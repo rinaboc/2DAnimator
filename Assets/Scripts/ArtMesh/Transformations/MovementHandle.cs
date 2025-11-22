@@ -13,7 +13,7 @@ public class MovementHandle : DraggableHandle
             Vector3 localClickPosition = ParentTransform.parent.InverseTransformPoint(ClickWorldPosition);
 
             ParentTransform.gameObject
-                .GetComponent<ArtMesh>()
+                .GetComponent<MeshController>()
                 .UpdateTransform(localClickPosition + offsetLocal, TransformType.POSITION);
         }
     }
@@ -33,7 +33,7 @@ public class MovementHandle : DraggableHandle
     {
         if (dragging)
         {
-            ParentTransform.gameObject.GetComponent<ArtMesh>().SaveTransform(TransformType.POSITION);
+            ParentTransform.gameObject.GetComponent<MeshController>().SaveTransform(TransformType.POSITION);
         }
         dragging = false;
     }

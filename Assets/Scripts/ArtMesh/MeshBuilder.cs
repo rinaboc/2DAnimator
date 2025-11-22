@@ -22,8 +22,8 @@ public class MeshBuilder
 
         Material _meshMaterial = new(artMeshMaterial);
         _meshMaterial.mainTexture = sprite.texture;
-        _meshMaterial.SetVector("_TopLeftAnchor", ViewportManager.instance.TopLeftAnchor);
-        _meshMaterial.SetVector("_BottomRightAnchor", ViewportManager.instance.BottomRightAnchor);
+        _meshMaterial.SetVector("_TopLeftAnchor", ViewportManager.Instance.TopLeftAnchor);
+        _meshMaterial.SetVector("_BottomRightAnchor", ViewportManager.Instance.BottomRightAnchor);
         ArtMeshObject.AddComponent<MeshRenderer>().material = _meshMaterial;
 
         BoxCollider boxCollider = ArtMeshObject.AddComponent<BoxCollider>();

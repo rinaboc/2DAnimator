@@ -11,11 +11,11 @@ public class ScrollHandler : MonoBehaviour
     {
         get
         {
-            return ScaleManager.instance.CurrentScale;
+            return ScaleManager.Instance.CurrentScale;
         }
         set
         {
-            ScaleManager.instance.CurrentScale = value;
+            ScaleManager.Instance.CurrentScale = value;
         }
     }
 

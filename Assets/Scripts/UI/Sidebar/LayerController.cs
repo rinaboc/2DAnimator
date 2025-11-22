@@ -4,28 +4,45 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-public class LayerInteractionController : Clickable, ISelectable
+public class LayerController : Clickable, ISelectable
 {
     public GameObject ParentObj;
     [SerializeField] private Color SelectedColor;
 
-    public Guid LayerID { get; private set; }
+    public Guid ID { get; private set; }
     [SerializeField] private TMP_InputField LayerInput;
 
     private InputAction DoubleClickAction;
     protected override void Start()
     {
         base.Start();
+        LayerInput.enabled = false;
+    }
 
+    void OnEnable()
+    {
         DoubleClickAction = InputSystem.actions.FindAction("DoubleClick");
         DoubleClickAction.performed += OnDoubleClick;
 
-        LayerInput.enabled = false;
+        UIEvents.LayerSelectEvent += OnSelect;
+        UIEvents.LayerDeselectEvent += OnDeselect;
     }
 
     void OnDestroy()
     {
-        DoubleClickAction.Dispose();
+        DoubleClickAction.performed -= OnDoubleClick;
+        UIEvents.LayerSelectEvent -= OnSelect;
+        UIEvents.LayerDeselectEvent -= OnDeselect;
+    }
+
+    public void OnDeselect()
+    {
+        SetSelected(false);
+    }
+
+    public void OnSelect(Guid id)
+    {
+        SetSelected(id == ID);
     }
 
     public void SetSelected(bool isSelected)
@@ -35,13 +52,13 @@ public class LayerInteractionController : Clickable, ISelectable
         LayerInput.enabled = isSelected;
     }
 
-    public LayerInteractionController SetID(Guid id)
+    public LayerController SetID(Guid id)
     {
-        LayerID = id;
+        ID = id;
         return this;
     }
 
-    public LayerInteractionController SetText(string text)
+    public LayerController SetText(string text)
     {
         LayerInput.text = text;
         return this;
@@ -57,15 +74,10 @@ public class LayerInteractionController : Clickable, ISelectable
 
     public void TextChanged()
     {
-        try
+        if (MeshRegistry.Instance.TryGet(ID, out MeshData meshData))
         {
-            MeshData meshData = MeshRegistry.Instance.GetMeshData(LayerID);
             meshData.name = LayerInput.text;
             Debug.Log(meshData.ToString());
-        }
-        catch (Exception)
-        {
-            Debug.LogError("Couldn't change meshData name.");
         }
     }
 }
