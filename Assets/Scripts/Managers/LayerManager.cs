@@ -73,6 +73,7 @@ public class LayerManager : ManagerBase<LayerManager>
     /// </summary>
     public void CreateArtMesh(Texture2D texture, string path)
     {
+        // TODO: move mesh creation to meshManager
         MeshData newMesh = new(path);
 
         // create ArtObject inside viewport and assign the image to its sprite

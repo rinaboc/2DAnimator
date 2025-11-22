@@ -105,10 +105,10 @@ public class MeshController : MonoBehaviour, ISelectable
     {
         if (MeshRegistry.Instance.TryGet(ID, out MeshData meshData))
         {
-            this.transform.position = meshData.Position;
-            ArtMeshObject.transform.localScale = meshData.Scale;
+            this.transform.position = meshData.transform.Position;
+            ArtMeshObject.transform.localScale = meshData.transform.Scale;
             UpdateBoundingBox();
-            this.transform.localRotation = meshData.Rotation;
+            this.transform.localRotation = meshData.transform.Rotation;
         }
     }
 
@@ -182,21 +182,21 @@ public class MeshController : MonoBehaviour, ISelectable
         {
             case TransformType.POSITION:
                 if (areParametersAssigned)
-                    updatedAnimationData = this.transform.localPosition - meshData.Position;
+                    updatedAnimationData = this.transform.localPosition - meshData.transform.Position;
                 else
-                    meshData.Position = this.transform.localPosition;
+                    meshData.transform.Position = this.transform.localPosition;
                 break;
             case TransformType.ROTATION:
                 if (areParametersAssigned)
-                    updatedAnimationData = Quaternion.Inverse(meshData.Rotation) * this.transform.localRotation;
+                    updatedAnimationData = Quaternion.Inverse(meshData.transform.Rotation) * this.transform.localRotation;
                 else
-                    meshData.Rotation = this.transform.localRotation;
+                    meshData.transform.Rotation = this.transform.localRotation;
                 break;
             case TransformType.SCALE:
                 if (areParametersAssigned)
-                    updatedAnimationData = ArtMeshObject.transform.localScale - meshData.Scale;
+                    updatedAnimationData = ArtMeshObject.transform.localScale - meshData.transform.Scale;
                 else
-                    meshData.Scale = ArtMeshObject.transform.localScale;
+                    meshData.transform.Scale = ArtMeshObject.transform.localScale;
                 break;
         }
 

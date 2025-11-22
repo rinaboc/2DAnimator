@@ -202,13 +202,13 @@ public class ParameterManager : ManagerBase<ParameterManager>
                 switch (transformType)
                 {
                     case TransformType.POSITION:
-                        point.Position = (Vector3)data;
+                        point.transform.Position = (Vector3)data;
                         break;
                     case TransformType.ROTATION:
-                        point.Rotation = (Quaternion)data;
+                        point.transform.Rotation = (Quaternion)data;
                         break;
                     case TransformType.SCALE:
-                        point.Scale = (Vector3)data;
+                        point.transform.Scale = (Vector3)data;
                         break;
                 }
 

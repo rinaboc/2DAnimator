@@ -1,5 +1,6 @@
 using System;
 
+[Serializable]
 public class KeyFrame : EntityBase
 {
     public Guid ParamID;

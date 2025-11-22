@@ -1,6 +1,6 @@
 using System;
-using UnityEngine;
 
+[Serializable]
 public class MeshData : EntityBase
 {
     private static ushort _objCounter = 0;
@@ -8,18 +8,14 @@ public class MeshData : EntityBase
     public string sourcePath;
     public string name;
 
-    public Vector3 Position { get; set; }
-    public Quaternion Rotation { get; set; }
-    public Vector3 Scale { get; set; }
+    public TransformData transform;
 
     public MeshData(string sourcePath) : base()
     {
         drawOrder = ++_objCounter;
         this.sourcePath = sourcePath;
         name = "ArtObject" + ID;
-
-        Rotation = Quaternion.identity;
-        Scale = Vector3.one;
+        transform = new();
     }
 
     protected override void Register()

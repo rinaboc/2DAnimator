@@ -132,13 +132,13 @@ public class AnimationManager : ManagerBase<AnimationManager>
             float t = maxP != minP ? // not left end of the slider
                 (value - minPoint.ParamValue) / (maxPoint.ParamValue - minPoint.ParamValue) : 0f;
 
-            Vector3 interpPos = Vector3.Lerp(minPoint.Position, maxPoint.Position, t);
-            Vector3 interpScale = Vector3.Lerp(minPoint.Scale, maxPoint.Scale, t);
-            Quaternion interpRotation = Quaternion.Lerp(minPoint.Rotation, maxPoint.Rotation, t);
+            Vector3 interpPos = Vector3.Lerp(minPoint.transform.Position, maxPoint.transform.Position, t);
+            Vector3 interpScale = Vector3.Lerp(minPoint.transform.Scale, maxPoint.transform.Scale, t);
+            Quaternion interpRotation = Quaternion.Lerp(minPoint.transform.Rotation, maxPoint.transform.Rotation, t);
 
-            artMesh.MoveArtMesh(meshData.Position + interpPos);
-            artMesh.ScaleArtMesh(meshData.Scale + interpScale);
-            artMesh.RotateArtMesh(meshData.Rotation * interpRotation);
+            artMesh.MoveArtMesh(meshData.transform.Position + interpPos);
+            artMesh.ScaleArtMesh(meshData.transform.Scale + interpScale);
+            artMesh.RotateArtMesh(meshData.transform.Rotation * interpRotation);
         }
     }
 }

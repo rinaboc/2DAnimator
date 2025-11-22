@@ -570,9 +570,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ViewportScaledTransform: {fileID: 1653363159}
-  onScaleChange:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &146342146
 GameObject:
   m_ObjectHideFlags: 0
