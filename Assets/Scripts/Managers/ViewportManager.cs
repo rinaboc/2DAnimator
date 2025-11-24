@@ -18,4 +18,9 @@ public class ViewportManager : ManagerBase<ViewportManager>
             return _bottomRightAnchor.position;
         }
     }
+
+    public override void LoadState(ref SaveData saveData)
+    {
+        throw new System.NotImplementedException();
+    }
 }

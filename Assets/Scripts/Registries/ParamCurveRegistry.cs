@@ -56,4 +56,9 @@ public class ParamCurveRegistry : RegistryBase<ParamCurve>
 
         return ret;
     }
+
+    public override void SaveState(ref SaveData saveData)
+    {
+        throw new NotImplementedException();
+    }
 }

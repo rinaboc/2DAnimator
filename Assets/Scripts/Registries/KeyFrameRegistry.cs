@@ -68,4 +68,9 @@ public class KeyFrameRegistry : RegistryBase<KeyFrame>
         }
         return ret;
     }
+
+    public override void SaveState(ref SaveData saveData)
+    {
+        throw new NotImplementedException();
+    }
 }

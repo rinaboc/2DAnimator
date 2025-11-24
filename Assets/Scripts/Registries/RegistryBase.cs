@@ -6,7 +6,7 @@ using UnityEngine;
 /// Base class for registries that store entries of type T
 /// </summary>
 /// <typeparam name="T">Must be a subclass of EntityBase</typeparam>
-public abstract class RegistryBase<T> : ScriptableObject where T : EntityBase
+public abstract class RegistryBase<T> : ScriptableObject, ISaveable where T : EntityBase
 {
     /// <summary>
     /// Dictionary to store the registered entries of type T
@@ -33,5 +33,12 @@ public abstract class RegistryBase<T> : ScriptableObject where T : EntityBase
         }
 
         return retEntries;
+    }
+
+    public abstract void SaveState(ref SaveData saveData);
+
+    public void RegisterSaveable()
+    {
+        SaveController.Register(this);
     }
 }

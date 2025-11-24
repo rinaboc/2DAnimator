@@ -225,4 +225,9 @@ public class ParameterManager : ManagerBase<ParameterManager>
         }
 
     }
+
+    public override void LoadState(ref SaveData saveData)
+    {
+        throw new NotImplementedException();
+    }
 }

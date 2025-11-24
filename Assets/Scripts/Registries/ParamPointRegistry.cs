@@ -23,4 +23,9 @@ public class ParamPointRegistry : RegistryBase<ParamPoint>
             return _instance;
         }
     }
+
+    public override void SaveState(ref SaveData saveData)
+    {
+        throw new NotImplementedException();
+    }
 }

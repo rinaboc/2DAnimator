@@ -141,4 +141,9 @@ public class AnimationManager : ManagerBase<AnimationManager>
             artMesh.RotateArtMesh(meshData.transform.Rotation * interpRotation);
         }
     }
+
+    public override void LoadState(ref SaveData saveData)
+    {
+        throw new NotImplementedException();
+    }
 }

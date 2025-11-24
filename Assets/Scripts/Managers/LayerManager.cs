@@ -198,4 +198,8 @@ public class LayerManager : ManagerBase<LayerManager>
         return false;
     }
 
+    public override void LoadState(ref SaveData saveData)
+    {
+        throw new NotImplementedException();
+    }
 }

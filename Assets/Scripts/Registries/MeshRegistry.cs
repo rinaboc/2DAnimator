@@ -21,4 +21,9 @@ public class MeshRegistry : RegistryBase<MeshData>
             return _instance;
         }
     }
+
+    public override void SaveState(ref SaveData saveData)
+    {
+        throw new System.NotImplementedException();
+    }
 }

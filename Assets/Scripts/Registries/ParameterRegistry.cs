@@ -24,4 +24,9 @@ public class ParameterRegistry : RegistryBase<Parameter>
             return _instance;
         }
     }
+
+    public override void SaveState(ref SaveData saveData)
+    {
+        throw new NotImplementedException();
+    }
 }

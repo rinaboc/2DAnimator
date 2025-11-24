@@ -28,4 +28,9 @@ public class MeshManager : ManagerBase<MeshManager>
 
         MeshRegistry.Instance.Remove(id);
     }
+
+    public override void LoadState(ref SaveData saveData)
+    {
+        throw new NotImplementedException();
+    }
 }
