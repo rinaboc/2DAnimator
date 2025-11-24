@@ -1,29 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "KeyFrameRegistry", menuName = "Global/KeyFrame Registry")]
-public class KeyFrameRegistry : RegistryBase<KeyFrame>
+[CreateAssetMenu(fileName = "KeyFrameRegistry", menuName = "Global/KeyFrameRegistry")]
+public class KeyFrameRegistry : RegistryBase<KeyFrame, KeyFrameRegistry>
 {
-    private static KeyFrameRegistry _instance;
-    public static KeyFrameRegistry Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = Resources.Load<KeyFrameRegistry>("KeyFrameRegistry");
-
-                if (_instance == null)
-                {
-                    Debug.LogError("KeyFrameRegistry asset not found in Resources!");
-                }
-            }
-
-            return _instance;
-        }
-    }
-
     public override bool Register(KeyFrame keyframe)
     {
         if (_map.ContainsKey(keyframe.ID))
@@ -71,6 +53,6 @@ public class KeyFrameRegistry : RegistryBase<KeyFrame>
 
     public override void SaveState(ref SaveData saveData)
     {
-        throw new NotImplementedException();
+        KeyFrame[] keyFrames = _map.Values.ToArray();
     }
 }
