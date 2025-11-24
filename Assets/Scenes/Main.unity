@@ -1924,6 +1924,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd0d9ff3bf867204193e2e3519133eed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ArtObjectPrefab: {fileID: 5891025336898045850, guid: ba09c95b64657d844b75f3448b7d7918, type: 3}
+  ViewportScale: {fileID: 1653363158}
 --- !u!1 &823835057
 GameObject:
   m_ObjectHideFlags: 0
@@ -2509,8 +2511,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d1a7d8e90bcc6eb48f59f11fa52f69f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ArtObjectPrefab: {fileID: 5891025336898045850, guid: ba09c95b64657d844b75f3448b7d7918, type: 3}
-  ViewportScale: {fileID: 1653363158}
   UIArtLayerPrefab: {fileID: 6070374671290091294, guid: f68554b2b1923634f9f0c2d6cc4377ff, type: 3}
   UILayersContent: {fileID: 2089455473}
 --- !u!1 &994627438

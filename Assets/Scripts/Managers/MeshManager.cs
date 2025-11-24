@@ -6,6 +6,10 @@ public class MeshManager : ManagerBase<MeshManager>
 {
     [SerializeField] private Dictionary<Guid, MeshController> _meshControllers = new();
 
+    [Header("Art Mesh creation")]
+    [SerializeField] private GameObject ArtObjectPrefab;
+    [SerializeField] private GameObject ViewportScale;
+
     void OnEnable()
     {
         UIEvents.LayerDeleteEvent += DeleteArtMeshObj;
@@ -29,7 +33,23 @@ public class MeshManager : ManagerBase<MeshManager>
         MeshRegistry.Instance.Remove(id);
     }
 
-    public override void LoadState(ref SaveData saveData)
+    public MeshData CreateArtMeshObj(Texture2D texture, string path)
+    {
+        MeshData newMesh = new(path);
+
+        // create ArtObject inside viewport and assign the image to its sprite
+        GameObject newArtObject = Instantiate(ArtObjectPrefab, ViewportScale.transform, false);
+        newArtObject.name = "ArtObject" + newMesh.ID;
+        newArtObject.GetComponent<MeshController>()
+            .LoadSprite(texture)
+            .SetMeshID(newMesh.ID)
+            .SetSelected(false);
+
+        RegisterArtMeshObj(newMesh.ID, newArtObject.GetComponent<MeshController>());
+        return newMesh;
+    }
+
+    public override void LoadState(SaveData saveData)
     {
         throw new NotImplementedException();
     }

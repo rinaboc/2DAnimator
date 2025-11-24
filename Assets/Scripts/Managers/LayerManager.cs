@@ -9,10 +9,6 @@ using System;
 /// </summary>
 public class LayerManager : ManagerBase<LayerManager>
 {
-    [Header("Art Mesh creation")]
-    [SerializeField] private GameObject ArtObjectPrefab;
-    [SerializeField] private GameObject ViewportScale;
-
     [Header("UI settings")]
     [SerializeField] private GameObject UIArtLayerPrefab;
     [SerializeField] private GameObject UILayersContent;
@@ -69,31 +65,9 @@ public class LayerManager : ManagerBase<LayerManager>
     }
 
     /// <summary>
-    /// Create an ArtObject inside the viewport and assign the input texture as the sprite.
-    /// </summary>
-    public void CreateArtMesh(Texture2D texture, string path)
-    {
-        // TODO: move mesh creation to meshManager
-        MeshData newMesh = new(path);
-
-        // create ArtObject inside viewport and assign the image to its sprite
-        GameObject newArtObject = Instantiate(ArtObjectPrefab, ViewportScale.transform, false);
-        newArtObject.name = "ArtObject" + newMesh.ID;
-        newArtObject.GetComponent<MeshController>()
-            .LoadSprite(texture)
-            .SetMeshID(newMesh.ID)
-            .SetSelected(false);
-
-        MeshManager.Instance.RegisterArtMeshObj(newMesh.ID, newArtObject.GetComponent<MeshController>());
-
-        CreateUIArtLayer(newMesh);
-        SelectUIArtLayer(newMesh.ID);
-    }
-
-    /// <summary>
     /// Creates a UI element to represent the ArtLayers in the project.
     /// </summary>
-    private void CreateUIArtLayer(MeshData meshData)
+    public void CreateUIArtLayer(MeshData meshData)
     {
         GameObject newArtLayer = Instantiate(UIArtLayerPrefab, UILayersContent.transform);
         newArtLayer.name = "ArtLayer" + meshData.ID;
@@ -110,6 +84,7 @@ public class LayerManager : ManagerBase<LayerManager>
         });
 
         RegisterUILayer(meshData.ID, newArtLayer.GetComponentInChildren<LayerController>());
+        SelectUIArtLayer(meshData.ID);
     }
 
     public void SelectUIArtLayer(Guid id)
@@ -198,7 +173,7 @@ public class LayerManager : ManagerBase<LayerManager>
         return false;
     }
 
-    public override void LoadState(ref SaveData saveData)
+    public override void LoadState(SaveData saveData)
     {
         throw new NotImplementedException();
     }

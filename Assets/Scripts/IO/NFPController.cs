@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System;
@@ -31,25 +29,31 @@ public class NFPController : MonoBehaviour
         // Pick an image file
         NativeFilePicker.PickFile((path) =>
         {
-            try
-            {
-                // load image
-                byte[] bytes = File.ReadAllBytes(path);
-                Texture2D texture = new Texture2D(1, 1, textureFormat: TextureFormat.RGBA32, false);
-                texture.filterMode = FilterMode.Trilinear;
-                texture.LoadImage(bytes);
-
-                // create new artmesh
-                LayerManager.Instance.CreateArtMesh(texture, path);
-
-                Debug.Log("Picked file: " + path);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("Couldn't load image.");
-                Debug.LogError(e.StackTrace);
-            }
+            LoadImage(path);
 
         }, fileTypes);
+    }
+
+    public void LoadImage(string path)
+    {
+        try
+        {
+            // load image
+            byte[] bytes = File.ReadAllBytes(path);
+            Texture2D texture = new Texture2D(1, 1, textureFormat: TextureFormat.RGBA32, false);
+            texture.filterMode = FilterMode.Trilinear;
+            texture.LoadImage(bytes);
+
+            // create new artmesh
+            MeshData meshData = MeshManager.Instance.CreateArtMeshObj(texture, path);
+            LayerManager.Instance.CreateUIArtLayer(meshData);
+
+            Debug.Log("Picked file: " + path);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Couldn't load image.");
+            Debug.LogError(e.StackTrace);
+        }
     }
 }
