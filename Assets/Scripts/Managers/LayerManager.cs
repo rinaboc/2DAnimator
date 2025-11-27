@@ -176,7 +176,6 @@ public class LayerManager : ManagerBase<LayerManager>
 
     public override void LoadState(SaveData saveData)
     {
-        // TODO: handle draw order when adding the layers
         MeshData[] sortedMeshDatas = saveData.MeshDatas;
         sortedMeshDatas.ToList().OrderBy(meshData => meshData.drawOrder).ToArray();
         foreach (var item in sortedMeshDatas)

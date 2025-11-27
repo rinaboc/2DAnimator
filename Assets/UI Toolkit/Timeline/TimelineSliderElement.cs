@@ -144,6 +144,17 @@ public partial class TimelineSliderElement : VisualElement
         m_keyframeLineElements[paramID].InsertKeyframeAt(CurrentFrame, key);
     }
 
+    public void LoadKeyframes(KeyFrame[] keyframes)
+    {
+        m_keyframeLineElements.Clear();
+        ClearFrameBarLists();
+
+        foreach (KeyFrame key in keyframes)
+        {
+            m_keyframeLineElements[key.ParamID].InsertKeyframeAt(key.Frame, key);
+        }
+    }
+
     private void UpdateKeyWidth()
     {
         foreach (List<VisualElement> bars in m_frameBars)

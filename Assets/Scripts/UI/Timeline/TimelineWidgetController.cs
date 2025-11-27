@@ -60,6 +60,11 @@ public class TimelineWidgetController : BaseUIController
         m_TimelineSlider.CreateKeyframeAtCurrentFrame(id, newKeyframe);
     }
 
+    public void LoadKeyframes(KeyFrame[] keyframes)
+    {
+        m_TimelineSlider.LoadKeyframes(keyframes);
+    }
+
     /// <summary>
     /// Opening and closing logic of the widget.
     /// </summary>

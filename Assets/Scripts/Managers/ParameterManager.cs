@@ -83,12 +83,45 @@ public class ParameterManager : ManagerBase<ParameterManager>
     public void CreateParameter(float min, float max, float defaultValue, string name = "parameter")
     {
         Parameter parameter = new(min, max, defaultValue, name);
+        CreateParameterSlider(parameter);
+    }
+
+    private void CreateParameterSlider(Parameter parameter)
+    {
         GameObject paramSlider = Instantiate(ParamSliderPrefab, ParamWidgetContent);
         ParameterSlider parameterSlider = paramSlider.GetComponent<ParameterSlider>();
         parameterSlider.SetParamID(parameter.ID);
         parameterSlider.UpdateSlider(parameter);
 
         _paramSliders.Add(parameter.ID, paramSlider);
+    }
+
+    private void DeleteParameterSlider(Guid id)
+    {
+        if (_paramSliders.TryGetValue(id, out GameObject paramSlider))
+        {
+            _paramSliders.Remove(id);
+            Destroy(paramSlider);
+        }
+    }
+
+    private void ClearParamSliders()
+    {
+        foreach (var item in _paramSliders)
+        {
+            Destroy(item.Value);
+        }
+        _paramSliders.Clear();
+    }
+
+
+    public void DeleteSelectedParameterSlider()
+    {
+        if (!_isParamSelected) return;
+
+        DeleteParameterSlider(SelectedParamID);
+        _isParamSelected = false;
+
     }
 
     public void CreateParamPoints(Guid parameterID, Guid meshID)
@@ -231,7 +264,32 @@ public class ParameterManager : ManagerBase<ParameterManager>
         ParameterRegistry.Instance.Clear();
         ParamCurveRegistry.Instance.Clear();
         ParamPointRegistry.Instance.Clear();
+        ClearParamSliders();
 
-        // TODO: load parameters and parameter points from save data
+        foreach (var item in saveData.Parameters)
+        {
+            ParameterRegistry.Instance.Register(item);
+            CreateParameterSlider(item);
+        }
+
+        foreach (var item in saveData.ParamPoints)
+        {
+            ParamPointRegistry.Instance.Register(item);
+        }
+
+        foreach (var item in saveData.ParamCurves)
+        {
+            ParamCurveRegistry.Instance.Register(item);
+            List<float> paramValues = new();
+            foreach (var pointID in item.ParamPoints)
+            {
+                if (ParamPointRegistry.Instance.TryGet(pointID, out ParamPoint point))
+                {
+                    paramValues.Add(point.ParamValue);
+                }
+            }
+            GetParamSlider(item.ParamID).CreateParamPointHandles(paramValues);
+        }
+
     }
 }

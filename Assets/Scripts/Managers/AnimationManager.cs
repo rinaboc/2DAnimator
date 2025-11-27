@@ -144,11 +144,11 @@ public class AnimationManager : ManagerBase<AnimationManager>
 
     public override void LoadState(SaveData saveData)
     {
-        // KeyFrameRegistry keyFrameRegistry = KeyFrameRegistry.Instance;
-        // keyFrameRegistry.Clear();
-        // foreach (var item in saveData.KeyFrames)
-        // {
-        //     keyFrameRegistry.Register(item);
-        // }
+        KeyFrameRegistry keyFrameRegistry = KeyFrameRegistry.Instance;
+        keyFrameRegistry.Clear();
+        foreach (var item in saveData.KeyFrames)
+        {
+            keyFrameRegistry.Register(item);
+        }
     }
 }
