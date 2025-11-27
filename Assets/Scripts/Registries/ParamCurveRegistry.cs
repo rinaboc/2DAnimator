@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ParamCurveRegistry", menuName = "Global/ParamCurveRegistry")]
@@ -38,8 +39,9 @@ public class ParamCurveRegistry : RegistryBase<ParamCurve, ParamCurveRegistry>
         return ret;
     }
 
-    public override void SaveState(ref SaveData saveData)
+    public override void SaveState(SaveData saveData)
     {
-        throw new NotImplementedException();
+        saveData.ParamCurves = new ParamCurve[_map.Count];
+        saveData.ParamCurves = _map.Values.ToArray();
     }
 }

@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class AnimationManager : ManagerBase<AnimationManager>
 {
-    private Dictionary<Guid, float> _ParamCurValues = new();
-    public bool GetParamCurValue(Guid id, out float value) => _ParamCurValues.TryGetValue(id, out value);
+    private Dictionary<Guid, float> _currentCurveSliderValues = new();
+    public bool GetCurrentCurveSliderValue(Guid id, out float value) => _currentCurveSliderValues.TryGetValue(id, out value);
 
     [SerializeField] private TimelineWidgetController _timelineWidget;
 
@@ -93,7 +93,7 @@ public class AnimationManager : ManagerBase<AnimationManager>
 
         if (paramCurves.Count > 0)
         {
-            _ParamCurValues[paramID] = value;
+            _currentCurveSliderValues[paramID] = value;
         }
 
         foreach (ParamCurve paramCurve in paramCurves)
@@ -142,8 +142,13 @@ public class AnimationManager : ManagerBase<AnimationManager>
         }
     }
 
-    public override void LoadState(ref SaveData saveData)
+    public override void LoadState(SaveData saveData)
     {
-        throw new NotImplementedException();
+        // KeyFrameRegistry keyFrameRegistry = KeyFrameRegistry.Instance;
+        // keyFrameRegistry.Clear();
+        // foreach (var item in saveData.KeyFrames)
+        // {
+        //     keyFrameRegistry.Register(item);
+        // }
     }
 }

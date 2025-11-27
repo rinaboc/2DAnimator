@@ -2,6 +2,6 @@ using UnityEngine;
 
 public interface ILoadable
 {
-    void LoadState(ref SaveData saveData);
+    void LoadState(SaveData saveData);
     void RegisterLoadable();
 }

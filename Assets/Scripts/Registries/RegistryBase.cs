@@ -20,6 +20,7 @@ public abstract class RegistryBase<T, L> : ScriptableObject, ISaveable
             if (_instance == null)
             {
                 _instance = Resources.Load<L>(typeof(L).Name);
+                _instance.RegisterSaveable();
 
                 if (_instance == null)
                 {
@@ -42,6 +43,8 @@ public abstract class RegistryBase<T, L> : ScriptableObject, ISaveable
 
     public IReadOnlyCollection<T> GetAll() => _map.Values;
 
+    public void Clear() => _map.Clear();
+
     /// <summary>
     /// Get multiple entries by a list of IDs
     /// </summary>
@@ -58,7 +61,7 @@ public abstract class RegistryBase<T, L> : ScriptableObject, ISaveable
         return retEntries;
     }
 
-    public abstract void SaveState(ref SaveData saveData);
+    public abstract void SaveState(SaveData saveData);
 
     public void RegisterSaveable()
     {

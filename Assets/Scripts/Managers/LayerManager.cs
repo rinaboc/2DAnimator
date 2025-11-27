@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using System;
+using System.Linq;
 
 /// <summary>
 /// Manager for handling Art Mesh layers and their corresponding UI elements
@@ -175,6 +176,12 @@ public class LayerManager : ManagerBase<LayerManager>
 
     public override void LoadState(SaveData saveData)
     {
-        throw new NotImplementedException();
+        // TODO: handle draw order when adding the layers
+        MeshData[] sortedMeshDatas = saveData.MeshDatas;
+        sortedMeshDatas.ToList().OrderBy(meshData => meshData.drawOrder).ToArray();
+        foreach (var item in sortedMeshDatas)
+        {
+            CreateUIArtLayer(item);
+        }
     }
 }

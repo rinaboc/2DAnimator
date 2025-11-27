@@ -29,31 +29,35 @@ public class NFPController : MonoBehaviour
         // Pick an image file
         NativeFilePicker.PickFile((path) =>
         {
-            LoadImage(path);
+            if (LoadImage(path, out Texture2D texture))
+            {
+                // create new artmesh
+                MeshData meshData = MeshManager.Instance.CreateArtMeshObj(texture, path);
+                LayerManager.Instance.CreateUIArtLayer(meshData);
+            }
 
         }, fileTypes);
     }
 
-    public void LoadImage(string path)
+    public static bool LoadImage(string path, out Texture2D texture)
     {
+        texture = new Texture2D(1, 1, textureFormat: TextureFormat.RGBA32, false);
         try
         {
             // load image
             byte[] bytes = File.ReadAllBytes(path);
-            Texture2D texture = new Texture2D(1, 1, textureFormat: TextureFormat.RGBA32, false);
             texture.filterMode = FilterMode.Trilinear;
             texture.LoadImage(bytes);
 
-            // create new artmesh
-            MeshData meshData = MeshManager.Instance.CreateArtMeshObj(texture, path);
-            LayerManager.Instance.CreateUIArtLayer(meshData);
-
             Debug.Log("Picked file: " + path);
+            return true;
         }
         catch (Exception e)
         {
             Debug.LogError("Couldn't load image.");
             Debug.LogError(e.StackTrace);
         }
+
+        return false;
     }
 }

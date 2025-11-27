@@ -29,8 +29,8 @@ public class ScaleManager : ManagerBase<ScaleManager>
         CurrentScale = OriginalScale;
     }
 
-    public override void LoadState(ref SaveData saveData)
+    public override void LoadState(SaveData saveData)
     {
-        throw new System.NotImplementedException();
+
     }
 }

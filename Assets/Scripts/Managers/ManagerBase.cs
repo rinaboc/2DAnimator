@@ -9,6 +9,7 @@ public abstract class ManagerBase<T> : MonoBehaviour, ILoadable where T : MonoBe
         if (Instance == null)
         {
             Instance = this as T;
+            RegisterLoadable();
         }
         else
         {
@@ -16,7 +17,7 @@ public abstract class ManagerBase<T> : MonoBehaviour, ILoadable where T : MonoBe
         }
     }
 
-    public abstract void LoadState(ref SaveData saveData);
+    public abstract void LoadState(SaveData saveData);
 
     public void RegisterLoadable()
     {

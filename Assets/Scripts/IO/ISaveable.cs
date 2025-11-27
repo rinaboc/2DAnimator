@@ -2,6 +2,6 @@ using UnityEngine;
 
 public interface ISaveable
 {
-    void SaveState(ref SaveData saveData);
+    void SaveState(SaveData saveData);
     void RegisterSaveable();
 }

@@ -105,10 +105,14 @@ public class MeshController : MonoBehaviour, ISelectable
     {
         if (MeshRegistry.Instance.TryGet(ID, out MeshData meshData))
         {
-            this.transform.position = meshData.transform.Position;
+            this.transform.localPosition = meshData.transform.Position;
             ArtMeshObject.transform.localScale = meshData.transform.Scale;
             UpdateBoundingBox();
             this.transform.localRotation = meshData.transform.Rotation;
+        }
+        else
+        {
+            Debug.LogError("Couldn't find mesh data to load transformation from.");
         }
     }
 

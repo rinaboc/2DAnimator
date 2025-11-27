@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Serialization;
 
 [Serializable]
 public class MeshData : EntityBase
@@ -16,6 +17,12 @@ public class MeshData : EntityBase
         this.sourcePath = sourcePath;
         name = "ArtObject" + ID;
         transform = new();
+    }
+
+    [OnDeserialized]
+    private void OnDeserialized(StreamingContext context)
+    {
+        _objCounter++;
     }
 
     protected override void Register()

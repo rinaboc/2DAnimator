@@ -226,8 +226,12 @@ public class ParameterManager : ManagerBase<ParameterManager>
 
     }
 
-    public override void LoadState(ref SaveData saveData)
+    public override void LoadState(SaveData saveData)
     {
-        throw new NotImplementedException();
+        ParameterRegistry.Instance.Clear();
+        ParamCurveRegistry.Instance.Clear();
+        ParamPointRegistry.Instance.Clear();
+
+        // TODO: load parameters and parameter points from save data
     }
 }

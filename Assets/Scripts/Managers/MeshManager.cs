@@ -38,19 +38,39 @@ public class MeshManager : ManagerBase<MeshManager>
         MeshData newMesh = new(path);
 
         // create ArtObject inside viewport and assign the image to its sprite
-        GameObject newArtObject = Instantiate(ArtObjectPrefab, ViewportScale.transform, false);
-        newArtObject.name = "ArtObject" + newMesh.ID;
-        newArtObject.GetComponent<MeshController>()
-            .LoadSprite(texture)
-            .SetMeshID(newMesh.ID)
-            .SetSelected(false);
+        MeshController meshController = SetupMeshController(texture, newMesh);
 
-        RegisterArtMeshObj(newMesh.ID, newArtObject.GetComponent<MeshController>());
+        RegisterArtMeshObj(newMesh.ID, meshController);
         return newMesh;
     }
 
+    private MeshController SetupMeshController(Texture2D texture, MeshData newMesh)
+    {
+        GameObject newArtObject = Instantiate(ArtObjectPrefab, ViewportScale.transform, false);
+        newArtObject.name = "ArtObject" + newMesh.ID;
+        MeshController meshController = newArtObject.GetComponent<MeshController>();
+        meshController
+            .LoadSprite(texture)
+            .SetMeshID(newMesh.ID)
+            .SetDrawOrder(newMesh.drawOrder)
+            .SetSelected(false);
+        return meshController;
+    }
+
+
     public override void LoadState(SaveData saveData)
     {
-        throw new NotImplementedException();
+        MeshRegistry.Instance.Clear();
+
+        foreach (var item in saveData.MeshDatas)
+        {
+            if (NFPController.LoadImage(item.sourcePath, out Texture2D texture))
+            {
+                MeshRegistry.Instance.Register(item);
+                MeshController meshController = SetupMeshController(texture, item);
+                meshController.LoadTransformationFromMeshData();
+                RegisterArtMeshObj(item.ID, meshController);
+            }
+        }
     }
 }
