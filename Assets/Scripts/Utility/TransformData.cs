@@ -7,9 +7,6 @@ public class TransformData
     [SerializeField] private float[] rotation = new float[4];
     [SerializeField] private float[] scale = new float[3];
 
-    // public Vector3 Position { get; set; }
-    // public Quaternion Rotation { get; set; }
-    // public Vector3 Scale { get; set; }
     public Vector3 Position
     {
         get => new(position[0], position[1], position[2]);
@@ -32,7 +29,7 @@ public class TransformData
     {
         Position = Vector3.zero;
         Rotation = Quaternion.identity;
-        Scale = Vector3.one;
+        Scale = Vector3.zero;
     }
 
     public override string ToString() => $"position {Position}, rotation {Rotation}, scale {Scale}";

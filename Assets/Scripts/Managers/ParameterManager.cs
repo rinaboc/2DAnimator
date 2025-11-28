@@ -101,6 +101,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
         if (_paramSliders.TryGetValue(id, out GameObject paramSlider))
         {
             _paramSliders.Remove(id);
+            ParameterRegistry.Instance.Remove(id);
             Destroy(paramSlider);
         }
     }
@@ -112,6 +113,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
             Destroy(item.Value);
         }
         _paramSliders.Clear();
+        ParameterRegistry.Instance.Clear();
     }
 
 

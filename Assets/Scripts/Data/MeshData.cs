@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using UnityEngine;
 
 [Serializable]
 public class MeshData : EntityBase
@@ -16,7 +17,10 @@ public class MeshData : EntityBase
         drawOrder = ++_objCounter;
         this.sourcePath = sourcePath;
         name = "ArtObject" + ID;
-        transform = new();
+        transform = new()
+        {
+            Scale = Vector3.one
+        };
     }
 
     [OnDeserialized]
