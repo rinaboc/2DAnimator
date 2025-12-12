@@ -29,4 +29,8 @@ public class ScaleManager : ManagerBase<ScaleManager>
         CurrentScale = OriginalScale;
     }
 
+    public override void LoadState(SaveData saveData)
+    {
+
+    }
 }

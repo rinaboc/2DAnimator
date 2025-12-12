@@ -1,29 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ParamCurveRegistry", menuName = "Global/ParamCurveRegistry")]
-public class ParamCurveRegistry : RegistryBase<ParamCurve>
+public class ParamCurveRegistry : RegistryBase<ParamCurve, ParamCurveRegistry>
 {
-    private static ParamCurveRegistry _instance;
-    public static ParamCurveRegistry Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = Resources.Load<ParamCurveRegistry>("ParamCurveRegistry");
-
-                if (_instance == null)
-                {
-                    Debug.LogError("ParamCurveRegistry asset not found in Resources!");
-                }
-            }
-
-            return _instance;
-        }
-    }
-
     public List<Guid> GetAssignedParamIDsOfMesh(Guid meshID)
     {
         List<Guid> retIDs = new();
@@ -55,5 +37,11 @@ public class ParamCurveRegistry : RegistryBase<ParamCurve>
         }
 
         return ret;
+    }
+
+    public override void SaveState(SaveData saveData)
+    {
+        saveData.ParamCurves = new ParamCurve[_map.Count];
+        saveData.ParamCurves = _map.Values.ToArray();
     }
 }

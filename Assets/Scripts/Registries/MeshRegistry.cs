@@ -1,24 +1,12 @@
+using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "MeshRegistry", menuName = "Global/Mesh Registry")]
-public class MeshRegistry : RegistryBase<MeshData>
+[CreateAssetMenu(fileName = "MeshRegistry", menuName = "Global/MeshRegistry")]
+public class MeshRegistry : RegistryBase<MeshData, MeshRegistry>
 {
-    private static MeshRegistry _instance;
-    public static MeshRegistry Instance
+    public override void SaveState(SaveData saveData)
     {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = Resources.Load<MeshRegistry>("MeshRegistry");
-
-                if (_instance == null)
-                {
-                    Debug.LogError("MeshRegistry asset not found in Resources!");
-                }
-            }
-
-            return _instance;
-        }
+        saveData.MeshDatas = new MeshData[_map.Count];
+        saveData.MeshDatas = _map.Values.ToArray();
     }
 }

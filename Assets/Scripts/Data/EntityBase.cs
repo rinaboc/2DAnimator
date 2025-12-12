@@ -1,9 +1,10 @@
 using System;
+using System.Runtime.Serialization;
 
 [Serializable]
 public abstract class EntityBase
 {
-    public readonly Guid ID;
+    public Guid ID;
 
     protected EntityBase(bool autoRegister = true)
     {

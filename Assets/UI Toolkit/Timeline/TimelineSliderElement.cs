@@ -10,7 +10,7 @@ public partial class TimelineSliderElement : VisualElement
     private float _sliderContainerWidth;
     private float _sliderWidth;
     public int m_maxFrames = 24; // TODO: custom max frame at runtime
-    public readonly int m_framePerSec = 12;
+    public readonly int m_framePerSec = 18; // TODO: custom FPS
 
     [UxmlAttribute]
     public int MaxFrames
@@ -122,7 +122,7 @@ public partial class TimelineSliderElement : VisualElement
         foreach (Parameter parameter in parameters)
         {
             KeyframeLineElement keyframeLine = new(MaxFrames, m_frameBars, parameter);
-            if (AnimationManager.Instance.GetParamCurValue(parameter.ID, out float paramValue))
+            if (AnimationManager.Instance.GetCurrentCurveSliderValue(parameter.ID, out float paramValue))
             {
                 keyframeLine.SetSliderValue(paramValue);
             }
@@ -142,6 +142,17 @@ public partial class TimelineSliderElement : VisualElement
     public void CreateKeyframeAtCurrentFrame(Guid paramID, KeyFrame key)
     {
         m_keyframeLineElements[paramID].InsertKeyframeAt(CurrentFrame, key);
+    }
+
+    public void LoadKeyframes(KeyFrame[] keyframes)
+    {
+        m_keyframeLineElements.Clear();
+        ClearFrameBarLists();
+
+        foreach (KeyFrame key in keyframes)
+        {
+            m_keyframeLineElements[key.ParamID].InsertKeyframeAt(key.Frame, key);
+        }
     }
 
     private void UpdateKeyWidth()

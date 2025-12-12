@@ -6,6 +6,10 @@ public class MeshManager : ManagerBase<MeshManager>
 {
     [SerializeField] private Dictionary<Guid, MeshController> _meshControllers = new();
 
+    [Header("Art Mesh creation")]
+    [SerializeField] private GameObject ArtObjectPrefab;
+    [SerializeField] private GameObject ViewportScale;
+
     void OnEnable()
     {
         UIEvents.LayerDeleteEvent += DeleteArtMeshObj;
@@ -27,5 +31,46 @@ public class MeshManager : ManagerBase<MeshManager>
         Destroy(artMesh.gameObject);
 
         MeshRegistry.Instance.Remove(id);
+    }
+
+    public MeshData CreateArtMeshObj(Texture2D texture, string path)
+    {
+        MeshData newMesh = new(path);
+
+        // create ArtObject inside viewport and assign the image to its sprite
+        MeshController meshController = SetupMeshController(texture, newMesh);
+
+        RegisterArtMeshObj(newMesh.ID, meshController);
+        return newMesh;
+    }
+
+    private MeshController SetupMeshController(Texture2D texture, MeshData newMesh)
+    {
+        GameObject newArtObject = Instantiate(ArtObjectPrefab, ViewportScale.transform, false);
+        newArtObject.name = "ArtObject" + newMesh.ID;
+        MeshController meshController = newArtObject.GetComponent<MeshController>();
+        meshController
+            .LoadSprite(texture)
+            .SetMeshID(newMesh.ID)
+            .SetDrawOrder(newMesh.drawOrder)
+            .SetSelected(false);
+        return meshController;
+    }
+
+
+    public override void LoadState(SaveData saveData)
+    {
+        MeshRegistry.Instance.Clear();
+
+        foreach (var item in saveData.MeshDatas)
+        {
+            if (NFPController.LoadImage(item.sourcePath, out Texture2D texture))
+            {
+                MeshRegistry.Instance.Register(item);
+                MeshController meshController = SetupMeshController(texture, item);
+                meshController.LoadTransformationFromMeshData();
+                RegisterArtMeshObj(item.ID, meshController);
+            }
+        }
     }
 }

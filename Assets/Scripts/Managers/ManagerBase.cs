@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public abstract class ManagerBase<T> : MonoBehaviour where T : MonoBehaviour
+public abstract class ManagerBase<T> : MonoBehaviour, ILoadable where T : MonoBehaviour
 {
     public static T Instance { get; private set; }
 
@@ -9,10 +9,18 @@ public abstract class ManagerBase<T> : MonoBehaviour where T : MonoBehaviour
         if (Instance == null)
         {
             Instance = this as T;
+            RegisterLoadable();
         }
         else
         {
             Destroy(this);
         }
+    }
+
+    public abstract void LoadState(SaveData saveData);
+
+    public void RegisterLoadable()
+    {
+        SaveController.Register(this);
     }
 }

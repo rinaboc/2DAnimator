@@ -1,26 +1,13 @@
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ParamPointRegistry", menuName = "Global/ParamPointRegistry")]
-public class ParamPointRegistry : RegistryBase<ParamPoint>
+public class ParamPointRegistry : RegistryBase<ParamPoint, ParamPointRegistry>
 {
-    private static ParamPointRegistry _instance;
-    public static ParamPointRegistry Instance
+    public override void SaveState(SaveData saveData)
     {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = Resources.Load<ParamPointRegistry>("ParamPointRegistry");
-
-                if (_instance == null)
-                {
-                    Debug.LogError("ParamPointRegistry asset not found in Resources!");
-                }
-            }
-
-            return _instance;
-        }
+        saveData.ParamPoints = new ParamPoint[_map.Count];
+        saveData.ParamPoints = _map.Values.ToArray();
     }
 }

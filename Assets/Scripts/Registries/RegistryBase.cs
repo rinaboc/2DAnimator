@@ -6,8 +6,32 @@ using UnityEngine;
 /// Base class for registries that store entries of type T
 /// </summary>
 /// <typeparam name="T">Must be a subclass of EntityBase</typeparam>
-public abstract class RegistryBase<T> : ScriptableObject where T : EntityBase
+/// <typeparam name="L">Is the actual type of the registry object
+public abstract class RegistryBase<T, L> : ScriptableObject, ISaveable
+    where T : EntityBase
+    where L : RegistryBase<T, L>
 {
+    protected static L _instance;
+
+    public static L Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = Resources.Load<L>(typeof(L).Name);
+                _instance.RegisterSaveable();
+
+                if (_instance == null)
+                {
+                    Debug.LogError($"{typeof(L).Name} asset not found in Resources!");
+                }
+            }
+
+            return _instance;
+        }
+    }
+
     /// <summary>
     /// Dictionary to store the registered entries of type T
     /// </summary>
@@ -18,6 +42,8 @@ public abstract class RegistryBase<T> : ScriptableObject where T : EntityBase
     public virtual bool Remove(Guid id) => _map.Remove(id);
 
     public IReadOnlyCollection<T> GetAll() => _map.Values;
+
+    public void Clear() => _map.Clear();
 
     /// <summary>
     /// Get multiple entries by a list of IDs
@@ -33,5 +59,12 @@ public abstract class RegistryBase<T> : ScriptableObject where T : EntityBase
         }
 
         return retEntries;
+    }
+
+    public abstract void SaveState(SaveData saveData);
+
+    public void RegisterSaveable()
+    {
+        SaveController.Register(this);
     }
 }

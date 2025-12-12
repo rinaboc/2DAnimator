@@ -27,7 +27,7 @@ public class ParameterSlider : Clickable, ISelectable
     [SerializeField] private GameObject ParamPointPrefab;
     [SerializeField] private Transform SlideArea;
 
-    private readonly List<GameObject> paramPoints = new();
+    private readonly Dictionary<float, GameObject> paramPoints = new();
 
     private float sliderValue;
     private string paramName;
@@ -102,7 +102,7 @@ public class ParameterSlider : Clickable, ISelectable
 
         slider.colors = colorBlock;
 
-        foreach (GameObject item in paramPoints)
+        foreach ((_, GameObject item) in paramPoints)
         {
             item.GetComponent<Image>().color = isAssigned ? CurveAssignedColor : CurveNormalColor;
         }
@@ -114,13 +114,17 @@ public class ParameterSlider : Clickable, ISelectable
         float minValue = values.Min();
         foreach (float value in values)
         {
+            float key = Mathf.Round(value * 100f) / 100f;
+            if (paramPoints.ContainsKey(key)) continue;
+
             GameObject pointHandle = Instantiate(ParamPointPrefab, SlideArea);
             RectTransform pointTransform = pointHandle.GetComponent<RectTransform>();
-            float normalizedPoint = (value - minValue) / (maxValue - minValue);
+            float normalizedPoint = (key - minValue) / (maxValue - minValue);
             pointTransform.anchorMax = pointTransform.anchorMin = new Vector2(normalizedPoint, pointTransform.anchorMin.y);
             pointHandle.transform.SetAsFirstSibling();
 
-            paramPoints.Add(pointHandle);
+            paramPoints.TryAdd(key, pointHandle);
+
         }
 
         SetMinMaxValues(minValue, maxValue);

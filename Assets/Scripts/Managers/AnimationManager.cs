@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class AnimationManager : ManagerBase<AnimationManager>
 {
-    private Dictionary<Guid, float> _ParamCurValues = new();
-    public bool GetParamCurValue(Guid id, out float value) => _ParamCurValues.TryGetValue(id, out value);
+    private Dictionary<Guid, float> _currentCurveSliderValues = new();
+    public bool GetCurrentCurveSliderValue(Guid id, out float value) => _currentCurveSliderValues.TryGetValue(id, out value);
 
     [SerializeField] private TimelineWidgetController _timelineWidget;
 
@@ -22,48 +22,41 @@ public class AnimationManager : ManagerBase<AnimationManager>
 
     private void AnimateTimeline(int currentFrame)
     {
-        List<Parameter> parameters = ParameterRegistry.Instance.GetAll().ToList();
+        var parameters = ParameterRegistry.Instance.GetAll();
 
         foreach (Parameter parameter in parameters)
         {
             List<KeyFrame> parameterKeys = KeyFrameRegistry.Instance.GetKeyFramesOfParam(parameter.ID);
             if (parameterKeys.Count < 2) continue;
 
-            KeyFrame minFrame = null, maxFrame = null;
+            parameterKeys.Sort((a, b) => a.Frame.CompareTo(b.Frame));
 
-            foreach (KeyFrame key in parameterKeys)
+            KeyFrame minFrame = parameterKeys.LastOrDefault(k => k.Frame <= currentFrame);
+            KeyFrame maxFrame = parameterKeys.FirstOrDefault(k => k.Frame >= currentFrame);
+
+            // current frame is outside the range of keyframes
+            if (minFrame == null) // Before the first keyframe
             {
-                if (currentFrame == key.Frame)
-                {
-                    Debug.Log("matching frame");
-                    minFrame = maxFrame = key;
-                    break;
-                }
-
-                if (currentFrame > key.Frame)
-                {
-                    minFrame = key;
-                    Debug.Log($"min frame: {minFrame}");
-                    continue;
-                }
-
-                if (currentFrame < key.Frame)
-                {
-                    maxFrame = key;
-                    Debug.Log($"max frame: {maxFrame}");
-                    break;
-                }
+                minFrame = maxFrame;
+            }
+            else if (maxFrame == null) // After the last keyframe
+            {
+                maxFrame = minFrame;
             }
 
-            if (minFrame != null && maxFrame == null) maxFrame = minFrame;
-            else if (maxFrame != null && minFrame == null) minFrame = maxFrame;
+            float interpolatedValue;
+            if (minFrame.Frame == maxFrame.Frame)
+            {
+                interpolatedValue = minFrame.ParamValue;
+            }
+            else
+            {
+                float t = (float)(currentFrame - minFrame.Frame) / (maxFrame.Frame - minFrame.Frame);
+                interpolatedValue = Mathf.Lerp(minFrame.ParamValue, maxFrame.ParamValue, t);
+            }
 
-            float delta = minFrame == maxFrame ? 0f : (minFrame.ParamValue - maxFrame.ParamValue) / (minFrame.Frame - maxFrame.Frame);
-            // if (minFrame.ParamValue > maxFrame.ParamValue) delta *= -1f;
-            float t = (currentFrame - minFrame.Frame) * delta + minFrame.ParamValue;
-
-            InterpolateParameter(t, parameter.ID);
-            UIEvents.RaiseParamInterpolated(parameter.ID, t);
+            InterpolateParameter(interpolatedValue, parameter.ID);
+            UIEvents.RaiseParamInterpolated(parameter.ID, interpolatedValue);
         }
     }
 
@@ -86,59 +79,97 @@ public class AnimationManager : ManagerBase<AnimationManager>
     /// </summary>
     public void InterpolateParameter(float value, Guid paramID)
     {
+        _currentCurveSliderValues[paramID] = value;
+        var accumTransforms = new Dictionary<Guid, TransformData>();
+        foreach (var curveValue in _currentCurveSliderValues)
+        {
+            CollectParameterDeltas(curveValue.Value, curveValue.Key, accumTransforms);
+        }
+
+        ApplyAccumulatedTransforms(accumTransforms);
+    }
+
+    private void CollectParameterDeltas(float value, Guid paramID, Dictionary<Guid, TransformData> accumTransforms)
+    {
         ParameterRegistry parameterRegistry = ParameterRegistry.Instance;
         ParamPointRegistry paramPointRegistry = ParamPointRegistry.Instance;
-        parameterRegistry.TryGet(paramID, out Parameter parameter);
+        if (!parameterRegistry.TryGet(paramID, out Parameter parameter)) return;
         List<ParamCurve> paramCurves = ParamCurveRegistry.Instance.GetEntries(parameter.ParamCurves);
-
-        if (paramCurves.Count > 0)
-        {
-            _ParamCurValues[paramID] = value;
-        }
 
         foreach (ParamCurve paramCurve in paramCurves)
         {
             List<ParamPoint> paramPoints = paramPointRegistry.GetEntries(paramCurve.ParamPoints);
-            List<ParamPoint> orderedPoints = paramPoints.OrderBy(point => point.ParamValue).ToList();
-            int minP = -1;
-            int maxP = -1;
-            for (int i = 0; i < orderedPoints.Count; i++)
+            if (paramPoints.Count == 0) continue;
+
+            paramPoints.Sort((p1, p2) => p1.ParamValue.CompareTo(p2.ParamValue));
+            int maxPIdx = paramPoints.FindIndex(p => p.ParamValue >= value);
+            int minPIdx;
+
+            if (maxPIdx == -1) // slider value greater than all param point values
             {
-                if (value > orderedPoints[i].ParamValue) continue;
-
-                maxP = i;
-                minP = i;
-                if (i <= 0) break;
-
-                minP = i - 1;
-                break;
+                minPIdx = maxPIdx = paramPoints.Count - 1;
+            }
+            else if (maxPIdx == 0)
+            {
+                minPIdx = 0;
+            }
+            else
+            {
+                minPIdx = maxPIdx - 1;
             }
 
-            if (maxP == -1) break; // no parameterpoint found on curve
+            ParamPoint maxPoint = paramPoints[maxPIdx];
+            ParamPoint minPoint = paramPoints[minPIdx];
 
-            ParamPoint maxPoint = orderedPoints[maxP];
-
-            MeshManager.Instance.GetMeshObject(paramCurve.MeshID, out MeshController artMesh);
-            MeshRegistry.Instance.TryGet(paramCurve.MeshID, out MeshData meshData);
-
-            if (artMesh == null || meshData == null)
+            float t = 0f;
+            if (maxPIdx != minPIdx)
             {
-                Debug.LogError("artmesh or meshdata null in interpolate parameter");
-                continue;
+                float range = maxPoint.ParamValue - minPoint.ParamValue;
+                if (range > 1e-3f) { t = (value - minPoint.ParamValue) / range; }
             }
-
-            ParamPoint minPoint = orderedPoints[minP];
-
-            float t = maxP != minP ? // not left end of the slider
-                (value - minPoint.ParamValue) / (maxPoint.ParamValue - minPoint.ParamValue) : 0f;
 
             Vector3 interpPos = Vector3.Lerp(minPoint.transform.Position, maxPoint.transform.Position, t);
             Vector3 interpScale = Vector3.Lerp(minPoint.transform.Scale, maxPoint.transform.Scale, t);
             Quaternion interpRotation = Quaternion.Lerp(minPoint.transform.Rotation, maxPoint.transform.Rotation, t);
 
-            artMesh.MoveArtMesh(meshData.transform.Position + interpPos);
-            artMesh.ScaleArtMesh(meshData.transform.Scale + interpScale);
-            artMesh.RotateArtMesh(meshData.transform.Rotation * interpRotation);
+            // accumulate per mesh
+            if (!accumTransforms.TryGetValue(paramCurve.MeshID, out TransformData cur)) cur = new TransformData();
+            cur.Position += interpPos;
+            cur.Scale += interpScale;
+            cur.Rotation *= interpRotation;
+            accumTransforms[paramCurve.MeshID] = cur;
+        }
+    }
+
+    private void ApplyAccumulatedTransforms(Dictionary<Guid, TransformData> accum)
+    {
+        foreach (var kv in accum)
+        {
+            var meshId = kv.Key;
+            var delta = kv.Value;
+
+            MeshManager.Instance.GetMeshObject(meshId, out MeshController artMesh);
+            MeshRegistry.Instance.TryGet(meshId, out MeshData meshData);
+            if (artMesh == null || meshData == null)
+            {
+                Debug.LogError("artmesh or meshdata null in apply accumulated transforms");
+                continue;
+            }
+
+            artMesh.MoveArtMesh(meshData.transform.Position + delta.Position);
+            artMesh.ScaleArtMesh(meshData.transform.Scale + delta.Scale);
+            artMesh.RotateArtMesh(meshData.transform.Rotation * delta.Rotation);
+        }
+    }
+
+    public override void LoadState(SaveData saveData)
+    {
+        KeyFrameRegistry keyFrameRegistry = KeyFrameRegistry.Instance;
+        keyFrameRegistry.Clear();
+        if (saveData.KeyFrames == null) return;
+        foreach (var item in saveData.KeyFrames)
+        {
+            keyFrameRegistry.Register(item);
         }
     }
 }

@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 [Serializable]
 public class Parameter : EntityBase
 {
-    private float minValue;
-    private float maxValue;
-    private float defaultValue;
+    [SerializeField] private float minValue;
+    [SerializeField] private float maxValue;
+    [SerializeField] private float defaultValue;
     public string Name { get; set; }
     public float MinValue
     {
