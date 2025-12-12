@@ -10,7 +10,7 @@ public partial class TimelineSliderElement : VisualElement
     private float _sliderContainerWidth;
     private float _sliderWidth;
     public int m_maxFrames = 24; // TODO: custom max frame at runtime
-    public readonly int m_framePerSec = 12;
+    public readonly int m_framePerSec = 18; // TODO: custom FPS
 
     [UxmlAttribute]
     public int MaxFrames

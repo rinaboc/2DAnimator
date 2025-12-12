@@ -22,35 +22,41 @@ public class AnimationManager : ManagerBase<AnimationManager>
 
     private void AnimateTimeline(int currentFrame)
     {
-        List<Parameter> parameters = ParameterRegistry.Instance.GetAll().ToList();
+        var parameters = ParameterRegistry.Instance.GetAll();
 
         foreach (Parameter parameter in parameters)
         {
             List<KeyFrame> parameterKeys = KeyFrameRegistry.Instance.GetKeyFramesOfParam(parameter.ID);
             if (parameterKeys.Count < 2) continue;
 
-            KeyFrame minFrame = null, maxFrame = null;
+            parameterKeys.Sort((a, b) => a.Frame.CompareTo(b.Frame));
 
-            foreach (KeyFrame key in parameterKeys)
+            KeyFrame minFrame = parameterKeys.LastOrDefault(k => k.Frame <= currentFrame);
+            KeyFrame maxFrame = parameterKeys.FirstOrDefault(k => k.Frame >= currentFrame);
+
+            // current frame is outside the range of keyframes
+            if (minFrame == null) // Before the first keyframe
             {
-                if (currentFrame == key.Frame)
-                {
-                    minFrame = maxFrame = key;
-                    break;
-                }
-
-                if (currentFrame > key.Frame) { minFrame = key; continue; }
-                if (currentFrame < key.Frame) { maxFrame = key; break; }
+                minFrame = maxFrame;
+            }
+            else if (maxFrame == null) // After the last keyframe
+            {
+                maxFrame = minFrame;
             }
 
-            if (minFrame != null && maxFrame == null) maxFrame = minFrame;
-            else if (maxFrame != null && minFrame == null) minFrame = maxFrame;
+            float interpolatedValue;
+            if (minFrame.Frame == maxFrame.Frame)
+            {
+                interpolatedValue = minFrame.ParamValue;
+            }
+            else
+            {
+                float t = (float)(currentFrame - minFrame.Frame) / (maxFrame.Frame - minFrame.Frame);
+                interpolatedValue = Mathf.Lerp(minFrame.ParamValue, maxFrame.ParamValue, t);
+            }
 
-            float delta = minFrame == maxFrame ? 0f : (minFrame.ParamValue - maxFrame.ParamValue) / (minFrame.Frame - maxFrame.Frame);
-            float t = (currentFrame - minFrame.Frame) * delta + minFrame.ParamValue;
-
-            InterpolateParameter(t, parameter.ID);
-            UIEvents.RaiseParamInterpolated(parameter.ID, t);
+            InterpolateParameter(interpolatedValue, parameter.ID);
+            UIEvents.RaiseParamInterpolated(parameter.ID, interpolatedValue);
         }
     }
 
