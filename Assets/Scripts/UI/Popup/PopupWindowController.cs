@@ -7,12 +7,15 @@ public class PopupWindowController : BaseUIController
 {
     private Button createButton;
 
-    [SerializeField, CreateProperty]
-    private float m_minValue, m_maxValue, m_defaultValue;
-    [SerializeField, CreateProperty]
-    private string m_paramName;
-    [SerializeField, CreateProperty]
-    private string m_errorMessage = "";
+    [SerializeField, CreateProperty] private float m_minValue, m_maxValue, m_defaultValue;
+    [SerializeField, CreateProperty] private string m_paramName;
+    [SerializeField, CreateProperty] private string m_errorMessage = "";
+
+    enum PopupMode
+    {
+        Create, Edit
+    }
+    private PopupMode m_popupMode = PopupMode.Create;
 
     private Guid _editedParamID;
 
@@ -20,6 +23,7 @@ public class PopupWindowController : BaseUIController
     {
         UIEvents.EditParameterInfoEvent += EditParameter;
         createButton = ui.Q<Button>("CreateButton");
+        ui.Q<Button>("ExitButton").clicked += () => ShowPanel(false);
 
         ShowPanel(false);
 
@@ -28,22 +32,16 @@ public class PopupWindowController : BaseUIController
 
     void OnDisable()
     {
-        RemoveButtonListeners();
+        ShowPanel(false);
         UIEvents.EditParameterInfoEvent -= EditParameter;
-    }
-
-    private void RemoveButtonListeners()
-    {
-        createButton.clicked -= OnCreateButtonClicked;
-        createButton.clicked -= OnEditButtonClicked;
     }
 
     public void EditParameter(Guid paramID)
     {
         if (ParameterRegistry.Instance.TryGet(paramID, out Parameter parameter))
         {
+            m_popupMode = PopupMode.Edit;
             ShowPanel(true);
-            RemoveButtonListeners();
             _editedParamID = parameter.ID;
             m_minValue = parameter.MinValue;
             m_maxValue = parameter.MaxValue;
@@ -51,18 +49,14 @@ public class PopupWindowController : BaseUIController
             m_paramName = parameter.Name;
 
             createButton.text = "Save";
-            createButton.clicked += OnEditButtonClicked;
         }
     }
 
     public void CreateParameter()
     {
-        ShowPanel(true);
-        RemoveButtonListeners();
-
+        m_popupMode = PopupMode.Create;
         createButton.text = "Create";
-        createButton.clicked += OnCreateButtonClicked;
-        Debug.Log("Creating new parameter");
+        ShowPanel(true);
     }
 
     private void OnCreateButtonClicked()
@@ -116,5 +110,17 @@ public class PopupWindowController : BaseUIController
     private void HideErrorMessage()
     {
         ui.Q<Label>("ErrorMessage").visible = false;
+    }
+
+    protected override void RemoveListeners()
+    {
+        createButton.clicked -= OnCreateButtonClicked;
+        createButton.clicked -= OnEditButtonClicked;
+    }
+
+    protected override void AddListeners()
+    {
+        createButton.clicked += m_popupMode == PopupMode.Create ?
+            OnCreateButtonClicked : OnEditButtonClicked;
     }
 }

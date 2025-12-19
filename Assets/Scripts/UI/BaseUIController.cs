@@ -14,8 +14,19 @@ public abstract class BaseUIController : MonoBehaviour
 
     protected void ShowPanel(bool isVisible)
     {
-        if (isVisible) ui.RemoveFromClassList("hide");
-        else ui.AddToClassList("hide");
+        if (isVisible)
+        {
+            ui.RemoveFromClassList("hide");
+            AddListeners();
+        }
+        else
+        {
+            ui.AddToClassList("hide");
+            RemoveListeners();
+        }
 
     }
+
+    protected virtual void RemoveListeners() { }
+    protected virtual void AddListeners() { }
 }
