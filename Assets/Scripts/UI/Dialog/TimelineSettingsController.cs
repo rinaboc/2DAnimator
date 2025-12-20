@@ -20,6 +20,9 @@ public class TimelineSettingsController : DialogController<TimelineSettingsEleme
         });
         maxFramesField.RegisterCallback<FocusOutEvent>(evt =>
         {
+            if (m_maxFrames > 60) m_maxFrames = 60;
+            if (m_maxFrames < 2) m_maxFrames = 2;
+
             m_TimelineWidgetController.SetMaxFrames(m_maxFrames);
         });
 

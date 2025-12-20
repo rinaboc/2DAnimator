@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 [UxmlElement]
@@ -15,7 +13,7 @@ public partial class KeyframeLineElement : VisualElement
         AddToClassList("animation-cell-container");
     }
 
-    public KeyframeLineElement(int MaxFrames, List<VisualElement>[] frameBars, Parameter parameter) : this()
+    public KeyframeLineElement(int MaxFrames, List<List<VisualElement>> frameBars, Parameter parameter) : this()
     {
         ParamID = parameter.ID;
 

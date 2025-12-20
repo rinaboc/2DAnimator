@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -18,6 +19,8 @@ public partial class TimelineSliderElement : VisualElement
             if (value == m_maxFrames) return;
             m_maxFrames = value;
             Debug.Log("max frames changed" + value);
+            BuildFrameBars(m_maxFrames);
+            RecalculateSliderHandle();
         }
     }
     private int m_currentFrame = 1;
@@ -53,7 +56,7 @@ public partial class TimelineSliderElement : VisualElement
     ScrollView m_keyframeContainer;
     Dictionary<Guid, KeyframeLineElement> m_keyframeLineElements = new();
 
-    List<VisualElement>[] m_frameBars;
+    List<List<VisualElement>> m_frameBars;
 
 
     public TimelineSliderElement()
@@ -75,15 +78,48 @@ public partial class TimelineSliderElement : VisualElement
         topSection.Add(m_topSectionRight);
         Add(topSection);
 
-        m_frameBars = new List<VisualElement>[m_maxFrames];
-        for (int i = 0; i < m_maxFrames; i++)
-        {
-            m_frameBars[i] = new List<VisualElement>();
-        }
+        BuildFrameBars(m_maxFrames);
 
         CreateHeader();
         CreateSlider();
         CreateKeyframeContainers();
+    }
+
+    private void BuildFrameBars(int maxFrames)
+    {
+        m_frameBars ??= new List<List<VisualElement>>();
+
+        if (m_frameBars.Count >= maxFrames)
+        {
+            // go from backwards and set style display to flex until its hidden
+            for (int i = m_frameBars.Count - 1; i >= 0; i--)
+            {
+                if (m_frameBars[i][0].style.display == DisplayStyle.Flex)
+                    break;
+
+                foreach (var key in m_frameBars[i])
+                {
+                    key.style.display = DisplayStyle.Flex;
+                }
+            }
+        }
+
+        for (int i = m_frameBars.Count; i < maxFrames; i++)
+        {
+            m_frameBars.Add(new List<VisualElement>());
+        }
+
+        if (m_frameBars.Count > maxFrames)
+        {
+            // set display to hide in outside frames
+            for (int i = maxFrames; i < m_frameBars.Count; i++)
+            {
+                foreach (var key in m_frameBars[i])
+                {
+                    key.style.display = DisplayStyle.None;
+                }
+            }
+        }
     }
 
     int previousHighlightIdx = 0;

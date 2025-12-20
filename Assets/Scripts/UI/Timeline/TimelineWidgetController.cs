@@ -136,6 +136,7 @@ public class TimelineWidgetController : BaseUIController
     public void SetMaxFrames(int maxFrames)
     {
         m_TimelineSlider.MaxFrames = maxFrames;
+        SendParametersToTimeline();
     }
 
     public void SetFramePerSec(int framePerSec)
