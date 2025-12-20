@@ -14,6 +14,7 @@ public class TimelineWidgetController : BaseUIController
 
     private bool m_widgetOpen = false;
 
+    private int m_framePerSec = 18;
     private Button m_PlayButton;
     bool isPlaybackRunning = false;
 
@@ -127,8 +128,18 @@ public class TimelineWidgetController : BaseUIController
     {
         do
         {
-            m_TimelineSlider.CurrentFrame = Currentframe >= m_TimelineSlider.m_maxFrames ? 1 : Currentframe + 1;
-            yield return new WaitForSecondsRealtime(1f / m_TimelineSlider.m_framePerSec);
+            m_TimelineSlider.CurrentFrame = Currentframe >= m_TimelineSlider.MaxFrames ? 1 : Currentframe + 1;
+            yield return new WaitForSecondsRealtime(1f / m_framePerSec);
         } while (isPlaybackRunning);
+    }
+
+    public void SetMaxFrames(int maxFrames)
+    {
+        m_TimelineSlider.MaxFrames = maxFrames;
+    }
+
+    public void SetFramePerSec(int framePerSec)
+    {
+        m_framePerSec = framePerSec;
     }
 }

@@ -1,0 +1,4 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/Dialog/dialogStyleSheet.uss?fileID=7433441132597879392&amp;guid=385c23faa9426574fa1fcbb23ac64fa1&amp;type=3#dialogStyleSheet" />
+    <TimelineSettingsElement data-source-type="TimelineSettingsController, Assembly-CSharp" m_max-frames="24" m_frame-per-sec="18" />
+</ui:UXML>

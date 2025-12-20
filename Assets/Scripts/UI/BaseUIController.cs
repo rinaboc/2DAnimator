@@ -12,7 +12,7 @@ public abstract class BaseUIController : MonoBehaviour
         ui.dataSource = this;
     }
 
-    protected void ShowPanel(bool isVisible)
+    protected virtual void ShowPanel(bool isVisible)
     {
         if (isVisible)
         {

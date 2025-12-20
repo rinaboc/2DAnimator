@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -9,16 +8,16 @@ public partial class TimelineSliderElement : VisualElement
 {
     private float _sliderContainerWidth;
     private float _sliderWidth;
-    public int m_maxFrames = 24; // TODO: custom max frame at runtime
-    public readonly int m_framePerSec = 18; // TODO: custom FPS
+    private int m_maxFrames = 24;
 
-    [UxmlAttribute]
     public int MaxFrames
     {
         get => m_maxFrames;
         set
         {
+            if (value == m_maxFrames) return;
             m_maxFrames = value;
+            Debug.Log("max frames changed" + value);
         }
     }
     private int m_currentFrame = 1;
@@ -174,6 +173,15 @@ public partial class TimelineSliderElement : VisualElement
         }
     }
 
+    private void RecalculateSliderHandle()
+    {
+        _sliderContainerWidth = m_sliderContainer.resolvedStyle.width;
+        _sliderWidth = _sliderContainerWidth / MaxFrames;
+        m_sliderHandle.style.width = _sliderWidth;
+
+        UpdateKeyWidth();
+    }
+
     /// <summary>
     /// Create slider element and register input callbacks.
     /// </summary>
@@ -187,11 +195,7 @@ public partial class TimelineSliderElement : VisualElement
         m_sliderHandle.RegisterCallbackOnce<GeometryChangedEvent>(
             (evt) =>
             {
-                _sliderContainerWidth = m_sliderContainer.resolvedStyle.width;
-                _sliderWidth = _sliderContainerWidth / MaxFrames;
-                m_sliderHandle.style.width = _sliderWidth;
-
-                UpdateKeyWidth();
+                RecalculateSliderHandle();
             }
         );
 
