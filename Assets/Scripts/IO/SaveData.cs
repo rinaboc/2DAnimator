@@ -8,4 +8,5 @@ public class SaveData
     public ParamCurve[] ParamCurves { get; set; }
     public ParamPoint[] ParamPoints { get; set; }
     public KeyFrame[] KeyFrames { get; set; }
+    public AnimationSettings AnimationSetting { get; set; }
 }

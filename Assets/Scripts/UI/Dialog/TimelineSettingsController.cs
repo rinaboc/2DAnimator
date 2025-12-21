@@ -2,12 +2,23 @@ using Unity.Properties;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class TimelineSettingsController : DialogController<TimelineSettingsElement>
+public class TimelineSettingsController : DialogController<TimelineSettingsElement>, ILoadable
 {
     [SerializeField] TimelineWidgetController m_TimelineWidgetController;
 
     [SerializeField, CreateProperty] private int m_maxFrames;
     [SerializeField, CreateProperty] private int m_framePerSec;
+
+    public void LoadState(SaveData saveData)
+    {
+        m_maxFrames = GeneralSettings.Instance.MaxFrames;
+        m_framePerSec = GeneralSettings.Instance.FramePerSec;
+    }
+
+    public void RegisterLoadable()
+    {
+        SaveController.Register(this);
+    }
 
     void Start()
     {

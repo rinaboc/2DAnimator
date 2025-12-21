@@ -164,6 +164,9 @@ public class AnimationManager : ManagerBase<AnimationManager>
 
     public override void LoadState(SaveData saveData)
     {
+        GeneralSettings.Instance.MaxFrames = saveData.AnimationSetting.maxFrames;
+        GeneralSettings.Instance.FramePerSec = saveData.AnimationSetting.framePerSec;
+
         KeyFrameRegistry keyFrameRegistry = KeyFrameRegistry.Instance;
         keyFrameRegistry.Clear();
         if (saveData.KeyFrames == null) return;
