@@ -103,7 +103,22 @@ public class TimelineWidgetController : BaseUIController
     private void SendParametersToTimeline()
     {
         List<Parameter> parameters = ParameterRegistry.Instance.GetAll().ToList();
-        m_TimelineSlider.LoadParameters(parameters);
+        m_TimelineSlider.ClearKeyframeContainer();
+
+        foreach (Parameter parameter in parameters)
+        {
+            List<KeyFrame> keyFrames = KeyFrameRegistry.Instance.GetKeyFramesOfParam(parameter.ID);
+            if (!AnimationManager.Instance.GetCurrentCurveSliderValue(parameter.ID, out float paramValue))
+            {
+                paramValue = parameter.DefaultValue;
+            }
+
+            m_TimelineSlider.CreateKeyFrameLine(parameter, paramValue, keyFrames);
+        }
+
+        m_TimelineSlider.UpdateKeyWidth();
+
+        // m_TimelineSlider.LoadParameters(parameters);
     }
 
     public int Currentframe => m_TimelineSlider.CurrentFrame;
@@ -129,7 +144,7 @@ public class TimelineWidgetController : BaseUIController
     {
         do
         {
-            m_TimelineSlider.CurrentFrame = Currentframe >= m_TimelineSlider.MaxFrames ? 1 : Currentframe + 1;
+            m_TimelineSlider.CurrentFrame = Currentframe >= GeneralSettings.Instance.MaxFrames ? 1 : Currentframe + 1;
             yield return new WaitForSecondsRealtime(1f / GeneralSettings.Instance.FramePerSec);
         } while (isPlaybackRunning);
     }
@@ -137,7 +152,7 @@ public class TimelineWidgetController : BaseUIController
     public void SetMaxFrames(int maxFrames)
     {
         GeneralSettings.Instance.MaxFrames = maxFrames;
-        m_TimelineSlider.MaxFrames = maxFrames;
+        m_TimelineSlider.Redraw();
         SendParametersToTimeline();
     }
 

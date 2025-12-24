@@ -9,20 +9,8 @@ public partial class TimelineSliderElement : VisualElement
 {
     private float _sliderContainerWidth;
     private float _sliderWidth;
-    private int m_maxFrames = 24;
+    private int m_maxFrames = GeneralSettings.Instance.MaxFrames;
 
-    public int MaxFrames
-    {
-        get => m_maxFrames;
-        set
-        {
-            if (value == m_maxFrames) return;
-            m_maxFrames = value;
-            Debug.Log("max frames changed" + value);
-            BuildFrameBars(m_maxFrames);
-            RecalculateSliderHandle();
-        }
-    }
     private int m_currentFrame = 1;
     public int CurrentFrame
     {
@@ -148,30 +136,24 @@ public partial class TimelineSliderElement : VisualElement
         this.Add(m_keyframeContainer);
     }
 
-    public void LoadParameters(List<Parameter> parameters)
+    public void ClearKeyframeContainer()
     {
         m_keyframeContainer.Clear();
         m_keyframeLineElements.Clear();
         ClearFrameBarLists();
+    }
 
-        foreach (Parameter parameter in parameters)
+    public void CreateKeyFrameLine(Parameter parameter, float paramSliderValue, List<KeyFrame> keyFrames = null)
+    {
+        KeyframeLineElement keyframeLine = new(m_maxFrames, m_frameBars, parameter);
+        keyframeLine.SetSliderValue(paramSliderValue);
+        m_keyframeContainer.Add(keyframeLine);
+        m_keyframeLineElements.Add(parameter.ID, keyframeLine);
+
+        if (keyFrames != null) foreach (var key in keyFrames)
         {
-            KeyframeLineElement keyframeLine = new(MaxFrames, m_frameBars, parameter);
-            if (AnimationManager.Instance.GetCurrentCurveSliderValue(parameter.ID, out float paramValue))
-            {
-                keyframeLine.SetSliderValue(paramValue);
-            }
-            m_keyframeContainer.Add(keyframeLine);
-            m_keyframeLineElements.Add(parameter.ID, keyframeLine);
-
-            List<KeyFrame> keyFrames = KeyFrameRegistry.Instance.GetKeyFramesOfParam(parameter.ID);
-            foreach (var key in keyFrames)
-            {
-                keyframeLine.InsertKeyframeAt(key.Frame, key);
-            }
+            keyframeLine.InsertKeyframeAt(key.Frame, key);
         }
-
-        UpdateKeyWidth();
     }
 
     public void CreateKeyframeAtCurrentFrame(Guid paramID, KeyFrame key)
@@ -190,7 +172,7 @@ public partial class TimelineSliderElement : VisualElement
         }
     }
 
-    private void UpdateKeyWidth()
+    public void UpdateKeyWidth()
     {
         foreach (List<VisualElement> bars in m_frameBars)
         {
@@ -212,7 +194,7 @@ public partial class TimelineSliderElement : VisualElement
     private void RecalculateSliderHandle()
     {
         _sliderContainerWidth = m_sliderContainer.resolvedStyle.width;
-        _sliderWidth = _sliderContainerWidth / MaxFrames;
+        _sliderWidth = _sliderContainerWidth / m_maxFrames;
         m_sliderHandle.style.width = _sliderWidth;
 
         UpdateKeyWidth();
@@ -273,7 +255,7 @@ public partial class TimelineSliderElement : VisualElement
     {
         if (_sliderContainerWidth <= 0) return;
 
-        int newFrame = (int)Math.Round(x / _sliderContainerWidth * (MaxFrames + 1));
+        int newFrame = (int)Math.Round(x / _sliderContainerWidth * (m_maxFrames + 1));
         if (CurrentFrame != newFrame)
         {
             CurrentFrame = newFrame;
@@ -322,9 +304,9 @@ public partial class TimelineSliderElement : VisualElement
             m_currentFrameField.value = 0;
             return;
         }
-        else if (m_currentFrameField.value > MaxFrames)
+        else if (m_currentFrameField.value > m_maxFrames)
         {
-            m_currentFrameField.value = MaxFrames;
+            m_currentFrameField.value = m_maxFrames;
             return;
         }
 
@@ -334,5 +316,17 @@ public partial class TimelineSliderElement : VisualElement
     private void UpdateFrameField()
     {
         m_currentFrameField.value = CurrentFrame;
+    }
+
+    public void Redraw()
+    {
+        int value = GeneralSettings.Instance.MaxFrames;
+        if (value == m_maxFrames) return;
+
+        m_maxFrames = value;
+        Debug.Log("max frames changed" + value);
+        BuildFrameBars(m_maxFrames);
+        RecalculateSliderHandle();
+        UpdateKeyWidth();
     }
 }
