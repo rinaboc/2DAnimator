@@ -1,0 +1,31 @@
+namespace Assets.Scripts.Utility
+{
+    public sealed class AppModelContext : IModelContext
+    {
+        public IRegistry<MeshData, MeshRegistry> Meshes { get; }
+        public IRegistry<Parameter, ParameterRegistry> Parameters { get; }
+        public IParamCurveRegistry ParamCurves { get; }
+        public IRegistry<ParamPoint, ParamPointRegistry> ParamPoints { get; }
+        public IKeyFrameRegistry KeyFrames { get; }
+
+        public AppModelContext(
+            IRegistry<MeshData, MeshRegistry> meshes,
+            IRegistry<Parameter, ParameterRegistry> parameters,
+            IParamCurveRegistry paramCurves,
+            IRegistry<ParamPoint, ParamPointRegistry> paramPoints,
+            IKeyFrameRegistry keyFrames
+        )
+        {
+            Meshes = meshes;
+            Parameters = parameters;
+            ParamCurves = paramCurves;
+            ParamPoints = paramPoints;
+            KeyFrames = keyFrames;
+        }
+
+        public void Save()
+        {
+
+        }
+    }
+}

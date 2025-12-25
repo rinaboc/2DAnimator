@@ -3,8 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+public interface IParamCurveRegistry : IRegistry<ParamCurve, ParamCurveRegistry>
+{
+    List<Guid> GetAssignedParamIDsOfMesh(Guid meshID);
+    List<ParamCurve> GetParamCurvesOfMesh(Guid meshID);
+}
+
 [CreateAssetMenu(fileName = "ParamCurveRegistry", menuName = "Global/ParamCurveRegistry")]
-public class ParamCurveRegistry : RegistryBase<ParamCurve, ParamCurveRegistry>
+public class ParamCurveRegistry : RegistryBase<ParamCurve, ParamCurveRegistry>, IParamCurveRegistry
 {
     public List<Guid> GetAssignedParamIDsOfMesh(Guid meshID)
     {

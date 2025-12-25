@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Assets.Scripts.Utility
 {
@@ -8,17 +10,33 @@ namespace Assets.Scripts.Utility
         public event Action<TState> StateChanged;
 
         private readonly IReducer<TState> _reducer;
+        private readonly IReadOnlyList<ICommandHandler> _handlers;
+        private readonly IModelContext _context;
 
-        public Store(TState state, IReducer<TState> reducer)
+        public Store(TState state, IReducer<TState> reducer, IEnumerable<ICommandHandler> handlers, IModelContext context)
         {
             State = state;
             _reducer = reducer;
+            _handlers = handlers.ToList();
+            _context = context;
         }
 
         public void Dispatch(IIntent intent)
         {
-            State = _reducer.Reduce(State, intent);
-            StateChanged?.Invoke(State);
+            var newState = _reducer.Reduce(State, intent);
+
+            if (!Equals(State, newState))
+            {
+                State = newState;
+                StateChanged?.Invoke(State);
+            }
+
+            foreach (var handler in _handlers)
+            {
+                if (handler.CanHandle(intent))
+                    handler.Execute(intent, State, _context);
+            }
+
         }
     }
 }
