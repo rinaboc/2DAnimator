@@ -26,6 +26,7 @@ public class MovementHandle : DraggableHandle
             offsetLocal = ParentTransform.localPosition - localClickPosition;
 
             dragging = true;
+            ParentTransform.gameObject.GetComponent<MeshController>().SendResetInterpolationIntent();
         }
     }
 

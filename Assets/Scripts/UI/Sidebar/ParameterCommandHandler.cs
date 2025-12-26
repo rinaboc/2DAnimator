@@ -1,0 +1,92 @@
+using System;
+using System.Collections.Generic;
+using Assets.Scripts.Utility;
+
+public class ParameterCommandHandler : ICommandHandler
+{
+    public bool CanHandle(IIntent intent)
+    {
+        Type intentType = intent.GetType();
+
+        return intentType == typeof(SelectParameterIntent) ||
+            intentType == typeof(CreateParameterIntent) ||
+            intentType == typeof(CreateParamPointsIntent);
+    }
+
+    public void Execute(IIntent intent, object state, IModelContext context)
+    {
+        switch (intent)
+        {
+            case SelectParameterIntent select:
+                ExecuteSelectParameter(select, state, context);
+                break;
+            case CreateParameterIntent create:
+                ExecuteCreateParameter(create, state, context);
+                break;
+            case CreateParamPointsIntent create:
+                ExecuteCreateParamPoints(create, state, context);
+                break;
+        }
+    }
+
+    private void ExecuteCreateParamPoints(CreateParamPointsIntent create, object state, IModelContext context)
+    {
+        if (!context.Parameters.TryGet(context.GeneralSettings.SelectedParamID, out Parameter parameter)) return;
+
+        ParamCurve paramCurve = new(create.MeshID, parameter.ID, autoRegister: false);
+        ParamPoint minPoint = new(parameter.MinValue, autoRegister: false);
+        ParamPoint maxPoint = new(parameter.MaxValue, autoRegister: false);
+
+        context.ParamCurves.Register(paramCurve);
+        context.ParamPoints.Register(minPoint);
+        context.ParamPoints.Register(maxPoint);
+
+        paramCurve.ParamPoints.Add(minPoint.ID);
+        paramCurve.ParamPoints.Add(maxPoint.ID);
+
+        parameter.ParamCurves.Add(paramCurve.ID);
+
+        List<float> paramValues = new()
+        {
+            minPoint.ParamValue,
+            maxPoint.ParamValue
+        };
+
+        if (Math.Abs(parameter.MinValue - parameter.DefaultValue) > 0.1f
+        && Math.Abs(parameter.MaxValue - parameter.DefaultValue) > 0.1f)
+        {
+            ParamPoint midPoint = new(parameter.DefaultValue, autoRegister: false);
+
+            context.ParamPoints.Register(midPoint);
+
+            paramCurve.ParamPoints.Add(midPoint.ID);
+            paramValues.Add(midPoint.ParamValue);
+        }
+
+        ParameterManager.Instance.GetParamSlider(parameter.ID).CreateParamPointHandles(paramValues);
+        ParameterManager.Instance.HighlightCreatedCurves(create.MeshID);
+    }
+
+    private void ExecuteCreateParameter(CreateParameterIntent create, object state, IModelContext context)
+    {
+        Parameter parameter = new(create.Min, create.Max, create.Default, create.Name, autoRegister: false)
+        {
+            ID = create.ParamID
+        };
+        context.Parameters.Register(parameter);
+        ParameterManager.Instance.CreateParameterSlider(parameter);
+    }
+
+    private void ExecuteSelectParameter(SelectParameterIntent select, object state, IModelContext context)
+    {
+        if (context.Parameters.TryGet(select.ParamID, out _))
+        {
+            context.GeneralSettings.SelectedParamID = select.ParamID;
+        }
+        else
+        {
+            context.GeneralSettings.SelectedParamID = Guid.Empty;
+        }
+
+    }
+}

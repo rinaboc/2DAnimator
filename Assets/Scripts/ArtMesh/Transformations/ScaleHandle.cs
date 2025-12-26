@@ -18,6 +18,8 @@ public class ScaleHandle : DraggableHandle
             dragging = true;
 
             originalScale = ParentTransform.gameObject.GetComponent<MeshController>().ArtMeshObject.transform.localScale;
+            ParentTransform.gameObject.GetComponent<MeshController>().SendResetInterpolationIntent();
+
         }
     }
 

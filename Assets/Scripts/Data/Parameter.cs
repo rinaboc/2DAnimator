@@ -39,7 +39,7 @@ public class Parameter : EntityBase
 
     public readonly List<Guid> ParamCurves;
 
-    public Parameter(float min, float max, float defaultValue, string name = "parameter") : base()
+    public Parameter(float min, float max, float defaultValue, string name = "parameter", bool autoRegister = true) : base(autoRegister)
     {
         MinValue = min;
         MaxValue = max;

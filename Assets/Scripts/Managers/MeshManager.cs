@@ -1,14 +1,33 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.ArtMesh;
+using Assets.Scripts.Utility;
 using UnityEngine;
 
 public class MeshManager : ManagerBase<MeshManager>
 {
     [SerializeField] private Dictionary<Guid, MeshController> _meshControllers = new();
+    private Dictionary<Guid, Store<MeshState>> _meshStores = new();
+    private MeshReducer _reducer = new();
+
+    [SerializeField] private AppInitializer _appInitializer;
+    private IModelContext _context;
+    private ICommandHandler _commandHandler = new MeshCommandHandler();
+
 
     [Header("Art Mesh creation")]
     [SerializeField] private GameObject ArtObjectPrefab;
     [SerializeField] private GameObject ViewportScale;
+
+    override protected void Awake()
+    {
+        base.Awake();
+    }
+
+    void Start()
+    {
+        _context = _appInitializer.Context;
+    }
 
     void OnEnable()
     {
@@ -40,8 +59,31 @@ public class MeshManager : ManagerBase<MeshManager>
         // create ArtObject inside viewport and assign the image to its sprite
         MeshController meshController = SetupMeshController(texture, newMesh);
 
+        // TODO: move this in the future to an intent
+        var meshState = new MeshState(newMesh.ID, newMesh.transform, new TransformData());
+        var store = new Store<MeshState>(meshState, _reducer, new ICommandHandler[] { _commandHandler }, _context);
+
+        var viewModel = meshController.gameObject.AddComponent<MeshViewModel>();
+        viewModel.Bind(store);
+
+        viewModel.Bind(meshController); // Binds MeshController as a view
+        viewModel.Bind(meshController.GetBoundingBox()); // Binds BoundingBox as a view
+
+        _meshStores[newMesh.ID] = store;
         RegisterArtMeshObj(newMesh.ID, meshController);
         return newMesh;
+    }
+
+    public void DispatchToMeshStore(Guid meshId, IIntent intent)
+    {
+        if (_meshStores.TryGetValue(meshId, out Store<MeshState> store))
+        {
+            store.Dispatch(intent);
+        }
+        else
+        {
+            Debug.LogError($"No store found for mesh {meshId}");
+        }
     }
 
     private MeshController SetupMeshController(Texture2D texture, MeshData newMesh)

@@ -13,6 +13,7 @@ public class RotateHandle : DraggableHandle
             startingVec = ClickWorldPosition - ParentTransform.position;
             defaultRotation = ParentTransform.localRotation;
             dragging = true;
+            ParentTransform.gameObject.GetComponent<MeshController>().SendResetInterpolationIntent();
         }
     }
 

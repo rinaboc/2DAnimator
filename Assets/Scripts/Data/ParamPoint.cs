@@ -6,7 +6,7 @@ public class ParamPoint : EntityBase
     public float ParamValue;
     public TransformData transform;
 
-    public ParamPoint(float paramValue) : base()
+    public ParamPoint(float paramValue, bool autoRegister = true) : base(autoRegister)
     {
         this.ParamValue = paramValue;
         transform = new();

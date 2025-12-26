@@ -1,10 +1,17 @@
+using System;
+using Assets.Scripts.ArtMesh;
+using Assets.Scripts.Utility;
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
-public class BoundingBox : MonoBehaviour
+public class BoundingBox : MonoBehaviour, IView<MeshState>
 {
     [SerializeField] private GameObject Center;
     [SerializeField] private GameObject Corners;
+
+    public BoxCollider boxCollider;
+    private Action<IIntent> EmitIntent;
+
 
     private void Awake()
     {
@@ -79,5 +86,16 @@ public class BoundingBox : MonoBehaviour
         GetComponentInChildren<LineRenderer>().enabled = isSelected;
         Center.SetActive(isSelected);
         Corners.SetActive(isSelected);
+    }
+
+    public void Render(MeshState state)
+    {
+        Vector3 combinedScale = state.MeshTransform.Scale + state.AnimationTransform.Scale;
+        CreateBoundingBox(boxCollider.center, Vector3.Scale(boxCollider.size, combinedScale));
+    }
+
+    public void SetIntentEmitter(Action<IIntent> intentEmitter)
+    {
+        EmitIntent = intentEmitter;
     }
 }

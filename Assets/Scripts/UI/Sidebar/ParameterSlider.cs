@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Utility;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-public class ParameterSlider : Clickable, ISelectable
+public class ParameterSlider : Clickable, ISelectable, IView<ParameterStates>
 {
     private Guid paramID;
 
@@ -32,6 +33,8 @@ public class ParameterSlider : Clickable, ISelectable
     private float sliderValue;
     private string paramName;
 
+    private Action<IIntent> EmitIntent;
+
     void OnEnable()
     {
         clickAction = InputSystem.actions.FindAction("Click");
@@ -46,7 +49,7 @@ public class ParameterSlider : Clickable, ISelectable
                 SetValue(input);
         });
 
-        UIEvents.ParameterSelectEvent += OnSelect;
+        // UIEvents.ParameterSelectEvent += OnSelect;
     }
 
     private void OnDestroy()
@@ -54,7 +57,7 @@ public class ParameterSlider : Clickable, ISelectable
         DoubleClickAction.performed -= OnDoubleClick;
         clickAction.performed -= OnClick;
 
-        UIEvents.ParameterSelectEvent -= OnSelect;
+        // UIEvents.ParameterSelectEvent -= OnSelect;
     }
 
     private void OnDoubleClick(InputAction.CallbackContext context)
@@ -80,7 +83,9 @@ public class ParameterSlider : Clickable, ISelectable
     {
         if (IsInsideCollider())
         {
-            ParameterManager.Instance.SelectParameter(paramID);
+            // ParameterManager.Instance.SelectParameter(paramID);
+            Debug.Log("clicked");
+            EmitIntent?.Invoke(new SelectParameterIntent(paramID));
         }
     }
 
@@ -134,7 +139,8 @@ public class ParameterSlider : Clickable, ISelectable
     {
         sliderValue = slider.value;
         ParameterValueField.text = sliderValue.ToString("F2");
-        AnimationManager.Instance.InterpolateParameter(sliderValue, paramID);
+        // AnimationManager.Instance.InterpolateParameter(sliderValue, paramID);
+        EmitIntent?.Invoke(new InterpolateParameterIntent(paramID, sliderValue));
     }
 
     public void SetValue(float value)
@@ -165,5 +171,15 @@ public class ParameterSlider : Clickable, ISelectable
     public void OnDeselect()
     {
         SetSelected(false);
+    }
+
+    public void Render(ParameterStates state)
+    {
+        SetSelected(state.Parameters[paramID].IsSelected);
+    }
+
+    public void SetIntentEmitter(Action<IIntent> intentEmitter)
+    {
+        this.EmitIntent = intentEmitter;
     }
 }

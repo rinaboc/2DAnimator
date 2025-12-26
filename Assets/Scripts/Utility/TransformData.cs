@@ -32,5 +32,16 @@ public class TransformData
         Scale = Vector3.zero;
     }
 
+    public static TransformData operator +(TransformData a, TransformData b)
+    {
+        TransformData result = new()
+        {
+            Position = a.Position + b.Position,
+            Rotation = a.Rotation * b.Rotation,
+            Scale = a.Scale + b.Scale
+        };
+        return result;
+    }
+
     public override string ToString() => $"position {Position}, rotation {Rotation}, scale {Scale}";
 }

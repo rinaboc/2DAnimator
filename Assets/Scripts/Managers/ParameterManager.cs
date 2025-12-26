@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Utility;
 using UnityEngine;
 
 public class ParameterManager : ManagerBase<ParameterManager>
@@ -9,8 +10,19 @@ public class ParameterManager : ManagerBase<ParameterManager>
     [SerializeField] private Transform ParamWidgetContent;
 
     private readonly Dictionary<Guid, GameObject> _paramSliders = new();
+    private ParameterReducer _reducer = new();
+    // private Dictionary<Guid, Store<ParameterStates>> _paramStores = new();
+    private Store<ParameterStates> _store;
+    private ParameterStates _state;
+    private ParametersViewModel _viewModel;
 
-    private ParameterSlider GetParamSlider(Guid id) => _paramSliders[id].GetComponent<ParameterSlider>();
+
+    [SerializeField] private AppInitializer _appInitializer;
+    private IModelContext _context;
+    private ICommandHandler _commandHandler;
+
+
+    public ParameterSlider GetParamSlider(Guid id) => _paramSliders[id].GetComponent<ParameterSlider>();
 
     private bool _isParamSelected = false;
     private Guid _selectedParamID;
@@ -25,6 +37,16 @@ public class ParameterManager : ManagerBase<ParameterManager>
     protected override void Awake()
     {
         base.Awake();
+        _context = _appInitializer.Context;
+        _commandHandler = new ParameterCommandHandler();
+        _state = new ParameterStates()
+        {
+            Parameters = new Dictionary<Guid, ParameterStates.ParameterState>()
+        };
+        _store = new Store<ParameterStates>(_state, _reducer, new ICommandHandler[] { _commandHandler }, _context);
+        _viewModel = gameObject.AddComponent<ParametersViewModel>();
+        _viewModel.Bind(_store);
+
         CreateDebugParam();
     }
 
@@ -56,11 +78,15 @@ public class ParameterManager : ManagerBase<ParameterManager>
     public void CreatePointsForCurrentMesh()
     {
         MeshController selectedArtMesh = LayerManager.Instance.SelectedArtMesh;
-        if (_isParamSelected && selectedArtMesh != null)
-        {
-            CreateParamPoints(SelectedParamID, selectedArtMesh.ID);
-            HighlightCreatedCurves(selectedArtMesh.ID);
-        }
+        if (selectedArtMesh == null) return;
+
+        _store.Dispatch(new CreateParamPointsIntent(selectedArtMesh.ID));
+
+        // if (_isParamSelected && selectedArtMesh != null)
+        // {
+        //     CreateParamPoints(SelectedParamID, selectedArtMesh.ID);
+        //     HighlightCreatedCurves(selectedArtMesh.ID);
+        // }
     }
 
     /// <summary>
@@ -82,11 +108,12 @@ public class ParameterManager : ManagerBase<ParameterManager>
 
     public void CreateParameter(float min, float max, float defaultValue, string name = "parameter")
     {
-        Parameter parameter = new(min, max, defaultValue, name);
-        CreateParameterSlider(parameter);
+        // Parameter parameter = new(min, max, defaultValue, name);
+        _store.Dispatch(new CreateParameterIntent(Guid.NewGuid(), min, max, defaultValue, name));
+        // CreateParameterSlider(parameter);
     }
 
-    private void CreateParameterSlider(Parameter parameter)
+    public void CreateParameterSlider(Parameter parameter)
     {
         GameObject paramSlider = Instantiate(ParamSliderPrefab, ParamWidgetContent);
         ParameterSlider parameterSlider = paramSlider.GetComponent<ParameterSlider>();
@@ -94,6 +121,9 @@ public class ParameterManager : ManagerBase<ParameterManager>
         parameterSlider.UpdateSlider(parameter);
 
         _paramSliders.Add(parameter.ID, paramSlider);
+
+        _viewModel.Bind(parameterSlider);
+
     }
 
     private void DeleteParameterSlider(Guid id)
@@ -201,64 +231,9 @@ public class ParameterManager : ManagerBase<ParameterManager>
         }
     }
 
-    public void UpdateAnimationData(object data, TransformType transformType, Guid meshID)
+    public void DispatchToParameterStore(Guid paramID, IIntent intent)
     {
-        if (!_isParamSelected) return;
-
-        ParameterRegistry parameterRegistry = ParameterRegistry.Instance;
-        ParamPointRegistry paramPointRegistry = ParamPointRegistry.Instance;
-
-        parameterRegistry.TryGet(SelectedParamID, out Parameter currentParam);
-        List<ParamCurve> currentParamCurves = ParamCurveRegistry.Instance.GetEntries(currentParam.ParamCurves);
-
-        float sliderValue = GetParamSlider(currentParam.ID).GetValue();
-        for (int i = 0; i < currentParamCurves.Count; i++)
-        {
-            ParamCurve paramCurve = currentParamCurves[i];
-
-            if (paramCurve.MeshID != meshID) // filter by mesh id
-                continue;
-
-            List<ParamPoint> paramPoints = paramPointRegistry.GetEntries(paramCurve.ParamPoints);
-
-            bool isPointUpdated = false;
-            float[] distFromPointValues = new float[paramPoints.Count];
-            for (int j = 0; j < paramPoints.Count; j++)
-            {
-                ParamPoint point = paramPoints[j];
-                distFromPointValues[j] = point.Dist(sliderValue);
-
-                if (distFromPointValues[j] > 0.01f)
-                {
-                    continue;
-                }
-
-                isPointUpdated = true;
-                switch (transformType)
-                {
-                    case TransformType.POSITION:
-                        point.transform.Position = (Vector3)data;
-                        break;
-                    case TransformType.ROTATION:
-                        point.transform.Rotation = (Quaternion)data;
-                        break;
-                    case TransformType.SCALE:
-                        point.transform.Scale = (Vector3)data;
-                        break;
-                }
-
-                Debug.Log($"updated point at {sliderValue}: " + point);
-                break;
-            }
-            if (!isPointUpdated)
-            {
-                Debug.Log("no point was updated");
-                int minIndex = Array.IndexOf(distFromPointValues, distFromPointValues.Min());
-                GetParamSlider(paramCurve.ParamID).SetValue(paramPoints[minIndex].ParamValue);
-                AnimationManager.Instance.InterpolateParameter(paramPoints[minIndex].ParamValue, paramCurve.ParamID);
-            }
-        }
-
+        _store.Dispatch(intent);
     }
 
     public override void LoadState(SaveData saveData)

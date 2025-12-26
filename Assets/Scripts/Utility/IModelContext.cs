@@ -1,3 +1,5 @@
+using System;
+
 namespace Assets.Scripts.Utility
 {
     public interface IModelContext
@@ -7,6 +9,7 @@ namespace Assets.Scripts.Utility
         IParamCurveRegistry ParamCurves { get; }
         IRegistry<ParamPoint, ParamPointRegistry> ParamPoints { get; }
         IKeyFrameRegistry KeyFrames { get; }
+        IGeneralSettings GeneralSettings { get; }
         void Save();
     }
 }

@@ -1,3 +1,5 @@
+using System;
+
 namespace Assets.Scripts.Utility
 {
     public sealed class AppModelContext : IModelContext
@@ -8,12 +10,15 @@ namespace Assets.Scripts.Utility
         public IRegistry<ParamPoint, ParamPointRegistry> ParamPoints { get; }
         public IKeyFrameRegistry KeyFrames { get; }
 
+        public IGeneralSettings GeneralSettings { get; }
+
         public AppModelContext(
             IRegistry<MeshData, MeshRegistry> meshes,
             IRegistry<Parameter, ParameterRegistry> parameters,
             IParamCurveRegistry paramCurves,
             IRegistry<ParamPoint, ParamPointRegistry> paramPoints,
-            IKeyFrameRegistry keyFrames
+            IKeyFrameRegistry keyFrames,
+            IGeneralSettings generalSettings
         )
         {
             Meshes = meshes;
@@ -21,6 +26,7 @@ namespace Assets.Scripts.Utility
             ParamCurves = paramCurves;
             ParamPoints = paramPoints;
             KeyFrames = keyFrames;
+            GeneralSettings = generalSettings;
         }
 
         public void Save()

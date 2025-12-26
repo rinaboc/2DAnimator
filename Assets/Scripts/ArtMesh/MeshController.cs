@@ -1,12 +1,16 @@
 using System;
+using Assets.Scripts.ArtMesh;
+using Assets.Scripts.Utility;
 using UnityEngine;
 
-public class MeshController : MonoBehaviour, ISelectable
+public class MeshController : MonoBehaviour, ISelectable, IView<MeshState>
 {
     public GameObject ArtMeshObject { get; private set; }
     [SerializeField] private Material ArtMeshMaterial;
     [SerializeField] private BoundingBox BoundingBox;
     public Guid ID { get; private set; }
+
+    private Action<IIntent> EmitIntent;
 
     private void Awake()
     {
@@ -96,6 +100,7 @@ public class MeshController : MonoBehaviour, ISelectable
         ArtMeshObject = MeshBuilder.Build(BoundingBox.transform, ArtMeshMaterial, texture);
 
         BoxCollider boxCollider = ArtMeshObject.GetComponent<BoxCollider>();
+        BoundingBox.boxCollider = boxCollider;
         BoundingBox.CreateBoundingBox(boxCollider.center, boxCollider.size);
 
         return this;
@@ -125,7 +130,6 @@ public class MeshController : MonoBehaviour, ISelectable
     public void ScaleArtMesh(Vector3 scale)
     {
         ArtMeshObject.transform.localScale = scale;
-        UpdateBoundingBox();
     }
 
     public void RotateArtMesh(Quaternion rotation)
@@ -140,18 +144,22 @@ public class MeshController : MonoBehaviour, ISelectable
 
     public void UpdateTransform(object value, TransformType type)
     {
+        TransformData transform = new();
+
         switch (type)
         {
             case TransformType.POSITION:
-                MoveArtMesh((Vector3)value);
+                transform.Position = (Vector3)value;
                 break;
             case TransformType.ROTATION:
-                RotateArtMesh((Quaternion)value);
+                transform.Rotation = (Quaternion)value;
                 break;
             case TransformType.SCALE:
-                ScaleArtMesh((Vector3)value);
+                transform.Scale = (Vector3)value;
                 break;
         }
+
+        EmitIntent(new UpdateTransformIntent(transform, type));
     }
 
     public void OnDeselect()
@@ -177,40 +185,31 @@ public class MeshController : MonoBehaviour, ISelectable
     /// <param name="value">transformation's value</param>
     public void SaveTransform(TransformType type)
     {
-        MeshRegistry.Instance.TryGet(ID, out MeshData meshData);
-
-        bool areParametersAssigned = ParamCurveRegistry.Instance.GetAssignedParamIDsOfMesh(meshData.ID).Count > 0;
-
-        object updatedAnimationData = null;
-        switch (type)
-        {
-            case TransformType.POSITION:
-                if (areParametersAssigned)
-                    updatedAnimationData = this.transform.localPosition - meshData.transform.Position;
-                else
-                    meshData.transform.Position = this.transform.localPosition;
-                break;
-            case TransformType.ROTATION:
-                if (areParametersAssigned)
-                    updatedAnimationData = Quaternion.Inverse(meshData.transform.Rotation) * this.transform.localRotation;
-                else
-                    meshData.transform.Rotation = this.transform.localRotation;
-                break;
-            case TransformType.SCALE:
-                if (areParametersAssigned)
-                    updatedAnimationData = ArtMeshObject.transform.localScale - meshData.transform.Scale;
-                else
-                    meshData.transform.Scale = ArtMeshObject.transform.localScale;
-                break;
-        }
-
-        if (updatedAnimationData != null)
-        {
-            ParameterManager.Instance.UpdateAnimationData(updatedAnimationData, type, meshData.ID);
-        }
-        else
-            Debug.Log("updated animation data is null");
+        EmitIntent(new SaveTransformIntent(type));
     }
 
+    public void Render(MeshState state)
+    {
+        TransformData transform = state.MeshTransform + state.AnimationTransform;
+        if (state.IsInterpolated)
+        {
+            transform = state.InterpolatedTransform;
+        }
 
+        MoveArtMesh(transform.Position);
+        RotateArtMesh(transform.Rotation);
+        ScaleArtMesh(transform.Scale);
+    }
+
+    public void SetIntentEmitter(Action<IIntent> intentEmitter)
+    {
+        EmitIntent = intentEmitter;
+    }
+
+    public BoundingBox GetBoundingBox() => BoundingBox;
+
+    public void SendResetInterpolationIntent()
+    {
+        EmitIntent?.Invoke(new ResetInterpolationIntent(ID));
+    }
 }
