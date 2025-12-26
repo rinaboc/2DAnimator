@@ -10,6 +10,7 @@ public record ResetInterpolationIntent(Guid MeshID) : IIntent;
 public record SelectParameterIntent(Guid ParamID) : IIntent;
 public record DeselectParameterIntent() : IIntent;
 public record CreateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
+public record DeleteSelectedParameterIntent() : IIntent;
 public record CreateParamPointsIntent(Guid MeshID) : IIntent;
 
 

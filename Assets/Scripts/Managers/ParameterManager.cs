@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Assets.Scripts.Utility;
 using UnityEngine;
 
@@ -11,7 +10,6 @@ public class ParameterManager : ManagerBase<ParameterManager>
 
     private readonly Dictionary<Guid, GameObject> _paramSliders = new();
     private ParameterReducer _reducer = new();
-    // private Dictionary<Guid, Store<ParameterStates>> _paramStores = new();
     private Store<ParameterStates> _store;
     private ParameterStates _state;
     private ParametersViewModel _viewModel;
@@ -21,18 +19,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
     private IModelContext _context;
     private ICommandHandler _commandHandler;
 
-
     public ParameterSlider GetParamSlider(Guid id) => _paramSliders[id].GetComponent<ParameterSlider>();
-
-    private bool _isParamSelected = false;
-    private Guid _selectedParamID;
-    public Guid SelectedParamID
-    {
-        get
-        {
-            return _isParamSelected ? _selectedParamID : throw new Exception("No parameters are selected");
-        }
-    }
 
     protected override void Awake()
     {
@@ -46,7 +33,10 @@ public class ParameterManager : ManagerBase<ParameterManager>
         _store = new Store<ParameterStates>(_state, _reducer, new ICommandHandler[] { _commandHandler }, _context);
         _viewModel = gameObject.AddComponent<ParametersViewModel>();
         _viewModel.Bind(_store);
+    }
 
+    void Start()
+    {
         CreateDebugParam();
     }
 
@@ -81,12 +71,6 @@ public class ParameterManager : ManagerBase<ParameterManager>
         if (selectedArtMesh == null) return;
 
         _store.Dispatch(new CreateParamPointsIntent(selectedArtMesh.ID));
-
-        // if (_isParamSelected && selectedArtMesh != null)
-        // {
-        //     CreateParamPoints(SelectedParamID, selectedArtMesh.ID);
-        //     HighlightCreatedCurves(selectedArtMesh.ID);
-        // }
     }
 
     /// <summary>
@@ -108,9 +92,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
 
     public void CreateParameter(float min, float max, float defaultValue, string name = "parameter")
     {
-        // Parameter parameter = new(min, max, defaultValue, name);
         _store.Dispatch(new CreateParameterIntent(Guid.NewGuid(), min, max, defaultValue, name));
-        // CreateParameterSlider(parameter);
     }
 
     public void CreateParameterSlider(Parameter parameter)
@@ -118,20 +100,17 @@ public class ParameterManager : ManagerBase<ParameterManager>
         GameObject paramSlider = Instantiate(ParamSliderPrefab, ParamWidgetContent);
         ParameterSlider parameterSlider = paramSlider.GetComponent<ParameterSlider>();
         parameterSlider.SetParamID(parameter.ID);
-        parameterSlider.UpdateSlider(parameter);
 
         _paramSliders.Add(parameter.ID, paramSlider);
-
-        _viewModel.Bind(parameterSlider);
+        parameterSlider.SetViewModel(_viewModel);
 
     }
 
-    private void DeleteParameterSlider(Guid id)
+    public void DeleteParameterSlider(Guid id)
     {
         if (_paramSliders.TryGetValue(id, out GameObject paramSlider))
         {
             _paramSliders.Remove(id);
-            ParameterRegistry.Instance.Remove(id);
             Destroy(paramSlider);
         }
     }
@@ -149,11 +128,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
 
     public void DeleteSelectedParameterSlider()
     {
-        if (!_isParamSelected) return;
-
-        DeleteParameterSlider(SelectedParamID);
-        _isParamSelected = false;
-
+        _store.Dispatch(new DeleteSelectedParameterIntent());
     }
 
     public void CreateParamPoints(Guid parameterID, Guid meshID)
@@ -207,13 +182,6 @@ public class ParameterManager : ManagerBase<ParameterManager>
             }
             paramCurveRegistry.Remove(paramCurve.ID);
         }
-    }
-
-    public void SelectParameter(Guid id)
-    {
-        UIEvents.RaiseParameterSelect(id);
-        _selectedParamID = id;
-        _isParamSelected = true;
     }
 
     private void OnLayerSelect(Guid id)

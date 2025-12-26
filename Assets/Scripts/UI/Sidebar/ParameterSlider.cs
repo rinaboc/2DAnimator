@@ -33,7 +33,7 @@ public class ParameterSlider : Clickable, ISelectable, IView<ParameterStates>
     private float sliderValue;
     private string paramName;
 
-    private Action<IIntent> EmitIntent;
+    private IViewModel<ParameterStates> _viewModel;
 
     void OnEnable()
     {
@@ -48,8 +48,6 @@ public class ParameterSlider : Clickable, ISelectable, IView<ParameterStates>
             if (float.TryParse(ParameterValueField.text, out float input))
                 SetValue(input);
         });
-
-        // UIEvents.ParameterSelectEvent += OnSelect;
     }
 
     private void OnDestroy()
@@ -57,7 +55,7 @@ public class ParameterSlider : Clickable, ISelectable, IView<ParameterStates>
         DoubleClickAction.performed -= OnDoubleClick;
         clickAction.performed -= OnClick;
 
-        // UIEvents.ParameterSelectEvent -= OnSelect;
+        _viewModel?.Unbind(this);
     }
 
     private void OnDoubleClick(InputAction.CallbackContext context)
@@ -83,9 +81,7 @@ public class ParameterSlider : Clickable, ISelectable, IView<ParameterStates>
     {
         if (IsInsideCollider())
         {
-            // ParameterManager.Instance.SelectParameter(paramID);
-            Debug.Log("clicked");
-            EmitIntent?.Invoke(new SelectParameterIntent(paramID));
+            _viewModel.Send(new SelectParameterIntent(paramID));
         }
     }
 
@@ -139,8 +135,7 @@ public class ParameterSlider : Clickable, ISelectable, IView<ParameterStates>
     {
         sliderValue = slider.value;
         ParameterValueField.text = sliderValue.ToString("F2");
-        // AnimationManager.Instance.InterpolateParameter(sliderValue, paramID);
-        EmitIntent?.Invoke(new InterpolateParameterIntent(paramID, sliderValue));
+        _viewModel.Send(new InterpolateParameterIntent(paramID, sliderValue));
     }
 
     public void SetValue(float value)
@@ -152,7 +147,6 @@ public class ParameterSlider : Clickable, ISelectable, IView<ParameterStates>
 
     public float GetValue()
     {
-        // return (int)Math.Round(sliderValue, MidpointRounding.AwayFromZero);
         return sliderValue;
     }
 
@@ -175,11 +169,17 @@ public class ParameterSlider : Clickable, ISelectable, IView<ParameterStates>
 
     public void Render(ParameterStates state)
     {
-        SetSelected(state.Parameters[paramID].IsSelected);
+        if (!state.Parameters.TryGetValue(paramID, out var parameterState)) return;
+
+        SetSelected(parameterState.IsSelected);
+        SetParamName(parameterState.Name);
+        SetMinMaxValues(parameterState.MinValue, parameterState.MaxValue);
+        SetValue(parameterState.DefaultValue);
     }
 
-    public void SetIntentEmitter(Action<IIntent> intentEmitter)
+    public void SetViewModel(IViewModel<ParameterStates> viewModel)
     {
-        this.EmitIntent = intentEmitter;
+        _viewModel = viewModel;
+        _viewModel.Bind(this);
     }
 }

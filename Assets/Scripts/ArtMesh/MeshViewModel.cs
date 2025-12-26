@@ -3,7 +3,7 @@ using Assets.Scripts.ArtMesh;
 using Assets.Scripts.Utility;
 using UnityEngine;
 
-public sealed class MeshViewModel : MonoBehaviour
+public sealed class MeshViewModel : MonoBehaviour, IViewModel<MeshState>
 {
     private Store<MeshState> _store;
     private List<IView<MeshState>> _views = new();
@@ -17,8 +17,12 @@ public sealed class MeshViewModel : MonoBehaviour
     public void Bind(IView<MeshState> view)
     {
         _views.Add(view);
-        view.SetIntentEmitter(Send);
         view.Render(_store.State);
+    }
+
+    public void Unbind(IView<MeshState> view)
+    {
+        _views.Remove(view);
     }
 
     public void Unbind()

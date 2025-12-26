@@ -10,8 +10,8 @@ public class BoundingBox : MonoBehaviour, IView<MeshState>
     [SerializeField] private GameObject Corners;
 
     public BoxCollider boxCollider;
-    private Action<IIntent> EmitIntent;
 
+    private IViewModel<MeshState> _viewModel;
 
     private void Awake()
     {
@@ -94,8 +94,9 @@ public class BoundingBox : MonoBehaviour, IView<MeshState>
         CreateBoundingBox(boxCollider.center, Vector3.Scale(boxCollider.size, combinedScale));
     }
 
-    public void SetIntentEmitter(Action<IIntent> intentEmitter)
+    public void SetViewModel(IViewModel<MeshState> viewModel)
     {
-        EmitIntent = intentEmitter;
+        _viewModel = viewModel;
+        _viewModel?.Bind(this);
     }
 }

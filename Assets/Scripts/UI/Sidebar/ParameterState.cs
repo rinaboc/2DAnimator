@@ -14,4 +14,5 @@ public class ParameterStates
     }
 
     public Dictionary<Guid, ParameterState> Parameters { get; set; }
+    public Guid SelectedParamID { get; set; }
 }

@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using Assets.Scripts.ArtMesh;
 using Assets.Scripts.Utility;
 using UnityEngine;
 
-public sealed class ParametersViewModel : MonoBehaviour
+public sealed class ParametersViewModel : MonoBehaviour, IViewModel<ParameterStates>
 {
     private Store<ParameterStates> _store;
     private List<IView<ParameterStates>> _views = new();
@@ -17,8 +16,12 @@ public sealed class ParametersViewModel : MonoBehaviour
     public void Bind(IView<ParameterStates> view)
     {
         _views.Add(view);
-        view.SetIntentEmitter(Send);
         view.Render(_store.State);
+    }
+
+    public void Unbind(IView<ParameterStates> view)
+    {
+        _views.Remove(view);
     }
 
     public void Unbind()

@@ -24,18 +24,18 @@ namespace Assets.Scripts.Utility
         public void Dispatch(IIntent intent)
         {
             var newState = _reducer.Reduce(State, intent);
+            bool stateChanged = !Equals(State, newState);
 
-            if (!Equals(State, newState))
-            {
-                State = newState;
-                StateChanged?.Invoke(State);
-            }
+            State = newState;
 
             foreach (var handler in _handlers)
             {
                 if (handler.CanHandle(intent))
                     handler.Execute(intent, State, _context);
             }
+
+            if (stateChanged)
+                StateChanged?.Invoke(State);
 
         }
     }

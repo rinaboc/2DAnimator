@@ -66,8 +66,8 @@ public class MeshManager : ManagerBase<MeshManager>
         var viewModel = meshController.gameObject.AddComponent<MeshViewModel>();
         viewModel.Bind(store);
 
-        viewModel.Bind(meshController); // Binds MeshController as a view
-        viewModel.Bind(meshController.GetBoundingBox()); // Binds BoundingBox as a view
+        meshController.SetViewModel(viewModel);
+        meshController.GetBoundingBox().SetViewModel(viewModel);
 
         _meshStores[newMesh.ID] = store;
         RegisterArtMeshObj(newMesh.ID, meshController);

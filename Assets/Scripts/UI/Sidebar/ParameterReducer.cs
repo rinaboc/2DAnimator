@@ -11,8 +11,36 @@ public class ParameterReducer : IReducer<ParameterStates>
             InterpolateParameterIntent interpolate => ReduceInterpolateParameter(previous, interpolate),
             SelectParameterIntent select => ReduceSelectParameter(previous, select),
             CreateParameterIntent create => ReduceCreateParameter(previous, create),
+            DeleteSelectedParameterIntent _ => ReduceDeleteSelectedParameter(previous),
             _ => previous
         };
+    }
+
+    private ParameterStates ReduceDeleteSelectedParameter(ParameterStates previous)
+    {
+        if (previous.SelectedParamID == Guid.Empty) return previous;
+
+        var ret = new ParameterStates
+        {
+            Parameters = previous.Parameters.ToDictionary(
+                p => p.Key,
+                p => new ParameterStates.ParameterState()
+                {
+                    ID = p.Value.ID,
+                    MinValue = p.Value.MinValue,
+                    MaxValue = p.Value.MaxValue,
+                    DefaultValue = p.Value.DefaultValue,
+                    Name = p.Value.Name,
+                    IsSelected = p.Value.IsSelected
+                }
+            ),
+            SelectedParamID = previous.SelectedParamID
+        };
+
+        ret.Parameters.Remove(previous.SelectedParamID);
+        ret.SelectedParamID = Guid.Empty;
+
+        return ret;
     }
 
     private ParameterStates ReduceCreateParameter(ParameterStates previous, CreateParameterIntent create)
@@ -30,7 +58,8 @@ public class ParameterReducer : IReducer<ParameterStates>
                     Name = p.Value.Name,
                     IsSelected = p.Value.IsSelected
                 }
-            )
+            ),
+            SelectedParamID = previous.SelectedParamID
         };
 
         ret.Parameters.Add(create.ParamID, new ParameterStates.ParameterState()
@@ -48,7 +77,7 @@ public class ParameterReducer : IReducer<ParameterStates>
 
     private ParameterStates ReduceSelectParameter(ParameterStates previous, SelectParameterIntent select)
     {
-        if (previous.Parameters[select.ParamID].IsSelected) return previous;
+        if (previous.SelectedParamID == select.ParamID) return previous;
 
         return new ParameterStates
         {
@@ -64,6 +93,7 @@ public class ParameterReducer : IReducer<ParameterStates>
                     IsSelected = p.Key == select.ParamID
                 }
             ),
+            SelectedParamID = select.ParamID
         };
     }
 

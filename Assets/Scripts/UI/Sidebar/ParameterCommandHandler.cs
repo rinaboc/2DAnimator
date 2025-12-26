@@ -8,9 +8,12 @@ public class ParameterCommandHandler : ICommandHandler
     {
         Type intentType = intent.GetType();
 
-        return intentType == typeof(SelectParameterIntent) ||
+        return
+            intentType == typeof(SelectParameterIntent) ||
             intentType == typeof(CreateParameterIntent) ||
-            intentType == typeof(CreateParamPointsIntent);
+            intentType == typeof(CreateParamPointsIntent) ||
+            intentType == typeof(DeleteSelectedParameterIntent)
+        ;
     }
 
     public void Execute(IIntent intent, object state, IModelContext context)
@@ -26,7 +29,20 @@ public class ParameterCommandHandler : ICommandHandler
             case CreateParamPointsIntent create:
                 ExecuteCreateParamPoints(create, state, context);
                 break;
+            case DeleteSelectedParameterIntent _:
+                ExecuteDeleteSelectedParameter(state, context);
+                break;
         }
+    }
+
+    private void ExecuteDeleteSelectedParameter(object state, IModelContext context)
+    {
+        if (context.GeneralSettings.SelectedParamID == Guid.Empty) return;
+
+        Guid selectedParamID = context.GeneralSettings.SelectedParamID;
+        context.Parameters.Remove(selectedParamID);
+        ParameterManager.Instance.DeleteParameterSlider(selectedParamID);
+        context.GeneralSettings.SelectedParamID = Guid.Empty;
     }
 
     private void ExecuteCreateParamPoints(CreateParamPointsIntent create, object state, IModelContext context)

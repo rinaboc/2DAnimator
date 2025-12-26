@@ -10,7 +10,8 @@ public class MeshController : MonoBehaviour, ISelectable, IView<MeshState>
     [SerializeField] private BoundingBox BoundingBox;
     public Guid ID { get; private set; }
 
-    private Action<IIntent> EmitIntent;
+    private IViewModel<MeshState> _viewModel;
+
 
     private void Awake()
     {
@@ -34,6 +35,8 @@ public class MeshController : MonoBehaviour, ISelectable, IView<MeshState>
     {
         UIEvents.LayerSelectEvent -= OnSelect;
         UIEvents.LayerDeselectEvent -= OnDeselect;
+
+        _viewModel?.Unbind(this);
     }
 
     public MeshController SetMeshID(Guid id)
@@ -159,7 +162,7 @@ public class MeshController : MonoBehaviour, ISelectable, IView<MeshState>
                 break;
         }
 
-        EmitIntent(new UpdateTransformIntent(transform, type));
+        _viewModel?.Send(new UpdateTransformIntent(transform, type));
     }
 
     public void OnDeselect()
@@ -185,7 +188,7 @@ public class MeshController : MonoBehaviour, ISelectable, IView<MeshState>
     /// <param name="value">transformation's value</param>
     public void SaveTransform(TransformType type)
     {
-        EmitIntent(new SaveTransformIntent(type));
+        _viewModel.Send(new SaveTransformIntent(type));
     }
 
     public void Render(MeshState state)
@@ -201,15 +204,16 @@ public class MeshController : MonoBehaviour, ISelectable, IView<MeshState>
         ScaleArtMesh(transform.Scale);
     }
 
-    public void SetIntentEmitter(Action<IIntent> intentEmitter)
-    {
-        EmitIntent = intentEmitter;
-    }
-
     public BoundingBox GetBoundingBox() => BoundingBox;
 
     public void SendResetInterpolationIntent()
     {
-        EmitIntent?.Invoke(new ResetInterpolationIntent(ID));
+        _viewModel?.Send(new ResetInterpolationIntent(ID));
+    }
+
+    public void SetViewModel(IViewModel<MeshState> viewModel)
+    {
+        _viewModel = viewModel;
+        _viewModel?.Bind(this);
     }
 }
