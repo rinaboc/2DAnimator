@@ -1,18 +1,15 @@
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.ArtMesh;
-using Assets.Scripts.Utility;
+using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
 public class MeshManager : ManagerBase<MeshManager>
 {
     [SerializeField] private Dictionary<Guid, MeshController> _meshControllers = new();
     private Dictionary<Guid, Store<MeshState>> _meshStores = new();
-    private MeshReducer _reducer = new();
 
     [SerializeField] private AppInitializer _appInitializer;
-    private IModelContext _context;
-    private ICommandHandler _commandHandler = new MeshCommandHandler();
 
 
     [Header("Art Mesh creation")]
@@ -22,11 +19,6 @@ public class MeshManager : ManagerBase<MeshManager>
     override protected void Awake()
     {
         base.Awake();
-    }
-
-    void Start()
-    {
-        _context = _appInitializer.Context;
     }
 
     void OnEnable()
@@ -61,7 +53,7 @@ public class MeshManager : ManagerBase<MeshManager>
 
         // TODO: move this in the future to an intent
         var meshState = new MeshState(newMesh.ID, newMesh.transform, new TransformData());
-        var store = new Store<MeshState>(meshState, _reducer, new ICommandHandler[] { _commandHandler }, _context);
+        var store = new Store<MeshState>(meshState, _appInitializer.Dispatcher);
 
         var viewModel = meshController.gameObject.AddComponent<MeshViewModel>();
         viewModel.Bind(store);

@@ -1,6 +1,6 @@
 using System;
 using Assets.Scripts.ArtMesh;
-using Assets.Scripts.Utility;
+using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
 public class MeshController : MonoBehaviour, ISelectable, IView<MeshState>

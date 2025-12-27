@@ -1,4 +1,4 @@
-using Assets.Scripts.Utility;
+using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
 public class AppInitializer : MonoBehaviour
@@ -10,9 +10,11 @@ public class AppInitializer : MonoBehaviour
     [SerializeField] private KeyFrameRegistry _keyFrameRegistry;
     [SerializeField] private GeneralSettings _generalSettings;
 
-
     public IModelContext Context { get => _context; }
     private IModelContext _context;
+
+    public IDispatcher Dispatcher { get => _dispatcher; }
+    private IDispatcher _dispatcher;
 
     void Awake()
     {
@@ -24,5 +26,13 @@ public class AppInitializer : MonoBehaviour
             _keyFrameRegistry,
             _generalSettings
         );
+
+        _dispatcher = new Dispatcher(_context);
+
+        _dispatcher.Register(new MeshCommandHandler());
+        _dispatcher.Register(new ParameterCommandHandler());
+
+        _dispatcher.Register(new MeshReducer());
+        _dispatcher.Register(new ParameterReducer());
     }
 }

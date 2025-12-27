@@ -1,9 +1,19 @@
 using System;
 using System.Linq;
-using Assets.Scripts.Utility;
+using Assets.Scripts.Utility.MVI;
 
 public class ParameterReducer : IReducer<ParameterStates>
 {
+    public bool CanReduce(IIntent intent)
+    {
+        Type intentType = intent.GetType();
+        return intentType == typeof(InterpolateParameterIntent)
+            || intentType == typeof(SelectParameterIntent)
+            || intentType == typeof(CreateParameterIntent)
+            || intentType == typeof(DeleteSelectedParameterIntent)
+        ;
+    }
+
     public ParameterStates Reduce(ParameterStates previous, IIntent intent)
     {
         return intent switch

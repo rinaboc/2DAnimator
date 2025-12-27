@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Assets.Scripts.Utility;
+using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
 public class ParameterManager : ManagerBase<ParameterManager>
@@ -9,28 +9,23 @@ public class ParameterManager : ManagerBase<ParameterManager>
     [SerializeField] private Transform ParamWidgetContent;
 
     private readonly Dictionary<Guid, GameObject> _paramSliders = new();
-    private ParameterReducer _reducer = new();
     private Store<ParameterStates> _store;
     private ParameterStates _state;
     private ParametersViewModel _viewModel;
 
 
     [SerializeField] private AppInitializer _appInitializer;
-    private IModelContext _context;
-    private ICommandHandler _commandHandler;
 
     public ParameterSlider GetParamSlider(Guid id) => _paramSliders[id].GetComponent<ParameterSlider>();
 
     protected override void Awake()
     {
         base.Awake();
-        _context = _appInitializer.Context;
-        _commandHandler = new ParameterCommandHandler();
         _state = new ParameterStates()
         {
             Parameters = new Dictionary<Guid, ParameterStates.ParameterState>()
         };
-        _store = new Store<ParameterStates>(_state, _reducer, new ICommandHandler[] { _commandHandler }, _context);
+        _store = new Store<ParameterStates>(_state, _appInitializer.Dispatcher);
         _viewModel = gameObject.AddComponent<ParametersViewModel>();
         _viewModel.Bind(_store);
     }

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.ArtMesh;
-using Assets.Scripts.Utility;
+using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
 public sealed class MeshViewModel : MonoBehaviour, IViewModel<MeshState>

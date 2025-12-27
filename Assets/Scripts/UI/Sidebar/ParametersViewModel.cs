@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Assets.Scripts.Utility;
+using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
 public sealed class ParametersViewModel : MonoBehaviour, IViewModel<ParameterStates>

@@ -1,6 +1,5 @@
-using System;
 using Assets.Scripts.ArtMesh;
-using Assets.Scripts.Utility;
+using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]

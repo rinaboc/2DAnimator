@@ -1,10 +1,20 @@
 using System;
 using Assets.Scripts.ArtMesh;
-using Assets.Scripts.Utility;
+using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
 public class MeshReducer : IReducer<MeshState>
 {
+    public bool CanReduce(IIntent intent)
+    {
+        Type intentType = intent.GetType();
+        return intentType == typeof(UpdateTransformIntent)
+            || intentType == typeof(SaveTransformIntent)
+            || intentType == typeof(InterpolateTransformIntent)
+            || intentType == typeof(ResetInterpolationIntent)
+        ;
+    }
+
     public MeshState Reduce(MeshState previous, IIntent intent)
     {
         return intent switch
@@ -43,13 +53,6 @@ public class MeshReducer : IReducer<MeshState>
 
     private MeshState ReduceSaveTransform(MeshState previous, SaveTransformIntent save)
     {
-        // bool areParametersAssigned = ParamCurveRegistry.Instance.GetAssignedParamIDsOfMesh(previous.ID).Count > 0;
-
-        // if (areParametersAssigned)
-        // {
-        //     ParameterManager.Instance.UpdateAnimationData(previous.AnimationTransform, save.Type, previous.ID);
-        // }
-
         return previous;
     }
 

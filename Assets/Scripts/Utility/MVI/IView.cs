@@ -1,6 +1,4 @@
-using System;
-
-namespace Assets.Scripts.Utility
+namespace Assets.Scripts.Utility.MVI
 {
     public interface IView<TState>
     {

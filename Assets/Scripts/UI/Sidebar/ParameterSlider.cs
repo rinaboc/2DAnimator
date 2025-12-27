@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.Scripts.Utility;
+using Assets.Scripts.Utility.MVI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
