@@ -5,16 +5,6 @@ using UnityEngine;
 
 public class MeshReducer : IReducer<MeshState>
 {
-    public bool CanReduce(IIntent intent)
-    {
-        Type intentType = intent.GetType();
-        return intentType == typeof(UpdateTransformIntent)
-            || intentType == typeof(SaveTransformIntent)
-            || intentType == typeof(InterpolateTransformIntent)
-            || intentType == typeof(ResetInterpolationIntent)
-        ;
-    }
-
     public MeshState Reduce(MeshState previous, IIntent intent)
     {
         return intent switch
@@ -29,22 +19,16 @@ public class MeshReducer : IReducer<MeshState>
 
     private MeshState ReduceResetInterpolation(MeshState previous, ResetInterpolationIntent reset)
     {
-        return new MeshState()
+        return new MeshState(previous)
         {
-            ID = previous.ID,
-            MeshTransform = previous.MeshTransform,
-            AnimationTransform = previous.AnimationTransform,
-            InterpolatedTransform = previous.InterpolatedTransform,
             IsInterpolated = false
         };
     }
 
     private MeshState ReduceInterpolateTransform(MeshState previous, InterpolateTransformIntent interpolate)
     {
-        return new MeshState()
+        return new MeshState(previous)
         {
-            ID = previous.ID,
-            MeshTransform = previous.MeshTransform,
             AnimationTransform = interpolate.Delta,
             InterpolatedTransform = previous.MeshTransform + interpolate.Delta,
             IsInterpolated = true
@@ -61,14 +45,7 @@ public class MeshReducer : IReducer<MeshState>
         // TODO: move this to state and connect an intent to set to true
         bool areParametersAssigned = ParamCurveRegistry.Instance.GetAssignedParamIDsOfMesh(previous.ID).Count > 0;
 
-        var next = new MeshState()
-        {
-            ID = previous.ID,
-            MeshTransform = previous.MeshTransform,
-            AnimationTransform = previous.AnimationTransform,
-            InterpolatedTransform = previous.InterpolatedTransform,
-            IsInterpolated = previous.IsInterpolated
-        };
+        var next = new MeshState(previous);
 
         switch (update.Type)
         {

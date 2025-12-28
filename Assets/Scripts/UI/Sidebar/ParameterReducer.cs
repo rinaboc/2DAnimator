@@ -4,16 +4,6 @@ using Assets.Scripts.Utility.MVI;
 
 public class ParameterReducer : IReducer<ParameterStates>
 {
-    public bool CanReduce(IIntent intent)
-    {
-        Type intentType = intent.GetType();
-        return intentType == typeof(InterpolateParameterIntent)
-            || intentType == typeof(SelectParameterIntent)
-            || intentType == typeof(CreateParameterIntent)
-            || intentType == typeof(DeleteSelectedParameterIntent)
-        ;
-    }
-
     public ParameterStates Reduce(ParameterStates previous, IIntent intent)
     {
         return intent switch
@@ -22,57 +12,87 @@ public class ParameterReducer : IReducer<ParameterStates>
             SelectParameterIntent select => ReduceSelectParameter(previous, select),
             CreateParameterIntent create => ReduceCreateParameter(previous, create),
             DeleteSelectedParameterIntent _ => ReduceDeleteSelectedParameter(previous),
+            UpdateParameterIntent update => ReduceUpdateParameter(previous, update),
+            CloseParameterSettingsIntent _ => ReduceCloseParameterSettings(previous),
+            OpenParameterCreatorIntent _ => ReduceOpenParameterCreator(previous),
+            OpenParameterEditorIntent _ => ReduceOpenParameterEditor(previous),
             _ => previous
         };
+    }
+
+    private ParameterStates ReduceOpenParameterEditor(ParameterStates previous)
+    {
+        return new ParameterStates
+        {
+            Parameters = previous.Parameters.ToDictionary(
+                p => p.Key,
+                p => new ParameterState(p.Value)
+            ),
+            SelectedParamID = previous.SelectedParamID,
+            IsSettingsOpen = true
+        };
+    }
+
+    private ParameterStates ReduceOpenParameterCreator(ParameterStates previous)
+    {
+        return new ParameterStates
+        {
+            Parameters = previous.Parameters.ToDictionary(
+                p => p.Key,
+                p => new ParameterState(p.Value)
+                {
+                    IsSelected = false
+                }
+            ),
+            SelectedParamID = Guid.Empty,
+            IsSettingsOpen = true
+        };
+    }
+
+    private ParameterStates ReduceCloseParameterSettings(ParameterStates previous)
+    {
+        return new ParameterStates
+        {
+            Parameters = previous.Parameters.ToDictionary(
+                p => p.Key,
+                p => new ParameterState(p.Value)
+            ),
+            SelectedParamID = previous.SelectedParamID,
+            IsSettingsOpen = false
+        };
+    }
+
+    private ParameterStates ReduceUpdateParameter(ParameterStates previous, UpdateParameterIntent update)
+    {
+        var next = previous.Clone();
+
+        var updatedParam = next.Parameters[update.ParamID];
+        updatedParam.MinValue = update.Min;
+        updatedParam.MaxValue = update.Max;
+        updatedParam.DefaultValue = update.Default;
+        updatedParam.Name = update.Name;
+
+        return next;
+
     }
 
     private ParameterStates ReduceDeleteSelectedParameter(ParameterStates previous)
     {
         if (previous.SelectedParamID == Guid.Empty) return previous;
 
-        var ret = new ParameterStates
-        {
-            Parameters = previous.Parameters.ToDictionary(
-                p => p.Key,
-                p => new ParameterStates.ParameterState()
-                {
-                    ID = p.Value.ID,
-                    MinValue = p.Value.MinValue,
-                    MaxValue = p.Value.MaxValue,
-                    DefaultValue = p.Value.DefaultValue,
-                    Name = p.Value.Name,
-                    IsSelected = p.Value.IsSelected
-                }
-            ),
-            SelectedParamID = previous.SelectedParamID
-        };
+        var next = previous.Clone();
 
-        ret.Parameters.Remove(previous.SelectedParamID);
-        ret.SelectedParamID = Guid.Empty;
+        next.Parameters.Remove(previous.SelectedParamID);
+        next.SelectedParamID = Guid.Empty;
 
-        return ret;
+        return next;
     }
 
     private ParameterStates ReduceCreateParameter(ParameterStates previous, CreateParameterIntent create)
     {
-        var ret = new ParameterStates
-        {
-            Parameters = previous.Parameters.ToDictionary(
-                p => p.Key,
-                p => new ParameterStates.ParameterState()
-                {
-                    ID = p.Value.ID,
-                    MinValue = p.Value.MinValue,
-                    MaxValue = p.Value.MaxValue,
-                    DefaultValue = p.Value.DefaultValue,
-                    Name = p.Value.Name,
-                    IsSelected = p.Value.IsSelected
-                }
-            ),
-            SelectedParamID = previous.SelectedParamID
-        };
+        var next = previous.Clone();
 
-        ret.Parameters.Add(create.ParamID, new ParameterStates.ParameterState()
+        next.Parameters.Add(create.ParamID, new ParameterState()
         {
             ID = create.ParamID,
             MinValue = create.Min,
@@ -82,7 +102,7 @@ public class ParameterReducer : IReducer<ParameterStates>
             IsSelected = false
         });
 
-        return ret;
+        return next;
     }
 
     private ParameterStates ReduceSelectParameter(ParameterStates previous, SelectParameterIntent select)
@@ -93,17 +113,13 @@ public class ParameterReducer : IReducer<ParameterStates>
         {
             Parameters = previous.Parameters.ToDictionary(
                 p => p.Key,
-                p => new ParameterStates.ParameterState()
+                p => new ParameterState(p.Value)
                 {
-                    ID = p.Value.ID,
-                    MinValue = p.Value.MinValue,
-                    MaxValue = p.Value.MaxValue,
-                    DefaultValue = p.Value.DefaultValue,
-                    Name = p.Value.Name,
                     IsSelected = p.Key == select.ParamID
                 }
             ),
-            SelectedParamID = select.ParamID
+            SelectedParamID = select.ParamID,
+            IsSettingsOpen = previous.IsSettingsOpen
         };
     }
 

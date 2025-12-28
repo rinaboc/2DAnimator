@@ -22,5 +22,14 @@ namespace Assets.Scripts.ArtMesh
         }
 
         public MeshState() { }
+        public MeshState(MeshState ms)
+        {
+            ID = ms.ID;
+            MeshTransform = ms.MeshTransform;
+            AnimationTransform = ms.AnimationTransform;
+            InterpolatedTransform = ms.InterpolatedTransform;
+            IsInterpolated = ms.IsInterpolated;
+            IsSelected = ms.IsSelected;
+        }
     }
 }

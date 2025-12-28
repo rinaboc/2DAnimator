@@ -7,22 +7,10 @@ using UnityEngine;
 
 public class MeshCommandHandler : ICommandHandler
 {
-    public bool CanHandle(IIntent intent)
-    {
-        Type intentType = intent.GetType();
-
-        return intentType == typeof(UpdateTransformIntent)
-            || intentType == typeof(SaveTransformIntent);
-
-    }
-
     public void Execute(IIntent intent, object state, IModelContext context)
     {
         switch (intent)
         {
-            case UpdateTransformIntent update:
-                ExecuteUpdateTransform(update, state, context);
-                break;
             case SaveTransformIntent save:
                 ExecuteSaveTransform(save, state, context);
                 break;
@@ -88,11 +76,6 @@ public class MeshCommandHandler : ICommandHandler
                 }
             }
         }
-    }
-
-    private void ExecuteUpdateTransform(UpdateTransformIntent update, object state, IModelContext context)
-    {
-        // throw new NotImplementedException();
     }
 }
 

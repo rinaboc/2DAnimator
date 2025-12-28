@@ -19,8 +19,7 @@ namespace Assets.Scripts.Utility.MVI
         {
             foreach (var handler in _handlers)
             {
-                if (handler.CanHandle(intent))
-                    handler.Execute(intent, state, _context);
+                handler.Execute(intent, state, _context);
             }
         }
 
@@ -32,10 +31,7 @@ namespace Assets.Scripts.Utility.MVI
                 foreach (var reducerObj in reducers)
                 {
                     var reducer = (IReducer<TState>)reducerObj;
-                    if (reducer.CanReduce(intent))
-                    {
-                        return reducer.Reduce(currentState, intent);
-                    }
+                    return reducer.Reduce(currentState, intent);
                 }
             }
             Debug.Log($"No reducer found for state type {stateType} and intent {intent.GetType()}");

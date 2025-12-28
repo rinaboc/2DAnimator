@@ -13,6 +13,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
     private ParameterStates _state;
     private ParametersViewModel _viewModel;
 
+    [SerializeField] private PopupWindowController _popupWindowController;
 
     [SerializeField] private AppInitializer _appInitializer;
 
@@ -23,7 +24,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
         base.Awake();
         _state = new ParameterStates()
         {
-            Parameters = new Dictionary<Guid, ParameterStates.ParameterState>()
+            Parameters = new Dictionary<Guid, ParameterState>()
         };
         _store = new Store<ParameterStates>(_state, _appInitializer.Dispatcher);
         _viewModel = gameObject.AddComponent<ParametersViewModel>();
@@ -32,6 +33,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
 
     void Start()
     {
+        _popupWindowController.SetViewModel(_viewModel);
         CreateDebugParam();
     }
 
@@ -57,7 +59,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
 
     public void CreateDebugParam()
     {
-        CreateParameter(0, 1, 0);
+        _store.Dispatch(new CreateParameterIntent(Guid.NewGuid(), 0, 1, 0, "parameter"));
     }
 
     public void CreatePointsForCurrentMesh()
@@ -66,28 +68,6 @@ public class ParameterManager : ManagerBase<ParameterManager>
         if (selectedArtMesh == null) return;
 
         _store.Dispatch(new CreateParamPointsIntent(selectedArtMesh.ID));
-    }
-
-    /// <summary>
-    /// Called when there's an update made to a parameter data object. Updates parameter slider.
-    /// </summary>
-    public void UpdateParameter(Parameter parameter)
-    {
-        ParameterSlider parameterSlider = GetParamSlider(parameter.ID);
-        parameterSlider.UpdateSlider(parameter);
-    }
-
-    /// <summary>
-    /// Call popup window to edit parameter details.
-    /// </summary>
-    public void StartParameterEditing(Guid paramID)
-    {
-        UIEvents.RaiseEditParameterInfo(paramID);
-    }
-
-    public void CreateParameter(float min, float max, float defaultValue, string name = "parameter")
-    {
-        _store.Dispatch(new CreateParameterIntent(Guid.NewGuid(), min, max, defaultValue, name));
     }
 
     public void CreateParameterSlider(Parameter parameter)
@@ -124,37 +104,6 @@ public class ParameterManager : ManagerBase<ParameterManager>
     public void DeleteSelectedParameterSlider()
     {
         _store.Dispatch(new DeleteSelectedParameterIntent());
-    }
-
-    public void CreateParamPoints(Guid parameterID, Guid meshID)
-    {
-        ParameterRegistry.Instance.TryGet(parameterID, out Parameter parameter);
-        ParamCurve paramCurve = new(meshID, parameter.ID);
-        ParamPoint minPoint = new(parameter.MinValue);
-        ParamPoint maxPoint = new(parameter.MaxValue);
-
-        paramCurve.ParamPoints.Add(minPoint.ID);
-        paramCurve.ParamPoints.Add(maxPoint.ID);
-
-        parameter.ParamCurves.Add(paramCurve.ID);
-
-        List<float> paramValues = new()
-        {
-            minPoint.ParamValue,
-            maxPoint.ParamValue
-        };
-
-        if (Math.Abs(parameter.MinValue - parameter.DefaultValue) > 0.1f
-        && Math.Abs(parameter.MaxValue - parameter.DefaultValue) > 0.1f)
-        {
-            ParamPoint midPoint = new(parameter.DefaultValue);
-            paramCurve.ParamPoints.Add(midPoint.ID);
-            paramValues.Add(midPoint.ParamValue);
-        }
-
-        GetParamSlider(parameterID).CreateParamPointHandles(paramValues);
-
-        Debug.Log("created parampoints");
     }
 
     public void DeleteParamPointsOfMesh(Guid meshID)

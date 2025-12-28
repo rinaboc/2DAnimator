@@ -4,18 +4,6 @@ using Assets.Scripts.Utility.MVI;
 
 public class ParameterCommandHandler : ICommandHandler
 {
-    public bool CanHandle(IIntent intent)
-    {
-        Type intentType = intent.GetType();
-
-        return
-            intentType == typeof(SelectParameterIntent) ||
-            intentType == typeof(CreateParameterIntent) ||
-            intentType == typeof(CreateParamPointsIntent) ||
-            intentType == typeof(DeleteSelectedParameterIntent)
-        ;
-    }
-
     public void Execute(IIntent intent, object state, IModelContext context)
     {
         switch (intent)
@@ -32,6 +20,28 @@ public class ParameterCommandHandler : ICommandHandler
             case DeleteSelectedParameterIntent _:
                 ExecuteDeleteSelectedParameter(state, context);
                 break;
+            case UpdateParameterIntent update:
+                ExecuteUpdateParameter(update, state, context);
+                break;
+            case OpenParameterCreatorIntent _:
+                ExecuteOpenParameterCreator(state, context);
+                break;
+        }
+    }
+
+    private void ExecuteOpenParameterCreator(object state, IModelContext context)
+    {
+        context.GeneralSettings.SelectedParamID = Guid.Empty;
+    }
+
+    private void ExecuteUpdateParameter(UpdateParameterIntent update, object state, IModelContext context)
+    {
+        if (context.Parameters.TryGet(update.ParamID, out Parameter parameter))
+        {
+            parameter.MinValue = update.Min;
+            parameter.MaxValue = update.Max;
+            parameter.DefaultValue = update.Default;
+            parameter.Name = update.Name;
         }
     }
 

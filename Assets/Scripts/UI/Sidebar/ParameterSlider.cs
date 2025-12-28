@@ -62,7 +62,7 @@ public class ParameterSlider : Clickable, ISelectable, IView<ParameterStates>
     {
         if (IsInsideCollider())
         {
-            ParameterManager.Instance.StartParameterEditing(paramID);
+            _viewModel.Send(new OpenParameterEditorIntent());
         }
     }
 
