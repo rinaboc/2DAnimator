@@ -13,7 +13,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
     private ParameterStates _state;
     private ParametersViewModel _viewModel;
 
-    [SerializeField] private PopupWindowController _popupWindowController;
+    [SerializeField] private ParameterSettingsView _parameterSettingsView;
 
     [SerializeField] private AppInitializer _appInitializer;
 
@@ -33,7 +33,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
 
     void Start()
     {
-        _popupWindowController.SetViewModel(_viewModel);
+        _parameterSettingsView.SetViewModel(_viewModel);
         CreateDebugParam();
     }
 

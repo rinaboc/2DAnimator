@@ -4,13 +4,13 @@ using Unity.Properties;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class PopupWindowController : BaseUIController, IView<ParameterStates>
+public class ParameterSettingsView : BaseUIController, IView<ParameterStates>
 {
     private Button submitButton;
 
-    [SerializeField, CreateProperty] private float m_minValue, m_maxValue, m_defaultValue;
-    [SerializeField, CreateProperty] private string m_paramName;
-    [SerializeField, CreateProperty] private string m_errorMessage = "";
+    [SerializeField, CreateProperty, HideInInspector] private float m_minValue, m_maxValue, m_defaultValue;
+    [SerializeField, CreateProperty, HideInInspector] private string m_paramName;
+    [SerializeField, CreateProperty, HideInInspector] private string m_errorMessage = "";
 
     enum PopupMode
     {

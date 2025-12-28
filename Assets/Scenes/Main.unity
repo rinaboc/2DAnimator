@@ -3702,7 +3702,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ParamSliderPrefab: {fileID: 65736109725081048, guid: 9a65e218bcc716b4eba94aa7d406f534, type: 3}
   ParamWidgetContent: {fileID: 313228744}
-  _popupWindowController: {fileID: 1803608291}
+  _parameterSettingsView: {fileID: 1803608291}
   _appInitializer: {fileID: 856699105}
 --- !u!4 &1368651308
 Transform:
@@ -5213,7 +5213,7 @@ GameObject:
   - component: {fileID: 1803608290}
   - component: {fileID: 1803608291}
   m_Layer: 5
-  m_Name: ParameterCreationPopUp
+  m_Name: ParameterSettingsView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
