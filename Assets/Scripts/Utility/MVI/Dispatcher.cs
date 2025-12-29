@@ -9,10 +9,20 @@ namespace Assets.Scripts.Utility.MVI
         private readonly Dictionary<Type, List<object>> _typedReducers = new();
         private readonly List<ICommandHandler> _handlers = new();
         private readonly IModelContext _context;
+        private readonly List<IStore> _stores = new();
+
 
         public Dispatcher(IModelContext context)
         {
             _context = context;
+        }
+
+        public void Dispatch(IIntent intent)
+        {
+            foreach (var store in _stores)
+            {
+                store.Reduce(intent);
+            }
         }
 
         public void Execute(IIntent intent, object state)
@@ -51,6 +61,16 @@ namespace Assets.Scripts.Utility.MVI
                 _typedReducers[stateType] = new List<object>();
             }
             _typedReducers[stateType].Add(reducer);
+        }
+
+        public void Register(IStore store)
+        {
+            _stores.Add(store);
+        }
+
+        public void Remove(IStore store)
+        {
+            _stores.Remove(store);
         }
     }
 }

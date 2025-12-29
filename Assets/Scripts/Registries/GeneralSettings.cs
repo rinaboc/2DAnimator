@@ -7,6 +7,7 @@ public interface IGeneralSettings
     int MaxFrames { get; set; }
     int FramePerSec { get; set; }
     Guid SelectedParamID { get; set; }
+    Guid SelectedMeshID { get; set; }
 }
 
 [CreateAssetMenu(fileName = "GeneralSettings", menuName = "Scriptable Objects/GeneralSettings")]
@@ -15,6 +16,7 @@ public class GeneralSettings : ScriptableObject, ISaveable, IGeneralSettings
     public int MaxFrames { get; set; }
     public int FramePerSec { get; set; }
     public Guid SelectedParamID { get; set; }
+    public Guid SelectedMeshID { get; set; }
 
     protected static GeneralSettings _instance;
 
@@ -29,6 +31,7 @@ public class GeneralSettings : ScriptableObject, ISaveable, IGeneralSettings
                 _instance.MaxFrames = 24;
                 _instance.FramePerSec = 16;
                 _instance.SelectedParamID = Guid.Empty;
+                _instance.SelectedMeshID = Guid.Empty;
 
                 if (_instance == null)
                 {

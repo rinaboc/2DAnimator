@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
@@ -64,10 +65,9 @@ public class ParameterManager : ManagerBase<ParameterManager>
 
     public void CreatePointsForCurrentMesh()
     {
-        MeshController selectedArtMesh = LayerManager.Instance.SelectedArtMesh;
-        if (selectedArtMesh == null) return;
-
-        _store.Dispatch(new CreateParamPointsIntent(selectedArtMesh.ID));
+        // MeshController selectedArtMesh = LayerManager.Instance.SelectedArtMesh;
+        // if (selectedArtMesh == null) return;
+        _store.Dispatch(new CreateParamPointsIntent());
     }
 
     public void CreateParameterSlider(Parameter parameter)

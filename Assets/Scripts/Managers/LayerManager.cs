@@ -4,6 +4,8 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using System;
 using System.Linq;
+using Assets.Scripts.Utility.MVI;
+using Assets.Scripts.States;
 
 /// <summary>
 /// Manager for handling Art Mesh layers and their corresponding UI elements
@@ -15,6 +17,10 @@ public class LayerManager : ManagerBase<LayerManager>
     [SerializeField] private GameObject UILayersContent;
 
     private Dictionary<Guid, LayerController> _layerControllers = new();
+
+    private IViewModel<LayerStates> _viewModel;
+
+    [SerializeField] private AppInitializer _appInitializer;
 
     private InputAction CancelAction;
 
@@ -48,6 +54,11 @@ public class LayerManager : ManagerBase<LayerManager>
         }
     }
 
+    void Start()
+    {
+        _viewModel = ViewModelFactory.Instance.CreateViewModel<LayersViewModel, LayerStates>(gameObject);
+    }
+
     void OnEnable()
     {
         CancelAction = InputSystem.actions.FindAction("Cancel");
@@ -68,24 +79,17 @@ public class LayerManager : ManagerBase<LayerManager>
     /// <summary>
     /// Creates a UI element to represent the ArtLayers in the project.
     /// </summary>
-    public void CreateUIArtLayer(MeshData meshData)
+    public void CreateUIArtLayer(Guid ID)
     {
         GameObject newArtLayer = Instantiate(UIArtLayerPrefab, UILayersContent.transform);
-        newArtLayer.name = "ArtLayer" + meshData.ID;
+        newArtLayer.name = "ArtLayer" + ID;
         newArtLayer.transform.SetSiblingIndex(0);
 
-        newArtLayer.GetComponentInChildren<LayerController>()
-            .SetID(meshData.ID)
-            .SetText(meshData.name)
-            .SetSelected(false);
+        var layerController = newArtLayer.GetComponentInChildren<LayerController>();
+        layerController.SetID(ID);
+        layerController.SetViewModel(_viewModel);
 
-        newArtLayer.GetComponent<Button>().onClick.AddListener(() =>
-        {
-            SelectUIArtLayer(meshData.ID);
-        });
-
-        RegisterUILayer(meshData.ID, newArtLayer.GetComponentInChildren<LayerController>());
-        SelectUIArtLayer(meshData.ID);
+        _layerControllers.TryAdd(ID, layerController);
     }
 
     public void SelectUIArtLayer(Guid id)
@@ -180,7 +184,7 @@ public class LayerManager : ManagerBase<LayerManager>
         sortedMeshDatas.ToList().OrderBy(meshData => meshData.drawOrder).ToArray();
         foreach (var item in sortedMeshDatas)
         {
-            CreateUIArtLayer(item);
+            CreateUIArtLayer(item.ID);
         }
     }
 }

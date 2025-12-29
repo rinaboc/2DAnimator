@@ -1,9 +1,27 @@
 using System;
+using System.Collections.Generic;
 using Assets.Scripts.Utility.MVI;
+using UnityEngine;
 
 namespace Assets.Scripts.Utility.MVI
 {
     public interface IIntent { }
+
+    public class IntentHelper
+    {
+        private static readonly Dictionary<Type, bool> _globalCache = new();
+
+        public static bool IsGlobalIntent(IIntent intent)
+        {
+            var type = intent.GetType();
+            if (_globalCache.TryGetValue(type, out var isGlobal))
+                return isGlobal;
+
+            isGlobal = Attribute.IsDefined(type, typeof(GlobalIntentAttribute));
+            _globalCache[type] = isGlobal;
+            return isGlobal;
+        }
+    }
 }
 
 #region Mesh Transformation
@@ -11,6 +29,15 @@ public record UpdateTransformIntent(TransformData Data, TransformType Type) : II
 public record SaveTransformIntent(TransformType Type) : IIntent;
 public record InterpolateTransformIntent(Guid MeshID, TransformData Delta) : IIntent;
 public record ResetInterpolationIntent(Guid MeshID) : IIntent;
+#endregion
+
+#region Layer Operations
+[GlobalIntent] public record CreateMeshLayerIntent(Guid ID, Texture2D Tex, string Path) : IIntent;
+[GlobalIntent] public record SelectLayerIntent(Guid LayerID) : IIntent;
+public record ChangeLayerNameIntent(Guid LayerID, string NewName) : IIntent;
+public record DeleteLayerIntent(Guid LayerID) : IIntent;
+public record MoveLayerUpIntent() : IIntent;
+public record MoveLayerDownIntent() : IIntent;
 #endregion
 
 #region Parameter Operations
@@ -22,7 +49,7 @@ public record DeselectParameterIntent() : IIntent;
 public record CreateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
 public record UpdateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
 public record DeleteSelectedParameterIntent() : IIntent;
-public record CreateParamPointsIntent(Guid MeshID) : IIntent;
+public record CreateParamPointsIntent() : IIntent;
 #endregion
 
 #region Animation

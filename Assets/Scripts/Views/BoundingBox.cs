@@ -1,4 +1,4 @@
-using Assets.Scripts.ArtMesh;
+using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
@@ -91,6 +91,7 @@ public class BoundingBox : MonoBehaviour, IView<MeshState>
     {
         Vector3 combinedScale = state.MeshTransform.Scale + state.AnimationTransform.Scale;
         CreateBoundingBox(boxCollider.center, Vector3.Scale(boxCollider.size, combinedScale));
+        SetSelected(state.IsSelected);
     }
 
     public void SetViewModel(IViewModel<MeshState> viewModel)

@@ -14,8 +14,8 @@ public class ParameterCommandHandler : ICommandHandler
             case CreateParameterIntent create:
                 ExecuteCreateParameter(create, state, context);
                 break;
-            case CreateParamPointsIntent create:
-                ExecuteCreateParamPoints(create, state, context);
+            case CreateParamPointsIntent _:
+                ExecuteCreateParamPoints(state, context);
                 break;
             case DeleteSelectedParameterIntent _:
                 ExecuteDeleteSelectedParameter(state, context);
@@ -55,11 +55,12 @@ public class ParameterCommandHandler : ICommandHandler
         context.GeneralSettings.SelectedParamID = Guid.Empty;
     }
 
-    private void ExecuteCreateParamPoints(CreateParamPointsIntent create, object state, IModelContext context)
+    private void ExecuteCreateParamPoints(object state, IModelContext context)
     {
         if (!context.Parameters.TryGet(context.GeneralSettings.SelectedParamID, out Parameter parameter)) return;
+        if (context.GeneralSettings.SelectedMeshID == Guid.Empty) return;
 
-        ParamCurve paramCurve = new(create.MeshID, parameter.ID, autoRegister: false);
+        ParamCurve paramCurve = new(context.GeneralSettings.SelectedMeshID, parameter.ID, autoRegister: false);
         ParamPoint minPoint = new(parameter.MinValue, autoRegister: false);
         ParamPoint maxPoint = new(parameter.MaxValue, autoRegister: false);
 
@@ -90,7 +91,7 @@ public class ParameterCommandHandler : ICommandHandler
         }
 
         ParameterManager.Instance.GetParamSlider(parameter.ID).CreateParamPointHandles(paramValues);
-        ParameterManager.Instance.HighlightCreatedCurves(create.MeshID);
+        ParameterManager.Instance.HighlightCreatedCurves(context.GeneralSettings.SelectedMeshID);
     }
 
     private void ExecuteCreateParameter(CreateParameterIntent create, object state, IModelContext context)

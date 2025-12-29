@@ -1,6 +1,7 @@
 using System;
+using UnityEngine;
 
-namespace Assets.Scripts.ArtMesh
+namespace Assets.Scripts.States
 {
     public class MeshState
     {
@@ -21,7 +22,18 @@ namespace Assets.Scripts.ArtMesh
             IsInterpolated = false;
         }
 
-        public MeshState() { }
+        public MeshState()
+        {
+            ID = Guid.Empty;
+            MeshTransform = new()
+            {
+                Scale = Vector3.one
+            };
+            AnimationTransform = new();
+            InterpolatedTransform = new();
+            IsInterpolated = false;
+            IsSelected = false;
+        }
         public MeshState(MeshState ms)
         {
             ID = ms.ID;

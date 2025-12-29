@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Assets.Scripts.ArtMesh;
+using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
@@ -44,24 +44,22 @@ public class MeshManager : ManagerBase<MeshManager>
         MeshRegistry.Instance.Remove(id);
     }
 
-    public MeshData CreateArtMeshObj(Texture2D texture, string path)
+    public MeshData CreateArtMeshObj(Texture2D texture, MeshData newMesh)
     {
-        MeshData newMesh = new(path);
-
         // create ArtObject inside viewport and assign the image to its sprite
         MeshController meshController = SetupMeshController(texture, newMesh);
 
-        // TODO: move this in the future to an intent
-        var meshState = new MeshState(newMesh.ID, newMesh.transform, new TransformData());
-        var store = new Store<MeshState>(meshState, _appInitializer.Dispatcher);
-
-        var viewModel = meshController.gameObject.AddComponent<MeshViewModel>();
-        viewModel.Bind(store);
+        var viewModel = ViewModelFactory.Instance.CreateViewModel<MeshViewModel, MeshState>(meshController.gameObject, new MeshState()
+        {
+            ID = newMesh.ID,
+            MeshTransform = newMesh.transform,
+            AnimationTransform = new TransformData()
+        });
 
         meshController.SetViewModel(viewModel);
         meshController.GetBoundingBox().SetViewModel(viewModel);
 
-        _meshStores[newMesh.ID] = store;
+        _meshStores[newMesh.ID] = ((MeshViewModel)viewModel).GetStore();
         RegisterArtMeshObj(newMesh.ID, meshController);
         return newMesh;
     }
@@ -78,7 +76,7 @@ public class MeshManager : ManagerBase<MeshManager>
         }
     }
 
-    private MeshController SetupMeshController(Texture2D texture, MeshData newMesh)
+    public MeshController SetupMeshController(Texture2D texture, MeshData newMesh)
     {
         GameObject newArtObject = Instantiate(ArtObjectPrefab, ViewportScale.transform, false);
         newArtObject.name = "ArtObject" + newMesh.ID;

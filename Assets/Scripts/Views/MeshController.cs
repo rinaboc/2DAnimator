@@ -1,5 +1,5 @@
 using System;
-using Assets.Scripts.ArtMesh;
+using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
@@ -27,14 +27,14 @@ public class MeshController : MonoBehaviour, ISelectable, IView<MeshState>
 
     void OnEnable()
     {
-        UIEvents.LayerSelectEvent += OnSelect;
-        UIEvents.LayerDeselectEvent += OnDeselect;
+        // UIEvents.LayerSelectEvent += OnSelect;
+        // UIEvents.LayerDeselectEvent += OnDeselect;
     }
 
     void OnDestroy()
     {
-        UIEvents.LayerSelectEvent -= OnSelect;
-        UIEvents.LayerDeselectEvent -= OnDeselect;
+        // UIEvents.LayerSelectEvent -= OnSelect;
+        // UIEvents.LayerDeselectEvent -= OnDeselect;
 
         _viewModel?.Unbind(this);
     }

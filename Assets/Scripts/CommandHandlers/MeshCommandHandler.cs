@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.Scripts.ArtMesh;
+using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
@@ -14,8 +14,22 @@ public class MeshCommandHandler : ICommandHandler
             case SaveTransformIntent save:
                 ExecuteSaveTransform(save, state, context);
                 break;
+            case CreateMeshLayerIntent create:
+                ExecuteCreateMeshLayer(create, state, context);
+                break;
         }
         ;
+    }
+
+    private void ExecuteCreateMeshLayer(CreateMeshLayerIntent create, object state, IModelContext context)
+    {
+        MeshData newMesh = new(create.Path, autoRegister: false)
+        {
+            ID = create.ID
+        };
+
+        context.Meshes.Register(newMesh);
+        MeshManager.Instance.CreateArtMeshObj(create.Tex, newMesh);
     }
 
     private void ExecuteSaveTransform(SaveTransformIntent save, object state, IModelContext context)

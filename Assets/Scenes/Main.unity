@@ -2239,6 +2239,7 @@ MonoBehaviour:
   _paramPointRegistry: {fileID: 11400000, guid: b4427f2cfbcfab041b508eb6d4d5f756, type: 2}
   _keyFrameRegistry: {fileID: 11400000, guid: b7ce77acb23ae7147b7cd647e7b096dd, type: 2}
   _generalSettings: {fileID: 11400000, guid: 2632dc982b6d42540813fa421d06cc0e, type: 2}
+  _nfpController: {fileID: 220679284}
 --- !u!1 &858284473
 GameObject:
   m_ObjectHideFlags: 0
@@ -2834,6 +2835,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UIArtLayerPrefab: {fileID: 6070374671290091294, guid: f68554b2b1923634f9f0c2d6cc4377ff, type: 3}
   UILayersContent: {fileID: 2089455473}
+  _appInitializer: {fileID: 856699105}
 --- !u!1 &994627438
 GameObject:
   m_ObjectHideFlags: 0
@@ -3329,6 +3331,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 856699104}
+  - {fileID: 2093550484}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1286876753
@@ -5941,6 +5944,51 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HorizontalFit: 0
   m_VerticalFit: 2
+--- !u!1 &2093550483
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2093550484}
+  - component: {fileID: 2093550485}
+  m_Layer: 0
+  m_Name: ViewModelFactory
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2093550484
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2093550483}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1245127355}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2093550485
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2093550483}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46b875093ead629428bf37b29ab8b8ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _appInitializer: {fileID: 856699105}
 --- !u!1 &2109233542
 GameObject:
   m_ObjectHideFlags: 0

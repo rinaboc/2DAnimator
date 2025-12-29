@@ -1,9 +1,13 @@
 using UnityEngine;
 using System.IO;
 using System;
+using Assets.Scripts.Utility.MVI;
+using Assets.Scripts.States;
 
-public class NFPController : MonoBehaviour
+public class NFPController : MonoBehaviour, IView<OperationState>
 {
+    private IViewModel<OperationState> _viewModel;
+
     void Start()
     {
         RequestPermissionAsynchronously(false);
@@ -32,8 +36,10 @@ public class NFPController : MonoBehaviour
             if (LoadImage(path, out Texture2D texture))
             {
                 // create new artmesh
-                MeshData meshData = MeshManager.Instance.CreateArtMeshObj(texture, path);
-                LayerManager.Instance.CreateUIArtLayer(meshData);
+                _viewModel.Send(new CreateMeshLayerIntent(Guid.NewGuid(), texture, path));
+
+                // MeshData meshData = MeshManager.Instance.CreateArtMeshObj(texture, path);
+                // LayerManager.Instance.CreateUIArtLayer(meshData);
             }
 
         }, fileTypes);
@@ -59,5 +65,15 @@ public class NFPController : MonoBehaviour
         }
 
         return false;
+    }
+
+    public void Render(OperationState state)
+    {
+    }
+
+    public void SetViewModel(IViewModel<OperationState> viewModel)
+    {
+        _viewModel = viewModel;
+        _viewModel.Bind(this);
     }
 }

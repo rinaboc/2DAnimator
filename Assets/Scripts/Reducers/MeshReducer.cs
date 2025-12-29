@@ -1,5 +1,5 @@
 using System;
-using Assets.Scripts.ArtMesh;
+using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
@@ -9,11 +9,20 @@ public class MeshReducer : IReducer<MeshState>
     {
         return intent switch
         {
+            SelectLayerIntent select => ReduceSelectLayer(previous, select),
             UpdateTransformIntent update => ReduceUpdateTransform(previous, update),
             SaveTransformIntent save => ReduceSaveTransform(previous, save),
             InterpolateTransformIntent interpolate => ReduceInterpolateTransform(previous, interpolate),
             ResetInterpolationIntent reset => ReduceResetInterpolation(previous, reset),
             _ => previous
+        };
+    }
+
+    private MeshState ReduceSelectLayer(MeshState previous, SelectLayerIntent select)
+    {
+        return new MeshState(previous)
+        {
+            IsSelected = previous.ID == select.LayerID
         };
     }
 
