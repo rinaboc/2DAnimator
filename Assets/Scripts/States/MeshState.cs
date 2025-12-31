@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts.States
@@ -11,16 +13,7 @@ namespace Assets.Scripts.States
         public TransformData InterpolatedTransform { get; set; }
         public bool IsInterpolated { get; set; }
         public bool IsSelected { get; set; }
-
-
-        public MeshState(Guid id, TransformData transform, TransformData animationTransform)
-        {
-            ID = id;
-            this.MeshTransform = transform;
-            this.AnimationTransform = animationTransform;
-            InterpolatedTransform = new();
-            IsInterpolated = false;
-        }
+        public ushort DrawOrder { get; set; }
 
         public MeshState()
         {
@@ -33,6 +26,7 @@ namespace Assets.Scripts.States
             InterpolatedTransform = new();
             IsInterpolated = false;
             IsSelected = false;
+            DrawOrder = 0;
         }
         public MeshState(MeshState ms)
         {
@@ -42,6 +36,30 @@ namespace Assets.Scripts.States
             InterpolatedTransform = ms.InterpolatedTransform;
             IsInterpolated = ms.IsInterpolated;
             IsSelected = ms.IsSelected;
+            DrawOrder = ms.DrawOrder;
         }
     }
+
+    public class MeshStates
+    {
+        public Dictionary<Guid, MeshState> Meshes { get; set; }
+        public Guid SelectedMeshID { get; set; }
+
+        public MeshStates()
+        {
+            Meshes = new();
+            SelectedMeshID = Guid.Empty;
+        }
+
+        public MeshStates Clone() => new()
+        {
+            Meshes = Meshes.ToDictionary(
+                p => p.Key,
+                p => new MeshState(p.Value)
+            ),
+            SelectedMeshID = SelectedMeshID
+        };
+
+    }
+
 }

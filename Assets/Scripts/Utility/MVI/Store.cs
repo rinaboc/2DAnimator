@@ -5,6 +5,7 @@ namespace Assets.Scripts.Utility.MVI
     public interface IStore
     {
         void Reduce(IIntent intent);
+        void Execute(IIntent intent);
     }
 
     public sealed class Store<TState> : IStore
@@ -27,9 +28,14 @@ namespace Assets.Scripts.Utility.MVI
             else
                 Reduce(intent);
 
-            _dispatcher.Execute(intent, State);
-
+            Execute(intent);
         }
+
+        public void Execute(IIntent intent)
+        {
+            _dispatcher.Execute(intent, State);
+        }
+
 
         public void Reduce(IIntent intent)
         {

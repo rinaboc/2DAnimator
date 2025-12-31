@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-public class ParameterSlider : Clickable, ISelectable, IView<ParameterStates>
+public class ParameterSlider : Clickable, IView<ParameterStates>
 {
     private Guid paramID;
 
@@ -149,23 +149,6 @@ public class ParameterSlider : Clickable, ISelectable, IView<ParameterStates>
     public float GetValue()
     {
         return sliderValue;
-    }
-
-    public void UpdateSlider(Parameter parameter)
-    {
-        SetParamName(parameter.Name);
-        SetMinMaxValues(parameter.MinValue, parameter.MaxValue);
-        SetValue(parameter.DefaultValue);
-    }
-
-    public void OnSelect(Guid id)
-    {
-        SetSelected(id == paramID);
-    }
-
-    public void OnDeselect()
-    {
-        SetSelected(false);
     }
 
     public void Render(ParameterStates state)

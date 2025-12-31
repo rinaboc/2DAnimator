@@ -31,6 +31,13 @@ namespace Assets.Scripts.States
         public Guid SelectedParamID { get; set; }
         public bool IsSettingsOpen { get; set; }
 
+        public ParameterStates()
+        {
+            Parameters = new();
+            SelectedParamID = Guid.Empty;
+            IsSettingsOpen = false;
+        }
+
         public ParameterStates Clone() => new()
         {
             Parameters = Parameters.ToDictionary(

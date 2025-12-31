@@ -3,14 +3,14 @@ using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
-public class MeshController : MonoBehaviour, ISelectable, IView<MeshState>
+public class MeshController : MonoBehaviour, IView<MeshStates>
 {
     public GameObject ArtMeshObject { get; private set; }
     [SerializeField] private Material ArtMeshMaterial;
     [SerializeField] private BoundingBox BoundingBox;
     public Guid ID { get; private set; }
 
-    private IViewModel<MeshState> _viewModel;
+    private IViewModel<MeshStates> _viewModel;
 
 
     private void Awake()
@@ -19,61 +19,16 @@ public class MeshController : MonoBehaviour, ISelectable, IView<MeshState>
             Debug.LogError("Not all fields have been assigned.");
     }
 
-    void Start()
-    {
-        if (MeshRegistry.Instance.TryGet(ID, out MeshData meshData))
-            SetDrawOrder(meshData.drawOrder);
-    }
-
-    void OnEnable()
-    {
-        // UIEvents.LayerSelectEvent += OnSelect;
-        // UIEvents.LayerDeselectEvent += OnDeselect;
-    }
-
     void OnDestroy()
     {
-        // UIEvents.LayerSelectEvent -= OnSelect;
-        // UIEvents.LayerDeselectEvent -= OnDeselect;
-
         _viewModel?.Unbind(this);
     }
 
     public MeshController SetMeshID(Guid id)
     {
         ID = id;
+        BoundingBox.SetID(id);
         return this;
-    }
-
-    /// <summary>
-    /// Update the two corner points that define a rectangular clipping area for drawing the ArtMesh.
-    /// </summary>
-    /// <returns></returns>
-    public MeshController UpdateClipAnchors()
-    {
-        ViewportManager viewportManager = ViewportManager.Instance;
-
-        Material _meshMaterial = ArtMeshObject.GetComponent<MeshRenderer>().material;
-
-        if (_meshMaterial != null)
-        {
-            _meshMaterial.SetVector("_TopLeftAnchor", viewportManager.TopLeftAnchor);
-            _meshMaterial.SetVector("_BottomRightAnchor", viewportManager.BottomRightAnchor);
-        }
-
-        BoundingBox.SetClipArea();
-
-        return this;
-    }
-
-    public void SwapDrawOrder(MeshController swap)
-    {
-        MeshRegistry.Instance.TryGet(swap.ID, out MeshData swapMeshData);
-        ushort newDrawOrder = swapMeshData.drawOrder;
-        MeshRegistry.Instance.TryGet(ID, out MeshData thisMeshData);
-        swap.SetDrawOrder(thisMeshData.drawOrder);
-        this.SetDrawOrder(newDrawOrder);
-
     }
 
     public MeshController SetDrawOrder(ushort newDrawOrder)
@@ -162,22 +117,7 @@ public class MeshController : MonoBehaviour, ISelectable, IView<MeshState>
                 break;
         }
 
-        _viewModel?.Send(new UpdateTransformIntent(transform, type));
-    }
-
-    public void OnDeselect()
-    {
-        SetSelected(false);
-    }
-
-    public void OnSelect(Guid id)
-    {
-        SetSelected(id == ID);
-    }
-
-    public void SetSelected(bool isSelected)
-    {
-        BoundingBox.SetSelected(isSelected);
+        _viewModel?.Send(new UpdateTransformIntent(ID, transform, type));
     }
 
     /// <summary>
@@ -188,20 +128,24 @@ public class MeshController : MonoBehaviour, ISelectable, IView<MeshState>
     /// <param name="value">transformation's value</param>
     public void SaveTransform(TransformType type)
     {
-        _viewModel.Send(new SaveTransformIntent(type));
+        _viewModel.Send(new SaveTransformIntent(ID, type));
     }
 
-    public void Render(MeshState state)
+    public void Render(MeshStates state)
     {
-        TransformData transform = state.MeshTransform + state.AnimationTransform;
-        if (state.IsInterpolated)
+        if (!state.Meshes.TryGetValue(ID, out var meshState)) return;
+
+        TransformData transform = meshState.MeshTransform + meshState.AnimationTransform;
+        if (meshState.IsInterpolated)
         {
-            transform = state.InterpolatedTransform;
+            transform = meshState.InterpolatedTransform;
         }
 
         MoveArtMesh(transform.Position);
         RotateArtMesh(transform.Rotation);
         ScaleArtMesh(transform.Scale);
+
+        SetDrawOrder(meshState.DrawOrder);
     }
 
     public BoundingBox GetBoundingBox() => BoundingBox;
@@ -211,7 +155,7 @@ public class MeshController : MonoBehaviour, ISelectable, IView<MeshState>
         _viewModel?.Send(new ResetInterpolationIntent(ID));
     }
 
-    public void SetViewModel(IViewModel<MeshState> viewModel)
+    public void SetViewModel(IViewModel<MeshStates> viewModel)
     {
         _viewModel = viewModel;
         _viewModel?.Bind(this);

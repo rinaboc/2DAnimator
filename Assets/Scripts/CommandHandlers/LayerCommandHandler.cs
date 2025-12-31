@@ -16,7 +16,31 @@ public class LayerCommandHandler : ICommandHandler
             case SelectLayerIntent select:
                 ExecuteSelectLayer(select, state, context);
                 break;
+            case MoveLayerUpIntent _:
+                ExecuteMoveLayerUp(state, context);
+                break;
+            case MoveLayerDownIntent _:
+                ExecuteMoveLayerDown(state, context);
+                break;
+            case DeleteLayerIntent _:
+                ExecuteDeleteLayer(state, context);
+                break;
         }
+    }
+
+    private void ExecuteDeleteLayer(object state, IModelContext context)
+    {
+        LayerManager.Instance.DeleteUILayer(context.GeneralSettings.SelectedMeshID);
+    }
+
+    private void ExecuteMoveLayerDown(object state, IModelContext context)
+    {
+        LayerManager.Instance.MoveLayerDown(context.GeneralSettings.SelectedMeshID);
+    }
+
+    private void ExecuteMoveLayerUp(object state, IModelContext context)
+    {
+        LayerManager.Instance.MoveLayerUp(context.GeneralSettings.SelectedMeshID);
     }
 
     private void ExecuteSelectLayer(SelectLayerIntent select, object state, IModelContext context)

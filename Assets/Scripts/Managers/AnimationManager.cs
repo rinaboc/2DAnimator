@@ -156,7 +156,7 @@ public class AnimationManager : ManagerBase<AnimationManager>
                 continue;
             }
 
-            MeshManager.Instance.DispatchToMeshStore(meshId, new InterpolateTransformIntent(meshId, delta));
+            MeshManager.Instance.DispatchToMeshStore(new InterpolateTransformIntent(meshId, delta));
             // artMesh.MoveArtMesh(meshData.transform.Position + delta.Position);
             // artMesh.ScaleArtMesh(meshData.transform.Scale + delta.Scale);
             // artMesh.RotateArtMesh(meshData.transform.Rotation * delta.Rotation);

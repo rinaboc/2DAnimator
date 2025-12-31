@@ -7,28 +7,18 @@ using UnityEngine;
 public class MeshManager : ManagerBase<MeshManager>
 {
     [SerializeField] private Dictionary<Guid, MeshController> _meshControllers = new();
-    private Dictionary<Guid, Store<MeshState>> _meshStores = new();
-
-    [SerializeField] private AppInitializer _appInitializer;
+    private Store<MeshStates> _store;
+    private IViewModel<MeshStates> _viewModel;
 
 
     [Header("Art Mesh creation")]
     [SerializeField] private GameObject ArtObjectPrefab;
     [SerializeField] private GameObject ViewportScale;
 
-    override protected void Awake()
+    void Start()
     {
-        base.Awake();
-    }
-
-    void OnEnable()
-    {
-        UIEvents.LayerDeleteEvent += DeleteArtMeshObj;
-    }
-
-    void OnDisable()
-    {
-        UIEvents.LayerDeleteEvent -= DeleteArtMeshObj;
+        _viewModel = ViewModelFactory.Instance.CreateViewModel<MeshViewModel, MeshStates>(gameObject);
+        _store = ((MeshViewModel)_viewModel).GetStore();
     }
 
     public bool GetMeshObject(Guid id, out MeshController artMesh) => _meshControllers.TryGetValue(id, out artMesh);
@@ -40,52 +30,32 @@ public class MeshManager : ManagerBase<MeshManager>
         MeshController artMesh = _meshControllers[id];
         _meshControllers.Remove(id);
         Destroy(artMesh.gameObject);
-
-        MeshRegistry.Instance.Remove(id);
     }
 
-    public MeshData CreateArtMeshObj(Texture2D texture, MeshData newMesh)
+    public void CreateArtMeshObj(Texture2D texture, Guid ID)
     {
         // create ArtObject inside viewport and assign the image to its sprite
-        MeshController meshController = SetupMeshController(texture, newMesh);
+        MeshController meshController = SetupMeshController(texture, ID);
 
-        var viewModel = ViewModelFactory.Instance.CreateViewModel<MeshViewModel, MeshState>(meshController.gameObject, new MeshState()
-        {
-            ID = newMesh.ID,
-            MeshTransform = newMesh.transform,
-            AnimationTransform = new TransformData()
-        });
+        meshController.SetViewModel(_viewModel);
+        meshController.GetBoundingBox().SetViewModel(_viewModel);
 
-        meshController.SetViewModel(viewModel);
-        meshController.GetBoundingBox().SetViewModel(viewModel);
-
-        _meshStores[newMesh.ID] = ((MeshViewModel)viewModel).GetStore();
-        RegisterArtMeshObj(newMesh.ID, meshController);
-        return newMesh;
+        RegisterArtMeshObj(ID, meshController);
     }
 
-    public void DispatchToMeshStore(Guid meshId, IIntent intent)
+    public void DispatchToMeshStore(IIntent intent)
     {
-        if (_meshStores.TryGetValue(meshId, out Store<MeshState> store))
-        {
-            store.Dispatch(intent);
-        }
-        else
-        {
-            Debug.LogError($"No store found for mesh {meshId}");
-        }
+        _store.Dispatch(intent);
     }
 
-    public MeshController SetupMeshController(Texture2D texture, MeshData newMesh)
+    public MeshController SetupMeshController(Texture2D texture, Guid ID)
     {
         GameObject newArtObject = Instantiate(ArtObjectPrefab, ViewportScale.transform, false);
-        newArtObject.name = "ArtObject" + newMesh.ID;
+        newArtObject.name = "ArtObject" + ID;
         MeshController meshController = newArtObject.GetComponent<MeshController>();
         meshController
             .LoadSprite(texture)
-            .SetMeshID(newMesh.ID)
-            .SetDrawOrder(newMesh.drawOrder)
-            .SetSelected(false);
+            .SetMeshID(ID);
         return meshController;
     }
 
@@ -99,7 +69,7 @@ public class MeshManager : ManagerBase<MeshManager>
             if (NFPController.LoadImage(item.sourcePath, out Texture2D texture))
             {
                 MeshRegistry.Instance.Register(item);
-                MeshController meshController = SetupMeshController(texture, item);
+                MeshController meshController = SetupMeshController(texture, item.ID);
                 meshController.LoadTransformationFromMeshData();
                 RegisterArtMeshObj(item.ID, meshController);
             }

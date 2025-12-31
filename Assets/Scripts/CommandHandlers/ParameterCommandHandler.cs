@@ -26,7 +26,24 @@ public class ParameterCommandHandler : ICommandHandler
             case OpenParameterCreatorIntent _:
                 ExecuteOpenParameterCreator(state, context);
                 break;
+            case SelectLayerIntent select:
+                ExecuteSelectLayer(select, state, context);
+                break;
+            case DeleteLayerIntent _:
+                ExecuteDeleteLayer(state, context);
+                break;
         }
+    }
+
+    private void ExecuteDeleteLayer(object state, IModelContext context)
+    {
+        ParameterManager.Instance.HighlightCurves(new());
+    }
+
+    private void ExecuteSelectLayer(SelectLayerIntent select, object state, IModelContext context)
+    {
+        List<Guid> paramIDs = context.ParamCurves.GetAssignedParamIDsOfMesh(select.LayerID);
+        ParameterManager.Instance.HighlightCurves(paramIDs);
     }
 
     private void ExecuteOpenParameterCreator(object state, IModelContext context)
@@ -91,7 +108,8 @@ public class ParameterCommandHandler : ICommandHandler
         }
 
         ParameterManager.Instance.GetParamSlider(parameter.ID).CreateParamPointHandles(paramValues);
-        ParameterManager.Instance.HighlightCreatedCurves(context.GeneralSettings.SelectedMeshID);
+        List<Guid> assignedParams = context.ParamCurves.GetAssignedParamIDsOfMesh(context.GeneralSettings.SelectedMeshID);
+        ParameterManager.Instance.HighlightCurves(assignedParams);
     }
 
     private void ExecuteCreateParameter(CreateParameterIntent create, object state, IModelContext context)
@@ -101,7 +119,7 @@ public class ParameterCommandHandler : ICommandHandler
             ID = create.ParamID
         };
         context.Parameters.Register(parameter);
-        ParameterManager.Instance.CreateParameterSlider(parameter);
+        ParameterManager.Instance.CreateParameterSlider(create.ParamID);
     }
 
     private void ExecuteSelectParameter(SelectParameterIntent select, object state, IModelContext context)

@@ -1,20 +1,28 @@
+using System;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
-public class BoundingBox : MonoBehaviour, IView<MeshState>
+public class BoundingBox : MonoBehaviour, IView<MeshStates>
 {
     [SerializeField] private GameObject Center;
     [SerializeField] private GameObject Corners;
 
     public BoxCollider boxCollider;
+    public Guid ID { get; private set; }
+    public void SetID(Guid id) => ID = id;
 
-    private IViewModel<MeshState> _viewModel;
+    private IViewModel<MeshStates> _viewModel;
 
     private void Awake()
     {
         if (Center == null || Corners == null) Debug.LogError("Not all fields have been assigned.");
+    }
+
+    void OnDestroy()
+    {
+        _viewModel?.Unbind(this);
     }
 
     /// <summary>
@@ -87,14 +95,15 @@ public class BoundingBox : MonoBehaviour, IView<MeshState>
         Corners.SetActive(isSelected);
     }
 
-    public void Render(MeshState state)
+    public void Render(MeshStates state)
     {
-        Vector3 combinedScale = state.MeshTransform.Scale + state.AnimationTransform.Scale;
+        if (!state.Meshes.TryGetValue(ID, out var meshState)) return;
+        Vector3 combinedScale = meshState.MeshTransform.Scale + meshState.AnimationTransform.Scale;
         CreateBoundingBox(boxCollider.center, Vector3.Scale(boxCollider.size, combinedScale));
-        SetSelected(state.IsSelected);
+        SetSelected(meshState.IsSelected);
     }
 
-    public void SetViewModel(IViewModel<MeshState> viewModel)
+    public void SetViewModel(IViewModel<MeshStates> viewModel)
     {
         _viewModel = viewModel;
         _viewModel?.Bind(this);

@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-public class LayerController : Clickable, ISelectable, IView<LayerStates>
+public class LayerController : Clickable, IView<LayerStates>
 {
     public GameObject ParentObj;
     [SerializeField] private Color SelectedColor;
@@ -29,30 +29,16 @@ public class LayerController : Clickable, ISelectable, IView<LayerStates>
         DoubleClickAction = InputSystem.actions.FindAction("DoubleClick");
         DoubleClickAction.performed += OnDoubleClick;
 
-        UIEvents.LayerSelectEvent += OnSelect;
-        UIEvents.LayerDeselectEvent += OnDeselect;
-
         ParentObj.GetComponent<Button>().onClick.AddListener(() =>
         {
-            _viewModel.Send(new SelectLayerIntent(ID));
+            _viewModel?.Send(new SelectLayerIntent(ID));
         });
     }
 
     void OnDestroy()
     {
         DoubleClickAction.performed -= OnDoubleClick;
-        UIEvents.LayerSelectEvent -= OnSelect;
-        UIEvents.LayerDeselectEvent -= OnDeselect;
-    }
-
-    public void OnDeselect()
-    {
-        SetSelected(false);
-    }
-
-    public void OnSelect(Guid id)
-    {
-        SetSelected(id == ID);
+        _viewModel?.Unbind(this);
     }
 
     public void SetSelected(bool isSelected)
@@ -68,12 +54,6 @@ public class LayerController : Clickable, ISelectable, IView<LayerStates>
         return this;
     }
 
-    public LayerController SetText(string text)
-    {
-        LayerInput.text = text;
-        return this;
-    }
-
     void OnDoubleClick(InputAction.CallbackContext context)
     {
         if (IsInsideCollider())
@@ -84,11 +64,6 @@ public class LayerController : Clickable, ISelectable, IView<LayerStates>
 
     public void TextChanged()
     {
-        // if (MeshRegistry.Instance.TryGet(ID, out MeshData meshData))
-        // {
-        //     meshData.name = LayerInput.text;
-        //     Debug.Log(meshData.ToString());
-        // }
         _viewModel.Send(new ChangeLayerNameIntent(ID, LayerInput.text));
     }
 

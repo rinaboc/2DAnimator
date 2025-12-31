@@ -10,44 +10,17 @@ public class ParameterManager : ManagerBase<ParameterManager>
     [SerializeField] private Transform ParamWidgetContent;
 
     private readonly Dictionary<Guid, GameObject> _paramSliders = new();
-    private Store<ParameterStates> _store;
-    private ParameterStates _state;
-    private ParametersViewModel _viewModel;
+    private IViewModel<ParameterStates> _viewModel;
 
     [SerializeField] private ParameterSettingsView _parameterSettingsView;
 
-    [SerializeField] private AppInitializer _appInitializer;
-
     public ParameterSlider GetParamSlider(Guid id) => _paramSliders[id].GetComponent<ParameterSlider>();
-
-    protected override void Awake()
-    {
-        base.Awake();
-        _state = new ParameterStates()
-        {
-            Parameters = new Dictionary<Guid, ParameterState>()
-        };
-        _store = new Store<ParameterStates>(_state, _appInitializer.Dispatcher);
-        _viewModel = gameObject.AddComponent<ParametersViewModel>();
-        _viewModel.Bind(_store);
-    }
 
     void Start()
     {
+        _viewModel = ViewModelFactory.Instance.CreateViewModel<ParametersViewModel, ParameterStates>(gameObject);
         _parameterSettingsView.SetViewModel(_viewModel);
         CreateDebugParam();
-    }
-
-    void OnEnable()
-    {
-        UIEvents.LayerDeleteEvent += DeleteParamPointsOfMesh;
-        UIEvents.LayerSelectEvent += OnLayerSelect;
-    }
-
-    void OnDisable()
-    {
-        UIEvents.LayerDeleteEvent -= DeleteParamPointsOfMesh;
-        UIEvents.LayerSelectEvent -= OnLayerSelect;
     }
 
     public bool ParameterWidgetVisibility
@@ -60,23 +33,21 @@ public class ParameterManager : ManagerBase<ParameterManager>
 
     public void CreateDebugParam()
     {
-        _store.Dispatch(new CreateParameterIntent(Guid.NewGuid(), 0, 1, 0, "parameter"));
+        _viewModel.Send(new CreateParameterIntent(Guid.NewGuid(), 0, 1, 0, "parameter"));
     }
 
     public void CreatePointsForCurrentMesh()
     {
-        // MeshController selectedArtMesh = LayerManager.Instance.SelectedArtMesh;
-        // if (selectedArtMesh == null) return;
-        _store.Dispatch(new CreateParamPointsIntent());
+        _viewModel.Send(new CreateParamPointsIntent());
     }
 
-    public void CreateParameterSlider(Parameter parameter)
+    public void CreateParameterSlider(Guid ID)
     {
         GameObject paramSlider = Instantiate(ParamSliderPrefab, ParamWidgetContent);
         ParameterSlider parameterSlider = paramSlider.GetComponent<ParameterSlider>();
-        parameterSlider.SetParamID(parameter.ID);
+        parameterSlider.SetParamID(ID);
 
-        _paramSliders.Add(parameter.ID, paramSlider);
+        _paramSliders.Add(ID, paramSlider);
         parameterSlider.SetViewModel(_viewModel);
 
     }
@@ -103,49 +74,20 @@ public class ParameterManager : ManagerBase<ParameterManager>
 
     public void DeleteSelectedParameterSlider()
     {
-        _store.Dispatch(new DeleteSelectedParameterIntent());
+        _viewModel.Send(new DeleteSelectedParameterIntent());
     }
 
-    public void DeleteParamPointsOfMesh(Guid meshID)
+    public void HighlightCurves(List<Guid> paramIDs)
     {
-        DeleteAnimationDataOfMesh(meshID);
-        HighlightCreatedCurves(meshID);
-    }
-
-    public void DeleteAnimationDataOfMesh(Guid id)
-    {
-        ParamCurveRegistry paramCurveRegistry = ParamCurveRegistry.Instance;
-        ParamPointRegistry paramPointRegistry = ParamPointRegistry.Instance;
-        List<ParamCurve> paramCurves = paramCurveRegistry.GetParamCurvesOfMesh(id);
-        for (int i = 0; i < paramCurves.Count; i++)
-        {
-            ParamCurve paramCurve = paramCurves[i];
-            foreach (Guid pointID in paramCurve.ParamPoints)
-            {
-                paramPointRegistry.Remove(pointID);
-            }
-            paramCurveRegistry.Remove(paramCurve.ID);
-        }
-    }
-
-    private void OnLayerSelect(Guid id)
-    {
-        HighlightCreatedCurves(id);
-    }
-
-    public void HighlightCreatedCurves(Guid meshID)
-    {
-        List<Guid> assignedParams = ParamCurveRegistry.Instance.GetAssignedParamIDsOfMesh(meshID);
-
         foreach (var item in _paramSliders)
         {
-            item.Value.GetComponent<ParameterSlider>().SetAssignedCurve(assignedParams.Contains(item.Key));
+            item.Value.GetComponent<ParameterSlider>().SetAssignedCurve(paramIDs.Contains(item.Key));
         }
     }
 
-    public void DispatchToParameterStore(Guid paramID, IIntent intent)
+    public void DispatchToParameterStore(IIntent intent)
     {
-        _store.Dispatch(intent);
+        _viewModel.Send(intent);
     }
 
     public override void LoadState(SaveData saveData)
@@ -158,7 +100,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
         foreach (var item in saveData.Parameters)
         {
             ParameterRegistry.Instance.Register(item);
-            CreateParameterSlider(item);
+            CreateParameterSlider(item.ID);
         }
 
         foreach (var item in saveData.ParamPoints)

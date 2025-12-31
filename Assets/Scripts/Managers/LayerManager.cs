@@ -20,39 +20,8 @@ public class LayerManager : ManagerBase<LayerManager>
 
     private IViewModel<LayerStates> _viewModel;
 
-    [SerializeField] private AppInitializer _appInitializer;
-
     private InputAction CancelAction;
 
-    /// <summary>
-    /// Currently selected mesh data's id
-    /// </summary>
-    private bool _isLayerSelected = false;
-    private Guid _selectedLayerID;
-
-    private GameObject SelectedUILayer
-    {
-        get
-        {
-            if (_isLayerSelected && GetUILayer(_selectedLayerID, out LayerController layer))
-            {
-                return layer.ParentObj;
-            }
-            else return null;
-        }
-    }
-
-    public MeshController SelectedArtMesh
-    {
-        get
-        {
-            if (_isLayerSelected && MeshManager.Instance.GetMeshObject(_selectedLayerID, out MeshController artMesh))
-            {
-                return artMesh;
-            }
-            else return null;
-        }
-    }
 
     void Start()
     {
@@ -73,7 +42,7 @@ public class LayerManager : ManagerBase<LayerManager>
 
     private void OnCancel(InputAction.CallbackContext context)
     {
-        DeselectCurrentUIArtLayer();
+        _viewModel.Send(new SelectLayerIntent(Guid.Empty));
     }
 
     /// <summary>
@@ -92,86 +61,49 @@ public class LayerManager : ManagerBase<LayerManager>
         _layerControllers.TryAdd(ID, layerController);
     }
 
-    public void SelectUIArtLayer(Guid id)
-    {
-        // deselect previous layer
-        DeselectCurrentUIArtLayer();
-
-        // select the new layer
-        _selectedLayerID = id;
-        _isLayerSelected = true;
-
-        UIEvents.RaiseLayerSelect(id);
-    }
-
-    public void DeselectCurrentUIArtLayer()
-    {
-        if (_isLayerSelected)
-        {
-            UIEvents.RaiseLayerDeselect();
-            // SelectedUILayer.GetComponentInChildren<LayerController>().SetSelected(false);
-            SelectedArtMesh.SetSelected(false);
-        }
-    }
-
     public void MoveUIArtLayerUp()
     {
-        if (!_isLayerSelected) return; // nothing is selected
+        _viewModel.Send(new MoveLayerUpIntent());
+    }
 
-        Transform selectedArtLayer = SelectedUILayer.transform;
-        int artLayerIndex = selectedArtLayer.GetSiblingIndex();
-
-        if (artLayerIndex > 0)
+    public void MoveLayerUp(Guid ID)
+    {
+        if (!GetUILayer(ID, out LayerController layer)) return;
+        int layerIdx = layer.ParentObj.transform.GetSiblingIndex();
+        if (layerIdx > 0)
         {
-            Guid swappedID = UILayersContent.transform.GetChild(artLayerIndex - 1).gameObject.GetComponentInChildren<LayerController>().ID;
-            MeshManager.Instance.GetMeshObject(swappedID, out MeshController swappedMesh);
-            SelectedArtMesh.SwapDrawOrder(swappedMesh);
-
-            selectedArtLayer.SetSiblingIndex(artLayerIndex - 1);
-
+            layer.ParentObj.transform.SetSiblingIndex(layerIdx - 1);
         }
     }
 
     public void MoveUIArtLayerDown()
     {
-        if (!_isLayerSelected) return;
+        _viewModel.Send(new MoveLayerDownIntent());
+    }
 
-        Transform selectedArtLayer = SelectedUILayer.transform;
-        int artLayerIndex = selectedArtLayer.GetSiblingIndex();
-
-        if (artLayerIndex < UILayersContent.transform.childCount - 1)
+    public void MoveLayerDown(Guid ID)
+    {
+        if (!GetUILayer(ID, out LayerController layer)) return;
+        int layerIdx = layer.ParentObj.transform.GetSiblingIndex();
+        if (layerIdx < UILayersContent.transform.childCount - 1)
         {
-            Guid swappedID = UILayersContent.transform.GetChild(artLayerIndex + 1).gameObject.GetComponentInChildren<LayerController>().ID;
-            MeshManager.Instance.GetMeshObject(swappedID, out MeshController swappedMesh);
-            SelectedArtMesh.SwapDrawOrder(swappedMesh);
-
-            selectedArtLayer.SetSiblingIndex(artLayerIndex + 1);
+            layer.ParentObj.transform.SetSiblingIndex(layerIdx + 1);
         }
     }
 
     public void DeleteSelectedArtObject()
     {
-        if (!_isLayerSelected) return;
-
-        Guid meshID = SelectedArtMesh.ID;
-
-        DeleteUILayer(meshID);
-
-        // deselect
-        _isLayerSelected = false;
+        _viewModel.Send(new DeleteLayerIntent());
     }
 
     private bool GetUILayer(Guid id, out LayerController layer) => _layerControllers.TryGetValue(id, out layer);
 
-    private bool RegisterUILayer(Guid id, LayerController controller) => _layerControllers.TryAdd(id, controller);
-
-    private bool DeleteUILayer(Guid id)
+    public bool DeleteUILayer(Guid id)
     {
         if (_layerControllers.TryGetValue(id, out LayerController layer))
         {
             _layerControllers.Remove(id);
             Destroy(layer.ParentObj);
-            UIEvents.RaiseLayerDelete(id);
             return true;
         }
 

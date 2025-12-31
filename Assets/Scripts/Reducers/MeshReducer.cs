@@ -1,11 +1,12 @@
 using System;
+using System.Linq;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
-public class MeshReducer : IReducer<MeshState>
+public class MeshReducer : IReducer<MeshStates>
 {
-    public MeshState Reduce(MeshState previous, IIntent intent)
+    public MeshStates Reduce(MeshStates previous, IIntent intent)
     {
         return intent switch
         {
@@ -14,67 +15,166 @@ public class MeshReducer : IReducer<MeshState>
             SaveTransformIntent save => ReduceSaveTransform(previous, save),
             InterpolateTransformIntent interpolate => ReduceInterpolateTransform(previous, interpolate),
             ResetInterpolationIntent reset => ReduceResetInterpolation(previous, reset),
+            CreateMeshLayerIntent create => ReduceCreateMeshLayer(previous, create),
+            MoveLayerDownIntent _ => ReduceMoveLayerDown(previous),
+            MoveLayerUpIntent _ => ReduceMoveLayerUp(previous),
+            DeleteLayerIntent _ => ReduceDeleteLayer(previous),
             _ => previous
         };
     }
 
-    private MeshState ReduceSelectLayer(MeshState previous, SelectLayerIntent select)
+    private MeshStates ReduceDeleteLayer(MeshStates previous)
     {
-        return new MeshState(previous)
+        if (previous.SelectedMeshID == Guid.Empty) return previous;
+
+        var next = previous.Clone();
+        next.Meshes.Remove(previous.SelectedMeshID);
+        next.SelectedMeshID = Guid.Empty;
+
+        return next;
+    }
+
+    private MeshStates ReduceMoveLayerDown(MeshStates previous)
+    {
+        var next = previous.Clone();
+        MeshState selectedMesh = next.Meshes[previous.SelectedMeshID];
+        ushort inf = 0;
+        Guid swapID = Guid.Empty;
+        foreach ((_, MeshState meshState) in next.Meshes)
         {
-            IsSelected = previous.ID == select.LayerID
+            if (meshState.DrawOrder < selectedMesh.DrawOrder && meshState.DrawOrder >= inf)
+            {
+                inf = meshState.DrawOrder;
+                swapID = meshState.ID;
+            }
+        }
+
+        if (swapID != Guid.Empty)
+        {
+            MeshState swappedMesh = next.Meshes[swapID];
+            (swappedMesh.DrawOrder, selectedMesh.DrawOrder) = (selectedMesh.DrawOrder, swappedMesh.DrawOrder);
+        }
+        else
+            return previous;
+
+        return next;
+    }
+
+    private MeshStates ReduceMoveLayerUp(MeshStates previous)
+    {
+        var next = previous.Clone();
+        MeshState selectedMesh = next.Meshes[previous.SelectedMeshID];
+        ushort inf = ushort.MaxValue;
+        Guid swapID = Guid.Empty;
+        foreach ((_, MeshState meshState) in next.Meshes)
+        {
+            if (meshState.DrawOrder > selectedMesh.DrawOrder && meshState.DrawOrder < inf)
+            {
+                inf = meshState.DrawOrder;
+                swapID = meshState.ID;
+            }
+        }
+
+        if (swapID != Guid.Empty)
+        {
+            MeshState swappedMesh = next.Meshes[swapID];
+            (swappedMesh.DrawOrder, selectedMesh.DrawOrder) = (selectedMesh.DrawOrder, swappedMesh.DrawOrder);
+        }
+        else
+            return previous;
+
+        return next;
+    }
+
+    private MeshStates ReduceCreateMeshLayer(MeshStates previous, CreateMeshLayerIntent create)
+    {
+        var next = previous.Clone();
+
+        next.Meshes[create.ID] = new()
+        {
+            ID = create.ID,
+            MeshTransform = new TransformData() { Scale = Vector3.one },
+            AnimationTransform = new TransformData(),
+            DrawOrder = (ushort)next.Meshes.Count
+        };
+
+        return next;
+    }
+
+    private MeshStates ReduceSelectLayer(MeshStates previous, SelectLayerIntent select)
+    {
+        return new()
+        {
+            Meshes = previous.Meshes.ToDictionary(
+                p => p.Key,
+                p => new MeshState(p.Value)
+                {
+                    IsSelected = p.Key == select.LayerID
+                }
+            ),
+            SelectedMeshID = select.LayerID
         };
     }
 
-    private MeshState ReduceResetInterpolation(MeshState previous, ResetInterpolationIntent reset)
+    private MeshStates ReduceResetInterpolation(MeshStates previous, ResetInterpolationIntent reset)
     {
-        return new MeshState(previous)
+        return new()
         {
-            IsInterpolated = false
+            Meshes = previous.Meshes.ToDictionary(
+                p => p.Key,
+                p => new MeshState(p.Value)
+                {
+                    IsInterpolated = false
+                }
+            ),
+            SelectedMeshID = previous.SelectedMeshID
         };
     }
 
-    private MeshState ReduceInterpolateTransform(MeshState previous, InterpolateTransformIntent interpolate)
+    private MeshStates ReduceInterpolateTransform(MeshStates previous, InterpolateTransformIntent interpolate)
     {
-        return new MeshState(previous)
-        {
-            AnimationTransform = interpolate.Delta,
-            InterpolatedTransform = previous.MeshTransform + interpolate.Delta,
-            IsInterpolated = true
-        };
+        var next = previous.Clone();
+
+        var mesh = next.Meshes[interpolate.MeshID];
+        mesh.AnimationTransform = interpolate.Delta;
+        mesh.InterpolatedTransform = mesh.MeshTransform + interpolate.Delta;
+        mesh.IsInterpolated = true;
+
+        return next;
     }
 
-    private MeshState ReduceSaveTransform(MeshState previous, SaveTransformIntent save)
+    private MeshStates ReduceSaveTransform(MeshStates previous, SaveTransformIntent save)
     {
         return previous;
     }
 
-    private MeshState ReduceUpdateTransform(MeshState previous, UpdateTransformIntent update)
+    private MeshStates ReduceUpdateTransform(MeshStates previous, UpdateTransformIntent update)
     {
         // TODO: move this to state and connect an intent to set to true
-        bool areParametersAssigned = ParamCurveRegistry.Instance.GetAssignedParamIDsOfMesh(previous.ID).Count > 0;
+        bool areParametersAssigned = ParamCurveRegistry.Instance.GetAssignedParamIDsOfMesh(update.MeshID).Count > 0;
 
-        var next = new MeshState(previous);
+        var next = previous.Clone();
+        var mesh = next.Meshes[update.MeshID];
 
         switch (update.Type)
         {
             case TransformType.POSITION:
                 if (areParametersAssigned)
-                    next.AnimationTransform.Position = update.Data.Position - previous.MeshTransform.Position;
+                    mesh.AnimationTransform.Position = update.Data.Position - mesh.MeshTransform.Position;
                 else
-                    next.MeshTransform.Position = update.Data.Position;
+                    mesh.MeshTransform.Position = update.Data.Position;
                 break;
             case TransformType.ROTATION:
                 if (areParametersAssigned)
-                    next.AnimationTransform.Rotation = Quaternion.Inverse(previous.MeshTransform.Rotation) * update.Data.Rotation;
+                    mesh.AnimationTransform.Rotation = Quaternion.Inverse(mesh.MeshTransform.Rotation) * update.Data.Rotation;
                 else
-                    next.MeshTransform.Rotation = update.Data.Rotation;
+                    mesh.MeshTransform.Rotation = update.Data.Rotation;
                 break;
             case TransformType.SCALE:
                 if (areParametersAssigned)
-                    next.AnimationTransform.Scale = update.Data.Scale - previous.MeshTransform.Scale;
+                    mesh.AnimationTransform.Scale = update.Data.Scale - mesh.MeshTransform.Scale;
                 else
-                    next.MeshTransform.Scale = update.Data.Scale;
+                    mesh.MeshTransform.Scale = update.Data.Scale;
                 break;
         }
         return next;

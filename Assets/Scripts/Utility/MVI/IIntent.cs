@@ -25,8 +25,8 @@ namespace Assets.Scripts.Utility.MVI
 }
 
 #region Mesh Transformation
-public record UpdateTransformIntent(TransformData Data, TransformType Type) : IIntent;
-public record SaveTransformIntent(TransformType Type) : IIntent;
+public record UpdateTransformIntent(Guid MeshID, TransformData Data, TransformType Type) : IIntent;
+public record SaveTransformIntent(Guid MeshID, TransformType Type) : IIntent;
 public record InterpolateTransformIntent(Guid MeshID, TransformData Delta) : IIntent;
 public record ResetInterpolationIntent(Guid MeshID) : IIntent;
 #endregion
@@ -35,9 +35,9 @@ public record ResetInterpolationIntent(Guid MeshID) : IIntent;
 [GlobalIntent] public record CreateMeshLayerIntent(Guid ID, Texture2D Tex, string Path) : IIntent;
 [GlobalIntent] public record SelectLayerIntent(Guid LayerID) : IIntent;
 public record ChangeLayerNameIntent(Guid LayerID, string NewName) : IIntent;
-public record DeleteLayerIntent(Guid LayerID) : IIntent;
-public record MoveLayerUpIntent() : IIntent;
-public record MoveLayerDownIntent() : IIntent;
+[GlobalIntent] public record DeleteLayerIntent() : IIntent;
+[GlobalIntent] public record MoveLayerUpIntent() : IIntent;
+[GlobalIntent] public record MoveLayerDownIntent() : IIntent;
 #endregion
 
 #region Parameter Operations

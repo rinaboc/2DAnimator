@@ -12,9 +12,7 @@ public class LayerReducer : IReducer<LayerStates>
             CreateMeshLayerIntent create => ReduceCreateMeshLayer(previous, create),
             ChangeLayerNameIntent change => ReduceChangeLayerName(previous, change),
             SelectLayerIntent select => ReduceSelectLayer(previous, select),
-            DeleteLayerIntent delete => ReduceDeleteLayer(previous, delete),
-            MoveLayerUpIntent _ => ReduceMoveLayerUp(previous),
-            MoveLayerDownIntent _ => ReduceMoveLayerDown(previous),
+            DeleteLayerIntent _ => ReduceDeleteLayer(previous),
             _ => previous
         };
     }
@@ -33,19 +31,13 @@ public class LayerReducer : IReducer<LayerStates>
         return next;
     }
 
-    private LayerStates ReduceMoveLayerDown(LayerStates previous)
+    private LayerStates ReduceDeleteLayer(LayerStates previous)
     {
-        throw new NotImplementedException();
-    }
+        var next = previous.Clone();
+        next.Layers.Remove(previous.SelectedLayerID);
+        next.SelectedLayerID = Guid.Empty;
 
-    private LayerStates ReduceMoveLayerUp(LayerStates previous)
-    {
-        throw new NotImplementedException();
-    }
-
-    private LayerStates ReduceDeleteLayer(LayerStates previous, DeleteLayerIntent delete)
-    {
-        throw new NotImplementedException();
+        return next;
     }
 
     private LayerStates ReduceSelectLayer(LayerStates previous, SelectLayerIntent select)
