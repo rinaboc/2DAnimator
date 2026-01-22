@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.States;
 using UnityEngine.UIElements;
 
 [UxmlElement]
@@ -17,8 +18,10 @@ public partial class KeyframeLineElement : VisualElement
     {
         ParamID = parameter.ID;
 
-        _paramSlider = new ParameterSliderElement(parameter);
+        _paramSlider = ViewFactory.Instance.CreateView<ParameterSliderElement, ParameterStates>();
+        _paramSlider._paramID = ParamID;
         Add(_paramSlider);
+
         for (int j = 1; j <= MaxFrames; j++)
         {
             VisualElement cell = new();
@@ -48,7 +51,7 @@ public partial class KeyframeLineElement : VisualElement
 
     public void SetSliderValue(float value)
     {
-        _paramSlider.SetSliderValue(value);
+        _paramSlider?.SetSliderValue(value);
     }
 
     public void InsertKeyframeAt(int frame, KeyFrame key)

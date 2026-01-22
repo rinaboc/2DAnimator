@@ -10,11 +10,6 @@ public class DialogController<T> : BaseUIController where T : DialogElement
         dialogElement = ui.Q<T>();
     }
 
-    void OnEnable()
-    {
-        dialogElement.Q<Button>("ExitButton").clicked += () => ShowPanel(false);
-    }
-
     protected override void ShowPanel(bool isVisible)
     {
         if (isVisible)

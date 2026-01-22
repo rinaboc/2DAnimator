@@ -30,6 +30,17 @@ public class ViewModelFactory : MonoBehaviour
         return viewModel;
     }
 
+    public IViewModel<TState> CreateViewModel<TViewModel, TState>(GameObject parent, AppInitializer appInitializer)
+    where TViewModel : MonoBehaviour, IViewModel<TState>
+    where TState : new()
+    {
+        var state = new TState();
+        var store = new Store<TState>(state, appInitializer.Dispatcher);
+        var viewModel = parent.AddComponent<TViewModel>();
+        viewModel.Bind(store);
+        return viewModel;
+    }
+
     public IViewModel<TState> CreateViewModel<TViewModel, TState>(GameObject parent, TState state)
     where TViewModel : MonoBehaviour, IViewModel<TState>
     where TState : new()

@@ -1,13 +1,17 @@
+using Assets.Scripts.States;
+using Assets.Scripts.Utility.MVI;
 using Unity.Properties;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class TimelineSettingsController : DialogController<TimelineSettingsElement>, ILoadable
+public class TimelineSettingsController : DialogController<TimelineSettingsElement>, ILoadable, IView<TimelineState>
 {
     [SerializeField] TimelineWidgetController m_TimelineWidgetController;
 
     [SerializeField, CreateProperty] private int m_maxFrames;
     [SerializeField, CreateProperty] private int m_framePerSec;
+
+    private IViewModel<TimelineState> _viewModel;
 
     public void LoadState(SaveData saveData)
     {
@@ -18,6 +22,23 @@ public class TimelineSettingsController : DialogController<TimelineSettingsEleme
     public void RegisterLoadable()
     {
         SaveController.Register(this);
+    }
+
+    public void Render(TimelineState state)
+    {
+        ShowPanel(state.IsSettingsOpen);
+
+        if (state.IsSettingsOpen)
+        {
+            m_maxFrames = state.MaxFrames;
+            m_framePerSec = state.FramePerSec;
+        }
+    }
+
+    public void SetViewModel(IViewModel<TimelineState> viewModel)
+    {
+        _viewModel = viewModel;
+        _viewModel?.Bind(this);
     }
 
     void Start()
@@ -34,7 +55,7 @@ public class TimelineSettingsController : DialogController<TimelineSettingsEleme
             if (m_maxFrames > 60) m_maxFrames = 60;
             if (m_maxFrames < 2) m_maxFrames = 2;
 
-            m_TimelineWidgetController.SetMaxFrames(m_maxFrames);
+            _viewModel?.Send(new UpdateMaxFramesIntent(m_maxFrames));
         });
 
         var framePerSecField = ui.Q<IntegerField>("FramePerSec");
@@ -46,7 +67,9 @@ public class TimelineSettingsController : DialogController<TimelineSettingsEleme
         });
         framePerSecField.RegisterCallback<FocusOutEvent>(evt =>
         {
-            m_TimelineWidgetController.SetFramePerSec(m_framePerSec);
+            _viewModel?.Send(new UpdateFramePerSecIntent(m_framePerSec));
         });
+
+        dialogElement.Q<Button>("ExitButton").clicked += () => _viewModel?.Send(new TimelineSettingsOpenIntent());
     }
 }

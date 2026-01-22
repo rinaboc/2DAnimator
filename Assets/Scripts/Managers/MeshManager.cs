@@ -7,19 +7,12 @@ using UnityEngine;
 public class MeshManager : ManagerBase<MeshManager>
 {
     [SerializeField] private Dictionary<Guid, MeshController> _meshControllers = new();
-    private Store<MeshStates> _store;
     private IViewModel<MeshStates> _viewModel;
-
+    [SerializeField] private AppInitializer _appInitializer;
 
     [Header("Art Mesh creation")]
     [SerializeField] private GameObject ArtObjectPrefab;
     [SerializeField] private GameObject ViewportScale;
-
-    void Start()
-    {
-        _viewModel = ViewModelFactory.Instance.CreateViewModel<MeshViewModel, MeshStates>(gameObject);
-        _store = ((MeshViewModel)_viewModel).GetStore();
-    }
 
     public bool GetMeshObject(Guid id, out MeshController artMesh) => _meshControllers.TryGetValue(id, out artMesh);
 
@@ -37,15 +30,23 @@ public class MeshManager : ManagerBase<MeshManager>
         // create ArtObject inside viewport and assign the image to its sprite
         MeshController meshController = SetupMeshController(texture, ID);
 
+        if (_viewModel == null && !_appInitializer.GetViewModel(out _viewModel))
+        {
+            Debug.LogError("Couldn't fetch viewModel");
+        }
         meshController.SetViewModel(_viewModel);
         meshController.GetBoundingBox().SetViewModel(_viewModel);
 
         RegisterArtMeshObj(ID, meshController);
     }
 
-    public void DispatchToMeshStore(IIntent intent)
+    public void DispatchToMeshViewModel(IIntent intent)
     {
-        _store.Dispatch(intent);
+        if (_viewModel == null && !_appInitializer.GetViewModel(out _viewModel))
+        {
+            Debug.LogError("Couldn't fetch viewModel");
+        }
+        _viewModel?.Send(intent);
     }
 
     public MeshController SetupMeshController(Texture2D texture, Guid ID)

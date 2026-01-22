@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Assets.Scripts.States;
+using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class TimelineSliderElement : VisualElement
+public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
 {
     private float _sliderContainerWidth;
     private float _sliderWidth;
@@ -46,6 +47,7 @@ public partial class TimelineSliderElement : VisualElement
 
     List<List<VisualElement>> m_frameBars;
 
+    private IViewModel<TimelineState> _viewModel;
 
     public TimelineSliderElement()
     {
@@ -288,7 +290,16 @@ public partial class TimelineSliderElement : VisualElement
             UIEvents.RaiseDeleteSelectedKeyframe();
         };
 
+        Button settingsButton = new() { text = "Settings" };
+        settingsButton.AddToClassList("delete-keyframe-button");
+        settingsButton.clicked += () =>
+        {
+            Debug.Log("settings clicked");
+            _viewModel?.Send(new TimelineSettingsOpenIntent());
+        };
+
         header.Add(m_Label);
+        header.Add(settingsButton);
         header.Add(deleteKeyframeButton);
         header.Add(m_currentFrameField);
 
@@ -318,15 +329,23 @@ public partial class TimelineSliderElement : VisualElement
         m_currentFrameField.value = CurrentFrame;
     }
 
-    public void Redraw()
+    public void Render(TimelineState state)
     {
-        int value = GeneralSettings.Instance.MaxFrames;
-        if (value == m_maxFrames) return;
+        Debug.Log("timelineslider draw");
+        if (m_maxFrames != state.MaxFrames)
+        {
+            m_maxFrames = state.MaxFrames;
+            BuildFrameBars(state.MaxFrames);
+            RecalculateSliderHandle();
+        }
 
-        m_maxFrames = value;
-        Debug.Log("max frames changed" + value);
-        BuildFrameBars(m_maxFrames);
-        RecalculateSliderHandle();
-        UpdateKeyWidth();
+        HighlightBarAt(state.CurrentFrame);
+        UpdateFrameField();
+    }
+
+    public void SetViewModel(IViewModel<TimelineState> viewModel)
+    {
+        _viewModel = viewModel;
+        _viewModel?.Bind(this);
     }
 }

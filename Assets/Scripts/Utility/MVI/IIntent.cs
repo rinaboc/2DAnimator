@@ -55,3 +55,10 @@ public record CreateParamPointsIntent() : IIntent;
 #region Animation
 public record InterpolateParameterIntent(Guid ParamID, float Value) : IIntent;
 #endregion
+
+#region Timeline Operations
+public record TimelineOpenIntent() : IIntent;
+public record UpdateFramePerSecIntent(int FPS) : IIntent;
+public record UpdateMaxFramesIntent(int MaxFrames) : IIntent;
+public record TimelineSettingsOpenIntent() : IIntent;
+#endregion

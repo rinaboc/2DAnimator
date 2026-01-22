@@ -1,0 +1,59 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Assets.Scripts.States
+{
+    public class KeyframeState
+    {
+        public int Frame { get; set; }
+        public bool IsSelected { get; set; }
+
+        public KeyframeState() { }
+        public KeyframeState(KeyframeState ks)
+        {
+            Frame = ks.Frame;
+            IsSelected = ks.IsSelected;
+        }
+    }
+
+    public class TimelineState
+    {
+        public bool IsOpen { get; set; }
+        public bool IsPlaying { get; set; }
+        public bool IsSettingsOpen { get; set; }
+        public int CurrentFrame { get; set; }
+        public int MaxFrames { get; set; }
+        public int FramePerSec { get; set; }
+
+        public Dictionary<Guid, Dictionary<Guid, KeyframeState>> Keyframes { get; set; }
+
+        public TimelineState()
+        {
+            IsOpen = false;
+            IsPlaying = false;
+            IsSettingsOpen = false;
+            CurrentFrame = 1;
+            MaxFrames = 24;
+            FramePerSec = 16;
+            Keyframes = new();
+        }
+
+        public TimelineState Clone() => new()
+        {
+            IsOpen = IsOpen,
+            IsPlaying = IsPlaying,
+            IsSettingsOpen = IsSettingsOpen,
+            CurrentFrame = CurrentFrame,
+            MaxFrames = MaxFrames,
+            FramePerSec = FramePerSec,
+            Keyframes = Keyframes.ToDictionary(
+                p => p.Key,
+                p => p.Value.ToDictionary(
+                    p => p.Key,
+                    p => new KeyframeState(p.Value)
+                )
+            )
+        };
+    }
+}

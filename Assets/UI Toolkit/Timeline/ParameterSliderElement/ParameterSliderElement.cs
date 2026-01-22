@@ -1,15 +1,19 @@
 using System;
+using Assets.Scripts.States;
+using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class ParameterSliderElement : VisualElement
+public partial class ParameterSliderElement : VisualElement, IView<ParameterStates>
 {
-    private Guid _paramID;
+    public Guid _paramID { get; set; }
     Slider _slider;
     Label _label;
     VisualElement _container;
     VisualElement _handle;
+
+    private IViewModel<ParameterStates> _viewModel;
 
     public ParameterSliderElement()
     {
@@ -35,19 +39,15 @@ public partial class ParameterSliderElement : VisualElement
         UIEvents.RaiseTimelineParameterSliderChanged(_paramID, evt.newValue);
     }
 
-    public ParameterSliderElement(Parameter parameter) : this()
+    public ParameterSliderElement(Guid ID) : this()
     {
-        _paramID = parameter.ID;
-        _label.text = parameter.Name;
-        _slider.lowValue = parameter.MinValue;
-        _slider.highValue = parameter.MaxValue;
-        _slider.value = parameter.DefaultValue;
-
-        AddKeys(new float[] { parameter.MinValue, parameter.MaxValue, parameter.DefaultValue });
+        _paramID = ID;
     }
 
     private void AddKeys(float[] values)
     {
+        _container.Clear();
+
         foreach (float value in values)
         {
             Button paramKey = new();
@@ -94,5 +94,24 @@ public partial class ParameterSliderElement : VisualElement
     public void SetSliderValue(float value)
     {
         _slider.SetValueWithoutNotify(value);
+    }
+
+    public void Render(ParameterStates state)
+    {
+        if (_paramID == Guid.Empty) return;
+
+        var parameter = state.Parameters[_paramID];
+        _label.text = parameter.Name;
+        _slider.lowValue = parameter.MinValue;
+        _slider.highValue = parameter.MaxValue;
+        _slider.value = parameter.DefaultValue;
+
+        AddKeys(new float[] { parameter.MinValue, parameter.MaxValue, parameter.DefaultValue });
+    }
+
+    public void SetViewModel(IViewModel<ParameterStates> viewModel)
+    {
+        _viewModel = viewModel;
+        _viewModel?.Bind(this);
     }
 }

@@ -2240,6 +2240,9 @@ MonoBehaviour:
   _keyFrameRegistry: {fileID: 11400000, guid: b7ce77acb23ae7147b7cd647e7b096dd, type: 2}
   _generalSettings: {fileID: 11400000, guid: 2632dc982b6d42540813fa421d06cc0e, type: 2}
   _nfpController: {fileID: 220679284}
+  _timelineWidgetController: {fileID: 1616220211}
+  _timelineSettingsController: {fileID: 2043721538}
+  _parameterSettingsView: {fileID: 1803608291}
 --- !u!1 &858284473
 GameObject:
   m_ObjectHideFlags: 0
@@ -2653,6 +2656,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 888089545}
   m_CullTransparentMesh: 1
+--- !u!1 &896028351
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 896028352}
+  - component: {fileID: 896028353}
+  m_Layer: 0
+  m_Name: ViewFactory
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &896028352
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 896028351}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 2.601758, y: -1.004414, z: 4.0306535}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1245127355}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &896028353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 896028351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06abfcbc1f6bd5b409f19032fe3d9814, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _appInitializer: {fileID: 856699105}
 --- !u!1 &960628349
 GameObject:
   m_ObjectHideFlags: 0
@@ -2835,7 +2883,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UIArtLayerPrefab: {fileID: 6070374671290091294, guid: f68554b2b1923634f9f0c2d6cc4377ff, type: 3}
   UILayersContent: {fileID: 2089455473}
-  _appInitializer: {fileID: 856699105}
 --- !u!1 &994627438
 GameObject:
   m_ObjectHideFlags: 0
@@ -3332,6 +3379,7 @@ Transform:
   m_Children:
   - {fileID: 856699104}
   - {fileID: 2093550484}
+  - {fileID: 896028352}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1286876753
@@ -3705,7 +3753,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ParamSliderPrefab: {fileID: 65736109725081048, guid: 9a65e218bcc716b4eba94aa7d406f534, type: 3}
   ParamWidgetContent: {fileID: 313228744}
-  _parameterSettingsView: {fileID: 1803608291}
   _appInitializer: {fileID: 856699105}
 --- !u!4 &1368651308
 Transform:

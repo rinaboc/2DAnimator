@@ -11,15 +11,16 @@ public class ParameterManager : ManagerBase<ParameterManager>
 
     private readonly Dictionary<Guid, GameObject> _paramSliders = new();
     private IViewModel<ParameterStates> _viewModel;
-
-    [SerializeField] private ParameterSettingsView _parameterSettingsView;
+    [SerializeField] private AppInitializer _appInitializer;
 
     public ParameterSlider GetParamSlider(Guid id) => _paramSliders[id].GetComponent<ParameterSlider>();
 
     void Start()
     {
-        _viewModel = ViewModelFactory.Instance.CreateViewModel<ParametersViewModel, ParameterStates>(gameObject);
-        _parameterSettingsView.SetViewModel(_viewModel);
+        if (!_appInitializer.GetViewModel(out _viewModel))
+        {
+            Debug.LogError("Couldn't fetch viewModel");
+        }
         CreateDebugParam();
     }
 
@@ -33,12 +34,12 @@ public class ParameterManager : ManagerBase<ParameterManager>
 
     public void CreateDebugParam()
     {
-        _viewModel.Send(new CreateParameterIntent(Guid.NewGuid(), 0, 1, 0, "parameter"));
+        _viewModel?.Send(new CreateParameterIntent(Guid.NewGuid(), 0, 1, 0, "parameter"));
     }
 
     public void CreatePointsForCurrentMesh()
     {
-        _viewModel.Send(new CreateParamPointsIntent());
+        _viewModel?.Send(new CreateParamPointsIntent());
     }
 
     public void CreateParameterSlider(Guid ID)
@@ -74,7 +75,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
 
     public void DeleteSelectedParameterSlider()
     {
-        _viewModel.Send(new DeleteSelectedParameterIntent());
+        _viewModel?.Send(new DeleteSelectedParameterIntent());
     }
 
     public void HighlightCurves(List<Guid> paramIDs)
@@ -87,7 +88,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
 
     public void DispatchToParameterStore(IIntent intent)
     {
-        _viewModel.Send(intent);
+        _viewModel?.Send(intent);
     }
 
     public override void LoadState(SaveData saveData)

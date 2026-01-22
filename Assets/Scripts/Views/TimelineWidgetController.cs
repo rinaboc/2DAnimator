@@ -2,10 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.States;
+using Assets.Scripts.Utility.MVI;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class TimelineWidgetController : BaseUIController
+public class TimelineWidgetController : BaseUIController, IView<TimelineState>
 {
     private VisualElement m_TimelineDrawer;
     private VisualElement m_Timeline;
@@ -16,6 +19,8 @@ public class TimelineWidgetController : BaseUIController
 
     private Button m_PlayButton;
     bool isPlaybackRunning = false;
+
+    private IViewModel<TimelineState> _viewModel;
 
     protected override void Awake()
     {
@@ -70,30 +75,7 @@ public class TimelineWidgetController : BaseUIController
     /// </summary>
     private void OnButtonClick(ClickEvent evt)
     {
-        if (m_widgetOpen)
-        {
-            m_TimelineDrawer.AddToClassList("close-timeline");
-            m_TimelineDrawer.RemoveFromClassList("open-timeline");
-            m_OpenButton.RemoveFromClassList("rotate");
-            m_Timeline.AddToClassList("hide");
-        }
-        else
-        {
-            m_TimelineDrawer.RemoveFromClassList("close-timeline");
-            m_TimelineDrawer.AddToClassList("open-timeline");
-            m_OpenButton.AddToClassList("rotate");
-            m_Timeline.RemoveFromClassList("hide");
-        }
-
-        m_widgetOpen = !m_widgetOpen;
-
-        ParameterManager.Instance.ParameterWidgetVisibility = !m_widgetOpen;
-        if (m_widgetOpen)
-        {
-            SendParametersToTimeline();
-            SetMaxFrames(GeneralSettings.Instance.MaxFrames);
-            SetFramePerSec(GeneralSettings.Instance.FramePerSec);
-        }
+        _viewModel?.Send(new TimelineOpenIntent());
     }
 
 
@@ -152,12 +134,61 @@ public class TimelineWidgetController : BaseUIController
     public void SetMaxFrames(int maxFrames)
     {
         GeneralSettings.Instance.MaxFrames = maxFrames;
-        m_TimelineSlider.Redraw();
+        // m_TimelineSlider.Redraw();
         SendParametersToTimeline();
     }
 
     public void SetFramePerSec(int framePerSec)
     {
         GeneralSettings.Instance.FramePerSec = framePerSec;
+    }
+
+    private void CloseTimeline()
+    {
+        if (!m_widgetOpen) return;
+
+        m_TimelineDrawer.AddToClassList("close-timeline");
+        m_TimelineDrawer.RemoveFromClassList("open-timeline");
+        m_OpenButton.RemoveFromClassList("rotate");
+        m_Timeline.AddToClassList("hide");
+        m_widgetOpen = false;
+    }
+
+    private void OpenTimeline(TimelineState state)
+    {
+        if (!m_widgetOpen)
+        {
+            m_TimelineDrawer.RemoveFromClassList("close-timeline");
+            m_TimelineDrawer.AddToClassList("open-timeline");
+            m_OpenButton.AddToClassList("rotate");
+            m_Timeline.RemoveFromClassList("hide");
+            m_widgetOpen = true;
+
+            ParameterManager.Instance.ParameterWidgetVisibility = !m_widgetOpen;
+
+            SendParametersToTimeline();
+        }
+        SetMaxFrames(state.MaxFrames);
+        SetFramePerSec(state.FramePerSec);
+
+    }
+
+    public void Render(TimelineState state)
+    {
+        if (state.IsOpen)
+        {
+            OpenTimeline(state);
+        }
+        else
+        {
+            CloseTimeline();
+        }
+    }
+    public void SetViewModel(IViewModel<TimelineState> viewModel)
+    {
+        _viewModel = viewModel;
+        _viewModel?.Bind(this);
+
+        m_TimelineSlider.SetViewModel(_viewModel);
     }
 }
