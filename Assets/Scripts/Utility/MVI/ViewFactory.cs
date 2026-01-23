@@ -30,8 +30,6 @@ public class ViewFactory : MonoBehaviour
         return view;
     }
 
-
-    // TODO: doesn't seem to pass constructors properly
     public TView CreateView<TView, TState>(params object[] constructorArgs)
         where TView : IView<TState>
         where TState : class

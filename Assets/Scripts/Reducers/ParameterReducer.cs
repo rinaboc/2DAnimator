@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
@@ -17,8 +18,37 @@ public class ParameterReducer : IReducer<ParameterStates>
             CloseParameterSettingsIntent _ => ReduceCloseParameterSettings(previous),
             OpenParameterCreatorIntent _ => ReduceOpenParameterCreator(previous),
             OpenParameterEditorIntent _ => ReduceOpenParameterEditor(previous),
+            CreateParamPointsIntent _ => ReduceCreateParamPoints(previous),
+            ParameterValueInterpolatedIntent interpolate => ReduceParameterValueInterpolated(previous, interpolate),
             _ => previous
         };
+    }
+
+    private ParameterStates ReduceCreateParamPoints(ParameterStates previous)
+    {
+        var ret = previous.Clone();
+        var selectedParam = ret.Parameters[ret.SelectedParamID];
+        List<float> paramValues = new()
+        {
+            selectedParam.MinValue,
+            selectedParam.MaxValue
+        };
+
+        if (Math.Abs(selectedParam.MinValue - selectedParam.DefaultValue) > 0.1f
+        && Math.Abs(selectedParam.MaxValue - selectedParam.DefaultValue) > 0.1f)
+        {
+            paramValues.Add(selectedParam.DefaultValue);
+        }
+
+        selectedParam.ParamPointValues = paramValues;
+        return ret;
+    }
+
+    private ParameterStates ReduceParameterValueInterpolated(ParameterStates previous, ParameterValueInterpolatedIntent interpolate)
+    {
+        var ret = previous.Clone();
+        ret.Parameters[interpolate.ParamID].CurValue = interpolate.Value;
+        return ret;
     }
 
     private ParameterStates ReduceOpenParameterEditor(ParameterStates previous)
@@ -72,6 +102,7 @@ public class ParameterReducer : IReducer<ParameterStates>
         updatedParam.MaxValue = update.Max;
         updatedParam.DefaultValue = update.Default;
         updatedParam.Name = update.Name;
+        updatedParam.CurValue = update.Default;
 
         return next;
 
@@ -100,7 +131,9 @@ public class ParameterReducer : IReducer<ParameterStates>
             MaxValue = create.Max,
             DefaultValue = create.Default,
             Name = create.Name,
-            IsSelected = false
+            IsSelected = false,
+            CurValue = create.Default,
+            ParamPointValues = new() { create.Default }
         });
 
         return next;

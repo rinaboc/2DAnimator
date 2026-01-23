@@ -50,6 +50,7 @@ public record CreateParameterIntent(Guid ParamID, float Min, float Max, float De
 public record UpdateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
 public record DeleteSelectedParameterIntent() : IIntent;
 public record CreateParamPointsIntent() : IIntent;
+public record ParameterValueInterpolatedIntent(Guid ParamID, float Value) : IIntent;
 #endregion
 
 #region Animation

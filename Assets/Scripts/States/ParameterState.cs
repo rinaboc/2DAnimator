@@ -12,8 +12,11 @@ namespace Assets.Scripts.States
         public float DefaultValue { get; set; }
         public string Name { get; set; }
         public bool IsSelected { get; set; }
+        public float CurValue { get; set; }
+        public List<float> ParamPointValues { get; set; }
 
-        public ParameterState() { }
+
+        public ParameterState() { ParamPointValues = new(); }
         public ParameterState(ParameterState ps)
         {
             ID = ps.ID;
@@ -22,6 +25,8 @@ namespace Assets.Scripts.States
             DefaultValue = ps.DefaultValue;
             Name = ps.Name;
             IsSelected = ps.IsSelected;
+            CurValue = ps.CurValue;
+            ParamPointValues = ps.ParamPointValues;
         }
     }
 

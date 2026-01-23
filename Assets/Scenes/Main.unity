@@ -1140,6 +1140,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _timelineWidget: {fileID: 1616220211}
+  _appInitializer: {fileID: 856699105}
 --- !u!1 &365910525
 GameObject:
   m_ObjectHideFlags: 0

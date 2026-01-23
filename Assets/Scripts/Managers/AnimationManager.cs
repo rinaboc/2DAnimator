@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.States;
+using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
 public class AnimationManager : ManagerBase<AnimationManager>
@@ -10,9 +12,18 @@ public class AnimationManager : ManagerBase<AnimationManager>
 
     [SerializeField] private TimelineWidgetController _timelineWidget;
 
+    [SerializeField] private AppInitializer _appInitializer;
+    private IViewModel<ParameterStates> _viewModel;
+
+
     void Start()
     {
         UIEvents.TimelineChangeEvent += AnimateTimeline;
+
+        if (!_appInitializer.GetViewModel(out _viewModel))
+        {
+            Debug.LogError("Couldn't fetch viewModel");
+        }
     }
 
     void OnDisable()
@@ -56,7 +67,8 @@ public class AnimationManager : ManagerBase<AnimationManager>
             }
 
             InterpolateParameter(interpolatedValue, parameter.ID);
-            UIEvents.RaiseParamInterpolated(parameter.ID, interpolatedValue);
+            // UIEvents.RaiseParamInterpolated(parameter.ID, interpolatedValue);
+            _viewModel?.Send(new ParameterValueInterpolatedIntent(parameter.ID, interpolatedValue));
         }
     }
 

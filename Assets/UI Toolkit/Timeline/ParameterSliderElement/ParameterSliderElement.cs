@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
@@ -44,27 +45,38 @@ public partial class ParameterSliderElement : VisualElement, IView<ParameterStat
         _paramID = ID;
     }
 
-    private void AddKeys(float[] values)
+    private void AddKeys(List<float> values)
     {
-        _container.Clear();
-
-        foreach (float value in values)
+        var paramKeys = new List<Button>();
+        foreach (var child in _container.Children())
         {
-            Button paramKey = new();
-            paramKey.AddToClassList("key-param-slider-handle");
+            if (child is Button paramKey) paramKeys.Add(paramKey);
+        }
 
-            _container.Add(paramKey);
-            _handle.BringToFront();
-
-            _container.RegisterCallback<GeometryChangedEvent>(evt =>
+        for (int i = 0; i < values.Count; i++)
+        {
+            float value = values[i];
+            if (paramKeys.Count > i)
             {
+                Button paramKey = paramKeys[i];
                 PositionParamKeyAt(value, paramKey);
-            });
-
-            paramKey.clicked += () =>
+            }
+            else
             {
-                _slider.value = value;
-            };
+                Button paramKey = new();
+                paramKey.AddToClassList("key-param-slider-handle");
+                _container.Add(paramKey);
+                _container.RegisterCallback<GeometryChangedEvent>(evt =>
+                {
+                    PositionParamKeyAt(value, paramKey);
+                });
+                paramKey.clicked += () =>
+                {
+                    _slider.value = value;
+                };
+            }
+
+            _handle.BringToFront();
         }
     }
 
@@ -100,13 +112,15 @@ public partial class ParameterSliderElement : VisualElement, IView<ParameterStat
     {
         if (_paramID == Guid.Empty) return;
 
+        Debug.Log("parameter slider draw");
+
         var parameter = state.Parameters[_paramID];
         _label.text = parameter.Name;
         _slider.lowValue = parameter.MinValue;
         _slider.highValue = parameter.MaxValue;
-        _slider.value = parameter.DefaultValue;
+        _slider.SetValueWithoutNotify(parameter.CurValue);
 
-        AddKeys(new float[] { parameter.MinValue, parameter.MaxValue, parameter.DefaultValue });
+        AddKeys(parameter.ParamPointValues);
     }
 
     public void SetViewModel(IViewModel<ParameterStates> viewModel)

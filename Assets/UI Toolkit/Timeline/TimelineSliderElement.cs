@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
@@ -48,6 +49,8 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
     List<List<VisualElement>> m_frameBars;
 
     private IViewModel<TimelineState> _viewModel;
+
+    private bool m_widgetOpen = false;
 
     public TimelineSliderElement()
     {
@@ -145,10 +148,9 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
         ClearFrameBarLists();
     }
 
-    public void CreateKeyFrameLine(Parameter parameter, float paramSliderValue, List<KeyFrame> keyFrames = null)
+    public void CreateKeyFrameLine(Parameter parameter, List<KeyFrame> keyFrames = null)
     {
         KeyframeLineElement keyframeLine = new(m_maxFrames, m_frameBars, parameter);
-        keyframeLine.SetSliderValue(paramSliderValue);
         m_keyframeContainer.Add(keyframeLine);
         m_keyframeLineElements.Add(parameter.ID, keyframeLine);
 
@@ -329,9 +331,28 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
         m_currentFrameField.value = CurrentFrame;
     }
 
+    private void RebuildKeyFrameLines()
+    {
+        ClearKeyframeContainer();
+
+        List<Parameter> parameters = ParameterRegistry.Instance.GetAll().ToList();
+        foreach (Parameter parameter in parameters)
+        {
+            List<KeyFrame> keyFrames = KeyFrameRegistry.Instance.GetKeyFramesOfParam(parameter.ID);
+            CreateKeyFrameLine(parameter, keyFrames);
+        }
+
+        UpdateKeyWidth();
+    }
+
     public void Render(TimelineState state)
     {
         Debug.Log("timelineslider draw");
+        if (state.IsOpen && (!m_widgetOpen || m_maxFrames != state.MaxFrames))
+        {
+            RebuildKeyFrameLines();
+        }
+
         if (m_maxFrames != state.MaxFrames)
         {
             m_maxFrames = state.MaxFrames;
@@ -341,6 +362,8 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
 
         HighlightBarAt(state.CurrentFrame);
         UpdateFrameField();
+
+        m_widgetOpen = state.IsOpen;
     }
 
     public void SetViewModel(IViewModel<TimelineState> viewModel)

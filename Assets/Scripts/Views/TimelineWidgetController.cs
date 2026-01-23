@@ -78,31 +78,6 @@ public class TimelineWidgetController : BaseUIController, IView<TimelineState>
         _viewModel?.Send(new TimelineOpenIntent());
     }
 
-
-    /// <summary>
-    /// Populate the timeline with the available parameters.
-    /// </summary>
-    private void SendParametersToTimeline()
-    {
-        List<Parameter> parameters = ParameterRegistry.Instance.GetAll().ToList();
-        m_TimelineSlider.ClearKeyframeContainer();
-
-        foreach (Parameter parameter in parameters)
-        {
-            List<KeyFrame> keyFrames = KeyFrameRegistry.Instance.GetKeyFramesOfParam(parameter.ID);
-            if (!AnimationManager.Instance.GetCurrentCurveSliderValue(parameter.ID, out float paramValue))
-            {
-                paramValue = parameter.DefaultValue;
-            }
-
-            m_TimelineSlider.CreateKeyFrameLine(parameter, paramValue, keyFrames);
-        }
-
-        m_TimelineSlider.UpdateKeyWidth();
-
-        // m_TimelineSlider.LoadParameters(parameters);
-    }
-
     public int Currentframe => m_TimelineSlider.CurrentFrame;
 
     /// <summary>
@@ -135,7 +110,6 @@ public class TimelineWidgetController : BaseUIController, IView<TimelineState>
     {
         GeneralSettings.Instance.MaxFrames = maxFrames;
         // m_TimelineSlider.Redraw();
-        SendParametersToTimeline();
     }
 
     public void SetFramePerSec(int framePerSec)
@@ -163,10 +137,6 @@ public class TimelineWidgetController : BaseUIController, IView<TimelineState>
             m_OpenButton.AddToClassList("rotate");
             m_Timeline.RemoveFromClassList("hide");
             m_widgetOpen = true;
-
-            ParameterManager.Instance.ParameterWidgetVisibility = !m_widgetOpen;
-
-            SendParametersToTimeline();
         }
         SetMaxFrames(state.MaxFrames);
         SetFramePerSec(state.FramePerSec);

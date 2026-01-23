@@ -18,8 +18,7 @@ public partial class KeyframeLineElement : VisualElement
     {
         ParamID = parameter.ID;
 
-        _paramSlider = ViewFactory.Instance.CreateView<ParameterSliderElement, ParameterStates>();
-        _paramSlider._paramID = ParamID;
+        _paramSlider = ViewFactory.Instance.CreateView<ParameterSliderElement, ParameterStates>(ParamID);
         Add(_paramSlider);
 
         for (int j = 1; j <= MaxFrames; j++)
@@ -33,25 +32,6 @@ public partial class KeyframeLineElement : VisualElement
 
             frameBars[j - 1].Add(cell);
         }
-
-        UIEvents.ParamInterpolatedEvent += OnParamInterpolated;
-    }
-
-    ~KeyframeLineElement()
-    {
-        UIEvents.ParamInterpolatedEvent -= OnParamInterpolated;
-    }
-
-    private void OnParamInterpolated(Guid paramID, float value)
-    {
-        if (!ParamID.Equals(paramID)) return;
-
-        SetSliderValue(value);
-    }
-
-    public void SetSliderValue(float value)
-    {
-        _paramSlider?.SetSliderValue(value);
     }
 
     public void InsertKeyframeAt(int frame, KeyFrame key)

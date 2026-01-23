@@ -24,17 +24,20 @@ public class ParameterManager : ManagerBase<ParameterManager>
         CreateDebugParam();
     }
 
+    private bool _parameterWidgetVisibility = true;
     public bool ParameterWidgetVisibility
     {
+        get => _parameterWidgetVisibility;
         set
         {
             ParamWidgetContent.gameObject.SetActive(value);
+            _parameterWidgetVisibility = value;
         }
     }
 
     public void CreateDebugParam()
     {
-        _viewModel?.Send(new CreateParameterIntent(Guid.NewGuid(), 0, 1, 0, "parameter"));
+        _viewModel?.Send(new CreateParameterIntent(Guid.NewGuid(), -1, 1, 0, "parameter"));
     }
 
     public void CreatePointsForCurrentMesh()
