@@ -35,9 +35,14 @@ public partial class ParameterSliderElement : VisualElement, IView<ParameterStat
         _handle.AddToClassList("param-slider-handle");
     }
 
+    ~ParameterSliderElement()
+    {
+        _viewModel?.Unbind(this);
+    }
+
     private void OnSliderChange(ChangeEvent<float> evt)
     {
-        UIEvents.RaiseTimelineParameterSliderChanged(_paramID, evt.newValue);
+        _viewModel?.Send(new TimelineParameterSliderChangedIntent(_paramID, evt.newValue, Guid.NewGuid()));
     }
 
     public ParameterSliderElement(Guid ID) : this()
@@ -101,11 +106,6 @@ public partial class ParameterSliderElement : VisualElement, IView<ParameterStat
         paramKey.style.position = Position.Absolute;
         paramKey.style.left = left;
         paramKey.style.top = 0;
-    }
-
-    public void SetSliderValue(float value)
-    {
-        _slider.SetValueWithoutNotify(value);
     }
 
     public void Render(ParameterStates state)

@@ -46,9 +46,10 @@ public record OpenParameterEditorIntent() : IIntent;
 public record CloseParameterSettingsIntent() : IIntent;
 public record SelectParameterIntent(Guid ParamID) : IIntent;
 public record DeselectParameterIntent() : IIntent;
-public record CreateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
+[GlobalIntent] public record CreateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
 public record UpdateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
 public record DeleteSelectedParameterIntent() : IIntent;
+[GlobalIntent] public record DeletedParameterIntent(Guid ParamID) : IIntent;
 public record CreateParamPointsIntent() : IIntent;
 public record ParameterValueInterpolatedIntent(Guid ParamID, float Value) : IIntent;
 #endregion
@@ -62,4 +63,8 @@ public record TimelineOpenIntent() : IIntent;
 public record UpdateFramePerSecIntent(int FPS) : IIntent;
 public record UpdateMaxFramesIntent(int MaxFrames) : IIntent;
 public record TimelineSettingsOpenIntent() : IIntent;
+public record SelectKeyframeIntent(Guid ID) : IIntent;
+public record DeleteKeyframeIntent() : IIntent;
+public record CurrentFrameChangedIntent(int Frame) : IIntent;
+[GlobalIntent] public record TimelineParameterSliderChangedIntent(Guid ParamID, float Value, Guid KeyID) : IIntent;
 #endregion

@@ -30,10 +30,7 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
             }
 
             m_currentFrame = newValue;
-            UpdateHandlePosition();
-            UpdateFrameField();
-            HighlightBarAt(m_currentFrame);
-            UIEvents.RaiseTimelineChange(CurrentFrame);
+            _viewModel?.Send(new CurrentFrameChangedIntent(CurrentFrame));
         }
     }
 
@@ -143,26 +140,20 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
 
     public void ClearKeyframeContainer()
     {
+        foreach (var line in m_keyframeLineElements.Values)
+        {
+            _viewModel?.Unbind(line);
+        }
         m_keyframeContainer.Clear();
         m_keyframeLineElements.Clear();
         ClearFrameBarLists();
     }
 
-    public void CreateKeyFrameLine(Parameter parameter, List<KeyFrame> keyFrames = null)
+    public void CreateKeyFrameLine(Guid paramID)
     {
-        KeyframeLineElement keyframeLine = new(m_maxFrames, m_frameBars, parameter);
+        var keyframeLine = ViewFactory.Instance.CreateView<KeyframeLineElement, TimelineState>(m_maxFrames, m_frameBars, paramID);
         m_keyframeContainer.Add(keyframeLine);
-        m_keyframeLineElements.Add(parameter.ID, keyframeLine);
-
-        if (keyFrames != null) foreach (var key in keyFrames)
-        {
-            keyframeLine.InsertKeyframeAt(key.Frame, key);
-        }
-    }
-
-    public void CreateKeyframeAtCurrentFrame(Guid paramID, KeyFrame key)
-    {
-        m_keyframeLineElements[paramID].InsertKeyframeAt(CurrentFrame, key);
+        m_keyframeLineElements.Add(paramID, keyframeLine);
     }
 
     public void LoadKeyframes(KeyFrame[] keyframes)
@@ -172,7 +163,7 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
 
         foreach (KeyFrame key in keyframes)
         {
-            m_keyframeLineElements[key.ParamID].InsertKeyframeAt(key.Frame, key);
+            m_keyframeLineElements[key.ParamID].InsertKeyframeAt(key.Frame, key.ID);
         }
     }
 
@@ -289,7 +280,7 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
         deleteKeyframeButton.AddToClassList("delete-keyframe-button");
         deleteKeyframeButton.clicked += () =>
         {
-            UIEvents.RaiseDeleteSelectedKeyframe();
+            _viewModel?.Send(new DeleteKeyframeIntent());
         };
 
         Button settingsButton = new() { text = "Settings" };
@@ -331,15 +322,14 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
         m_currentFrameField.value = CurrentFrame;
     }
 
-    private void RebuildKeyFrameLines()
+    private void RebuildKeyFrameLines(TimelineState state)
     {
         ClearKeyframeContainer();
 
-        List<Parameter> parameters = ParameterRegistry.Instance.GetAll().ToList();
-        foreach (Parameter parameter in parameters)
+        foreach (var (id, _) in state.Keyframes)
         {
-            List<KeyFrame> keyFrames = KeyFrameRegistry.Instance.GetKeyFramesOfParam(parameter.ID);
-            CreateKeyFrameLine(parameter, keyFrames);
+            if (!m_keyframeLineElements.ContainsKey(id))
+                CreateKeyFrameLine(id);
         }
 
         UpdateKeyWidth();
@@ -347,10 +337,9 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
 
     public void Render(TimelineState state)
     {
-        Debug.Log("timelineslider draw");
         if (state.IsOpen && (!m_widgetOpen || m_maxFrames != state.MaxFrames))
         {
-            RebuildKeyFrameLines();
+            RebuildKeyFrameLines(state);
         }
 
         if (m_maxFrames != state.MaxFrames)
@@ -360,6 +349,7 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
             RecalculateSliderHandle();
         }
 
+        UpdateHandlePosition();
         HighlightBarAt(state.CurrentFrame);
         UpdateFrameField();
 

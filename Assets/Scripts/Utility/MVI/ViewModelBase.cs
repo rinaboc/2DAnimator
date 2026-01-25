@@ -36,9 +36,11 @@ public class ViewModelBase<TState> : MonoBehaviour, IViewModel<TState>
 
     protected void OnStateChanged(TState state)
     {
-        foreach (var view in _views)
+        var views = new List<IView<TState>>(_views);
+        foreach (var view in views)
         {
-            view.Render(state);
+            if (_views.Contains(view))
+                view.Render(state);
         }
     }
 

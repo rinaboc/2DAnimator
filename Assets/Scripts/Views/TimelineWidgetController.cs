@@ -1,10 +1,6 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -44,25 +40,6 @@ public class TimelineWidgetController : BaseUIController, IView<TimelineState>
         m_Timeline.AddToClassList("hide");
 
         m_PlayButton.clicked += OnPlayButtonClicked;
-
-        UIEvents.TimelineParameterSliderChanged += OnKeySliderChanged;
-    }
-
-    void OnDisable()
-    {
-        UIEvents.TimelineParameterSliderChanged -= OnKeySliderChanged;
-    }
-
-    /// <summary>
-    /// When any of the slider of each parameter is changed, a keyframe is placed at the current frame and interpolates the meshes accordingly.
-    /// </summary>
-    /// <param name="id">Which parameter the slider is connected to</param>
-    /// <param name="value">Slider value</param>
-    private void OnKeySliderChanged(Guid id, float value)
-    {
-        AnimationManager.Instance.InterpolateParameter(value, id);
-        KeyFrame newKeyframe = AnimationManager.Instance.CreateKeyframe(id, value);
-        m_TimelineSlider.CreateKeyframeAtCurrentFrame(id, newKeyframe);
     }
 
     public void LoadKeyframes(KeyFrame[] keyframes)

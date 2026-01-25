@@ -8,30 +8,14 @@ public class ParameterCommandHandler : ICommandHandler
     {
         switch (intent)
         {
-            case SelectParameterIntent select:
-                ExecuteSelectParameter(select, state, context);
-                break;
-            case CreateParameterIntent create:
-                ExecuteCreateParameter(create, state, context);
-                break;
-            case CreateParamPointsIntent _:
-                ExecuteCreateParamPoints(state, context);
-                break;
-            case DeleteSelectedParameterIntent _:
-                ExecuteDeleteSelectedParameter(state, context);
-                break;
-            case UpdateParameterIntent update:
-                ExecuteUpdateParameter(update, state, context);
-                break;
-            case OpenParameterCreatorIntent _:
-                ExecuteOpenParameterCreator(state, context);
-                break;
-            case SelectLayerIntent select:
-                ExecuteSelectLayer(select, state, context);
-                break;
-            case DeleteLayerIntent _:
-                ExecuteDeleteLayer(state, context);
-                break;
+            case SelectParameterIntent select: ExecuteSelectParameter(select, state, context); break;
+            case CreateParameterIntent create: ExecuteCreateParameter(create, state, context); break;
+            case CreateParamPointsIntent _: ExecuteCreateParamPoints(state, context); break;
+            case DeleteSelectedParameterIntent _: ExecuteDeleteSelectedParameter(state, context); break;
+            case UpdateParameterIntent update: ExecuteUpdateParameter(update, state, context); break;
+            case OpenParameterCreatorIntent _: ExecuteOpenParameterCreator(state, context); break;
+            case SelectLayerIntent select: ExecuteSelectLayer(select, state, context); break;
+            case DeleteLayerIntent _: ExecuteDeleteLayer(state, context); break;
         }
     }
 
@@ -69,6 +53,8 @@ public class ParameterCommandHandler : ICommandHandler
         Guid selectedParamID = context.GeneralSettings.SelectedParamID;
         context.Parameters.Remove(selectedParamID);
         ParameterManager.Instance.DeleteParameterSlider(selectedParamID);
+
+        ParameterManager.Instance.DispatchToParameterStore(new DeletedParameterIntent(selectedParamID));
         context.GeneralSettings.SelectedParamID = Guid.Empty;
     }
 

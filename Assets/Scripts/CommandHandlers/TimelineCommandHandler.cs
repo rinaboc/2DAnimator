@@ -1,4 +1,5 @@
-using System;
+using System.Linq;
+using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 
 public class TimelineCommandHandler : ICommandHandler
@@ -8,7 +9,37 @@ public class TimelineCommandHandler : ICommandHandler
         switch (intent)
         {
             case TimelineOpenIntent _: ExecuteOpenTimeline(state, context); break;
+            case CurrentFrameChangedIntent change: ExecuteCurrentFrameChanged(change, state, context); break;
+            case TimelineParameterSliderChangedIntent change: ExecuteTimelineParameterSliderChanged(change, state, context); break;
+            case DeleteKeyframeIntent _: ExecuteDeleteKeyframe(state, context); break;
         }
+    }
+
+    private void ExecuteDeleteKeyframe(object state, IModelContext context)
+    {
+        var keyframeState = ((TimelineState)state).Keyframes;
+
+        foreach (KeyFrame kf in context.KeyFrames.GetAll().ToList())
+        {
+            if (!keyframeState[kf.ParamID].ContainsKey(kf.ID))
+            {
+                context.KeyFrames.Remove(kf.ID);
+            }
+        }
+    }
+
+    private void ExecuteCurrentFrameChanged(CurrentFrameChangedIntent change, object state, IModelContext context)
+    {
+        context.GeneralSettings.CurrentFrame = change.Frame;
+        AnimationManager.Instance.AnimateTimeline(change.Frame);
+    }
+
+    private void ExecuteTimelineParameterSliderChanged(TimelineParameterSliderChangedIntent change, object state, IModelContext context)
+    {
+        AnimationManager.Instance.InterpolateParameter(change.Value, change.ParamID);
+        KeyFrame keyFrame = new(change.ParamID, change.Value, context.GeneralSettings.CurrentFrame, autoRegister: false);
+        keyFrame.ID = change.KeyID;
+        context.KeyFrames.Register(keyFrame);
     }
 
     private void ExecuteOpenTimeline(object state, IModelContext context)

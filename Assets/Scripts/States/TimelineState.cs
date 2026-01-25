@@ -27,6 +27,7 @@ namespace Assets.Scripts.States
         public int FramePerSec { get; set; }
 
         public Dictionary<Guid, Dictionary<Guid, KeyframeState>> Keyframes { get; set; }
+        public Tuple<Guid, Guid> SelectedKeyframe { get; set; }
 
         public TimelineState()
         {
@@ -37,6 +38,7 @@ namespace Assets.Scripts.States
             MaxFrames = 24;
             FramePerSec = 16;
             Keyframes = new();
+            SelectedKeyframe = new(Guid.Empty, Guid.Empty);
         }
 
         public TimelineState Clone() => new()
@@ -53,7 +55,8 @@ namespace Assets.Scripts.States
                     p => p.Key,
                     p => new KeyframeState(p.Value)
                 )
-            )
+            ),
+            SelectedKeyframe = SelectedKeyframe
         };
     }
 }

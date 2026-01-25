@@ -1,33 +1,47 @@
 using System;
+using Assets.Scripts.States;
+using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class KeyframeElement : VisualElement
+public partial class KeyframeElement : VisualElement, IView<TimelineState>
 {
-    private Guid _id;
+    public Guid _id;
     private int _frame;
     private bool _isSelected = false;
     private KeyframeLineElement _parentElement;
+    private IViewModel<TimelineState> _viewModel;
 
     public KeyframeElement()
     {
         AddToClassList("keyframe");
     }
 
-    public KeyframeElement(KeyFrame key, KeyframeLineElement parentElement) : this()
+    public KeyframeElement(Guid keyID, int frame, KeyframeLineElement parentElement) : this()
     {
         _parentElement = parentElement;
-        _id = key.ID;
-        _frame = key.Frame;
+        _id = keyID;
+        _frame = frame;
         RegisterCallback<ClickEvent>(OnClick);
-        UIEvents.SelectKeyframeEvent += OnKeyframeSelect;
-        UIEvents.DeleteSelectedKeyframeEvent += OnDeleteKeyframe;
     }
 
-    private void OnKeyframeSelect(Guid id)
+    ~KeyframeElement()
     {
-        _isSelected = id.Equals(_id);
+        UnregisterCallback<ClickEvent>(OnClick);
+        _viewModel?.Unbind(this);
+    }
+
+    private void OnClick(ClickEvent evt)
+    {
+        if (_isSelected) return;
+        _viewModel?.Send(new SelectKeyframeIntent(_id));
+    }
+
+    public void Render(TimelineState state)
+    {
+        if (!state.Keyframes[_parentElement.ParamID].ContainsKey(_id)) { Debug.Log("zombie keyframe"); return; }
+        _isSelected = state.Keyframes[_parentElement.ParamID][_id].IsSelected;
         if (_isSelected)
         {
             AddToClassList("selected-keyframe");
@@ -38,30 +52,9 @@ public partial class KeyframeElement : VisualElement
         }
     }
 
-    ~KeyframeElement()
+    public void SetViewModel(IViewModel<TimelineState> viewModel)
     {
-        UnregisterCallback<ClickEvent>(OnClick);
-        UIEvents.SelectKeyframeEvent -= OnKeyframeSelect;
-        UIEvents.DeleteSelectedKeyframeEvent -= OnDeleteKeyframe;
-    }
-
-    private void OnDeleteKeyframe()
-    {
-        if (!_isSelected) return;
-
-        _parentElement.RemoveKeyframeFrom(_frame);
-        AnimationManager.Instance.RemoveKeyFrame(_id);
-    }
-
-    public void Delete()
-    {
-        AnimationManager.Instance.RemoveKeyFrame(_id);
-    }
-
-    private void OnClick(ClickEvent evt)
-    {
-        if (_isSelected) return;
-
-        UIEvents.RaiseSelectKeyframe(_id);
+        _viewModel = viewModel;
+        _viewModel?.Bind(this);
     }
 }

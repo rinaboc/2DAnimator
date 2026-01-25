@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 
@@ -12,8 +13,78 @@ public class TimelineReducer : IReducer<TimelineState>
             UpdateFramePerSecIntent update => ReduceUpdateFramePerSec(update, previous),
             UpdateMaxFramesIntent update => ReduceUpdateMaxFrames(update, previous),
             TimelineSettingsOpenIntent _ => ReduceOpenTimelineSettings(previous),
+            CreateParameterIntent create => ReduceCreateParameter(previous, create),
+            DeletedParameterIntent delete => ReduceDeleteParameter(previous, delete),
+            SelectKeyframeIntent select => ReduceSelectKeyframe(previous, select),
+            DeleteKeyframeIntent _ => ReduceDeleteKeyframe(previous),
+            CurrentFrameChangedIntent change => ReduceCurrentFrameChanged(change, previous),
+            TimelineParameterSliderChangedIntent change => ReduceTimelineParameterSliderChanged(change, previous),
             _ => previous
         };
+    }
+
+    private TimelineState ReduceDeleteKeyframe(TimelineState previous)
+    {
+        var next = previous.Clone();
+
+        if (next.SelectedKeyframe.Item1 == Guid.Empty || next.SelectedKeyframe.Item2 == Guid.Empty) return next;
+
+        next.Keyframes[next.SelectedKeyframe.Item1].Remove(next.SelectedKeyframe.Item2);
+        next.SelectedKeyframe = new(Guid.Empty, Guid.Empty);
+
+        return next;
+    }
+
+    private TimelineState ReduceTimelineParameterSliderChanged(TimelineParameterSliderChangedIntent change, TimelineState previous)
+    {
+        var next = previous.Clone();
+        next.Keyframes[change.ParamID][change.KeyID] = new KeyframeState() { Frame = next.CurrentFrame, IsSelected = false };
+        return next;
+    }
+
+    private TimelineState ReduceCurrentFrameChanged(CurrentFrameChangedIntent change, TimelineState previous)
+    {
+        var next = previous.Clone();
+        next.CurrentFrame = change.Frame;
+        return next;
+    }
+
+    private TimelineState ReduceSelectKeyframe(TimelineState previous, SelectKeyframeIntent select)
+    {
+        var next = previous.Clone();
+
+        if (next.SelectedKeyframe.Item1 != Guid.Empty && next.SelectedKeyframe.Item2 != Guid.Empty)
+            next.Keyframes[next.SelectedKeyframe.Item1][next.SelectedKeyframe.Item2].IsSelected = false;
+
+        foreach (Guid paramID in next.Keyframes.Keys)
+        {
+            foreach (Guid keyID in next.Keyframes[paramID].Keys)
+            {
+                if (keyID == select.ID)
+                {
+                    next.SelectedKeyframe = new(paramID, keyID);
+                    next.Keyframes[paramID][keyID].IsSelected = true;
+                    return next;
+                }
+            }
+        }
+
+        next.SelectedKeyframe = new(Guid.Empty, Guid.Empty);
+        return next;
+    }
+
+    private TimelineState ReduceDeleteParameter(TimelineState previous, DeletedParameterIntent delete)
+    {
+        var next = previous.Clone();
+        next.Keyframes.Remove(delete.ParamID);
+        return next;
+    }
+
+    private TimelineState ReduceCreateParameter(TimelineState previous, CreateParameterIntent create)
+    {
+        var next = previous.Clone();
+        next.Keyframes.Add(create.ParamID, new Dictionary<Guid, KeyframeState>());
+        return next;
     }
 
     private TimelineState ReduceOpenTimelineSettings(TimelineState previous)

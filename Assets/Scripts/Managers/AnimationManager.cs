@@ -18,20 +18,13 @@ public class AnimationManager : ManagerBase<AnimationManager>
 
     void Start()
     {
-        UIEvents.TimelineChangeEvent += AnimateTimeline;
-
         if (!_appInitializer.GetViewModel(out _viewModel))
         {
             Debug.LogError("Couldn't fetch viewModel");
         }
     }
 
-    void OnDisable()
-    {
-        UIEvents.TimelineChangeEvent -= AnimateTimeline;
-    }
-
-    private void AnimateTimeline(int currentFrame)
+    public void AnimateTimeline(int currentFrame)
     {
         var parameters = ParameterRegistry.Instance.GetAll();
 
@@ -67,7 +60,6 @@ public class AnimationManager : ManagerBase<AnimationManager>
             }
 
             InterpolateParameter(interpolatedValue, parameter.ID);
-            // UIEvents.RaiseParamInterpolated(parameter.ID, interpolatedValue);
             _viewModel?.Send(new ParameterValueInterpolatedIntent(parameter.ID, interpolatedValue));
         }
     }
