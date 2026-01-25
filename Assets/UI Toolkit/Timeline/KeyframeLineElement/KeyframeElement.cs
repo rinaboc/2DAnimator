@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class KeyframeElement : VisualElement, IView<TimelineState>
+public partial class KeyframeElement : VisualElement, IView<TimelineState>, IDisposable
 {
     public Guid _id;
     private int _frame;
@@ -26,7 +26,7 @@ public partial class KeyframeElement : VisualElement, IView<TimelineState>
         RegisterCallback<ClickEvent>(OnClick);
     }
 
-    ~KeyframeElement()
+    public void Dispose()
     {
         UnregisterCallback<ClickEvent>(OnClick);
         _viewModel?.Unbind(this);

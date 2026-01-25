@@ -5,7 +5,7 @@ using Assets.Scripts.Utility.MVI;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class KeyframeLineElement : VisualElement, IView<TimelineState>
+public partial class KeyframeLineElement : VisualElement, IView<TimelineState>, IDisposable
 {
     public Guid ParamID { get; }
     private List<VisualElement> _cells = new();
@@ -36,14 +36,22 @@ public partial class KeyframeLineElement : VisualElement, IView<TimelineState>
         }
     }
 
-    ~KeyframeLineElement()
+    public void Dispose()
     {
         _viewModel?.Unbind(this);
+        foreach (var cell in _cells)
+        {
+            var key = cell.Q<KeyframeElement>();
+            key?.Dispose();
+            cell.Clear();
+        }
     }
 
 
     public void InsertKeyframeAt(int frame, Guid keyID)
     {
+        if (_cells[frame - 1].Q<KeyframeElement>()?._id == keyID) return;
+
         RemoveKeyframeFrom(frame);
         var keyframe = ViewFactory.Instance.CreateView<KeyframeElement, TimelineState>(keyID, frame, this);
         _cells[frame - 1].Add(keyframe);
@@ -55,7 +63,7 @@ public partial class KeyframeLineElement : VisualElement, IView<TimelineState>
         if (cell.childCount > 0)
         {
             KeyframeElement keyframe = cell.Q<KeyframeElement>();
-            _viewModel?.Unbind(keyframe);
+            keyframe.Dispose();
             cell.Clear();
         }
     }
@@ -69,8 +77,8 @@ public partial class KeyframeLineElement : VisualElement, IView<TimelineState>
                 KeyframeElement keyframe = _cells[i].Q<KeyframeElement>();
                 if (!state.Keyframes[ParamID].ContainsKey(keyframe._id))
                 {
+                    keyframe.Dispose();
                     _cells[i].Clear();
-                    _viewModel?.Unbind(keyframe);
                 }
             }
         }

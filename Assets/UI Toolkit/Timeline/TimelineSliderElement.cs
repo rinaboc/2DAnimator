@@ -142,7 +142,7 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
     {
         foreach (var line in m_keyframeLineElements.Values)
         {
-            _viewModel?.Unbind(line);
+            line.Dispose();
         }
         m_keyframeContainer.Clear();
         m_keyframeLineElements.Clear();

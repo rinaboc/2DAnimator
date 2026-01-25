@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class ParameterSliderElement : VisualElement, IView<ParameterStates>
+public partial class ParameterSliderElement : VisualElement, IView<ParameterStates>, IDisposable
 {
     public Guid _paramID { get; set; }
     Slider _slider;
@@ -35,7 +35,7 @@ public partial class ParameterSliderElement : VisualElement, IView<ParameterStat
         _handle.AddToClassList("param-slider-handle");
     }
 
-    ~ParameterSliderElement()
+    public void Dispose()
     {
         _viewModel?.Unbind(this);
     }
