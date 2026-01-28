@@ -107,7 +107,7 @@ public class MeshController : MonoBehaviour, IView<MeshStates>
     /// <param name="value">transformation's value</param>
     public void SaveTransform(TransformType type)
     {
-        _viewModel.Send(new SaveTransformIntent(ID, type));
+        _viewModel?.Send(new SaveTransformIntent(ID, type));
     }
 
     public void Render(MeshStates state)

@@ -41,7 +41,7 @@ public class LayerManager : ManagerBase<LayerManager>
 
     private void OnCancel(InputAction.CallbackContext context)
     {
-        _viewModel.Send(new SelectLayerIntent(Guid.Empty));
+        _viewModel?.Send(new SelectLayerIntent(Guid.Empty));
     }
 
     /// <summary>
@@ -62,7 +62,7 @@ public class LayerManager : ManagerBase<LayerManager>
 
     public void MoveUIArtLayerUp()
     {
-        _viewModel.Send(new MoveLayerUpIntent());
+        _viewModel?.Send(new MoveLayerUpIntent());
     }
 
     public void MoveLayerUp(Guid ID)
@@ -77,7 +77,7 @@ public class LayerManager : ManagerBase<LayerManager>
 
     public void MoveUIArtLayerDown()
     {
-        _viewModel.Send(new MoveLayerDownIntent());
+        _viewModel?.Send(new MoveLayerDownIntent());
     }
 
     public void MoveLayerDown(Guid ID)
@@ -92,7 +92,7 @@ public class LayerManager : ManagerBase<LayerManager>
 
     public void DeleteSelectedArtObject()
     {
-        _viewModel.Send(new DeleteLayerIntent());
+        _viewModel?.Send(new DeleteLayerIntent());
     }
 
     private bool GetUILayer(Guid id, out LayerController layer) => _layerControllers.TryGetValue(id, out layer);

@@ -64,7 +64,7 @@ public class LayerController : Clickable, IView<LayerStates>
 
     public void TextChanged()
     {
-        _viewModel.Send(new ChangeLayerNameIntent(ID, LayerInput.text));
+        _viewModel?.Send(new ChangeLayerNameIntent(ID, LayerInput.text));
     }
 
     public void Render(LayerStates state)
@@ -83,6 +83,6 @@ public class LayerController : Clickable, IView<LayerStates>
     public void SetViewModel(IViewModel<LayerStates> viewModel)
     {
         _viewModel = viewModel;
-        _viewModel.Bind(this);
+        _viewModel?.Bind(this);
     }
 }

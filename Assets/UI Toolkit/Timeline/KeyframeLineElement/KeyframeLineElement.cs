@@ -83,6 +83,7 @@ public partial class KeyframeLineElement : VisualElement, IView<TimelineState>, 
             }
         }
 
+        if (!state.Keyframes.ContainsKey(ParamID)) return;
         foreach (var keyframe in state.Keyframes[ParamID])
         {
             InsertKeyframeAt(keyframe.Value.Frame, keyframe.Key);

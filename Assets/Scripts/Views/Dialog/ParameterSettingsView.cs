@@ -28,13 +28,13 @@ public class ParameterSettingsView : BaseUIController, IView<ParameterStates>
         submitButton = ui.Q<Button>("CreateButton");
         submitButton.clicked += OnSubmitButtonClicked;
 
-        ui.Q<Button>("ExitButton").clicked += () => _viewModel.Send(new CloseParameterSettingsIntent());
+        ui.Q<Button>("ExitButton").clicked += () => _viewModel?.Send(new CloseParameterSettingsIntent());
         Debug.Log($"{m_minValue}, {m_maxValue}, {m_defaultValue}");
     }
 
     public void OnParameterAddButtonClicked()
     {
-        _viewModel.Send(new OpenParameterCreatorIntent());
+        _viewModel?.Send(new OpenParameterCreatorIntent());
     }
 
     public void EditParameter(ParameterState state)
@@ -55,11 +55,11 @@ public class ParameterSettingsView : BaseUIController, IView<ParameterStates>
         if (!ValidateInput()) return;
 
         if (m_popupMode == PopupMode.Create)
-            _viewModel.Send(new CreateParameterIntent(Guid.NewGuid(), m_minValue, m_maxValue, m_defaultValue, m_paramName));
+            _viewModel?.Send(new CreateParameterIntent(Guid.NewGuid(), m_minValue, m_maxValue, m_defaultValue, m_paramName));
         else
-            _viewModel.Send(new UpdateParameterIntent(_editedParamID, m_minValue, m_maxValue, m_defaultValue, m_paramName));
+            _viewModel?.Send(new UpdateParameterIntent(_editedParamID, m_minValue, m_maxValue, m_defaultValue, m_paramName));
 
-        _viewModel.Send(new CloseParameterSettingsIntent());
+        _viewModel?.Send(new CloseParameterSettingsIntent());
     }
 
     private bool ValidateInput()
@@ -105,6 +105,6 @@ public class ParameterSettingsView : BaseUIController, IView<ParameterStates>
     public void SetViewModel(IViewModel<ParameterStates> viewModel)
     {
         _viewModel = viewModel;
-        _viewModel.Bind(this);
+        _viewModel?.Bind(this);
     }
 }

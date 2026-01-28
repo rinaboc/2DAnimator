@@ -63,7 +63,7 @@ public class ParameterSlider : Clickable, IView<ParameterStates>
     {
         if (IsInsideCollider())
         {
-            _viewModel.Send(new OpenParameterEditorIntent());
+            _viewModel?.Send(new OpenParameterEditorIntent());
         }
     }
 
@@ -82,7 +82,7 @@ public class ParameterSlider : Clickable, IView<ParameterStates>
     {
         if (IsInsideCollider())
         {
-            _viewModel.Send(new SelectParameterIntent(paramID));
+            _viewModel?.Send(new SelectParameterIntent(paramID));
         }
     }
 
@@ -136,7 +136,7 @@ public class ParameterSlider : Clickable, IView<ParameterStates>
     {
         sliderValue = slider.value;
         ParameterValueField.text = sliderValue.ToString("F2");
-        _viewModel.Send(new InterpolateParameterIntent(paramID, sliderValue));
+        _viewModel?.Send(new InterpolateParameterIntent(paramID, sliderValue));
     }
 
     public void SetValue(float value)
@@ -164,6 +164,6 @@ public class ParameterSlider : Clickable, IView<ParameterStates>
     public void SetViewModel(IViewModel<ParameterStates> viewModel)
     {
         _viewModel = viewModel;
-        _viewModel.Bind(this);
+        _viewModel?.Bind(this);
     }
 }
