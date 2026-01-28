@@ -902,6 +902,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 920240c22cbe16e4ba61df77c37397bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _appInitializer: {fileID: 856699105}
 --- !u!4 &220679285
 Transform:
   m_ObjectHideFlags: 0
@@ -1139,7 +1140,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1adffd454500614cb26ec5c52108000, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _timelineWidget: {fileID: 1616220211}
   _appInitializer: {fileID: 856699105}
 --- !u!1 &365910525
 GameObject:

@@ -38,14 +38,14 @@ public class ProjectManager : ManagerBase<ProjectManager>
 
     public void LoadProject(string path)
     {
-        try
-        {
-            SaveData saveData = _projectService.Load(path);
-            _viewModel?.Send(new InitializeProjectIntent(saveData));
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"Failed to load project: {ex.Message}");
-        }
+        // try
+        // {
+        SaveData saveData = _projectService.Load(path);
+        _viewModel?.Send(new InitializeProjectIntent(saveData));
+        // }
+        // catch (Exception ex)
+        // {
+        //     Debug.LogError($"Failed to load project: {ex.Message}");
+        // }
     }
 }

@@ -84,7 +84,7 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
             // go from backwards and set style display to flex until its hidden
             for (int i = m_frameBars.Count - 1; i >= 0; i--)
             {
-                if (m_frameBars[i][0].style.display == DisplayStyle.Flex)
+                if (0 < m_frameBars[i].Count && m_frameBars[i][0].style.display == DisplayStyle.Flex)
                     break;
 
                 foreach (var key in m_frameBars[i])
@@ -149,9 +149,9 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
         ClearFrameBarLists();
     }
 
-    public void CreateKeyFrameLine(Guid paramID)
+    public void CreateKeyFrameLine(Guid paramID, int maxFrames)
     {
-        var keyframeLine = ViewFactory.Instance.CreateView<KeyframeLineElement, TimelineState>(m_maxFrames, m_frameBars, paramID);
+        var keyframeLine = ViewFactory.Instance.CreateView<KeyframeLineElement, TimelineState>(maxFrames, m_frameBars, paramID);
         m_keyframeContainer.Add(keyframeLine);
         m_keyframeLineElements.Add(paramID, keyframeLine);
     }
@@ -329,7 +329,7 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
         foreach (var (id, _) in state.Keyframes)
         {
             if (!m_keyframeLineElements.ContainsKey(id))
-                CreateKeyFrameLine(id);
+                CreateKeyFrameLine(id, state.MaxFrames);
         }
 
         UpdateKeyWidth();
@@ -337,9 +337,10 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
 
     public void Render(TimelineState state)
     {
-        if (state.IsOpen && (!m_widgetOpen || m_maxFrames != state.MaxFrames))
+        if (!state.IsOpen)
         {
-            RebuildKeyFrameLines(state);
+            m_widgetOpen = false;
+            return;
         }
 
         if (m_maxFrames != state.MaxFrames)
@@ -347,6 +348,11 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
             m_maxFrames = state.MaxFrames;
             BuildFrameBars(state.MaxFrames);
             RecalculateSliderHandle();
+            RebuildKeyFrameLines(state);
+        }
+        else if (!m_widgetOpen)
+        {
+            RebuildKeyFrameLines(state);
         }
 
         UpdateHandlePosition();

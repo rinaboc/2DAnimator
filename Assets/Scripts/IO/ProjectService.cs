@@ -12,13 +12,6 @@ public interface IProjectService
 
 public class ProjectService : IProjectService
 {
-    // private string savePath;
-
-    // private void Awake()
-    // {
-    //     savePath = Application.persistentDataPath + "/program.save";
-    // }
-
     public void Save(string path, IModelContext context)
     {
         var saveData = CreateSaveData(context);

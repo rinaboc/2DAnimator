@@ -61,11 +61,6 @@ public class AppInitializer : MonoBehaviour
 
     private void BindViews()
     {
-        if (GetViewModel<OperationState>(out var operationViewModel))
-        {
-            _nfpController.SetViewModel(operationViewModel);
-        }
-
         if (GetViewModel<TimelineState>(out var timelineViewModel))
         {
             _timelineWidgetController.SetViewModel(timelineViewModel);

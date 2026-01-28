@@ -16,7 +16,13 @@ public class MeshManager : ManagerBase<MeshManager>
 
     public bool GetMeshObject(Guid id, out MeshController artMesh) => _meshControllers.TryGetValue(id, out artMesh);
 
-    public bool RegisterArtMeshObj(Guid id, MeshController artMeshObj) => _meshControllers.TryAdd(id, artMeshObj);
+    void Start()
+    {
+        if (!_appInitializer.GetViewModel(out _viewModel))
+        {
+            Debug.LogError("Couldn't fetch viewModel");
+        }
+    }
 
     public void DeleteArtMeshObj(Guid id)
     {
@@ -25,27 +31,27 @@ public class MeshManager : ManagerBase<MeshManager>
         Destroy(artMesh.gameObject);
     }
 
+    public void ClearArtMeshObjects()
+    {
+        foreach (var artMesh in _meshControllers.Values)
+        {
+            Destroy(artMesh.gameObject);
+        }
+        _meshControllers.Clear();
+    }
+
     public void CreateArtMeshObj(Texture2D texture, Guid ID)
     {
         // create ArtObject inside viewport and assign the image to its sprite
         MeshController meshController = SetupMeshController(texture, ID);
-
-        if (_viewModel == null && !_appInitializer.GetViewModel(out _viewModel))
-        {
-            Debug.LogError("Couldn't fetch viewModel");
-        }
         meshController.SetViewModel(_viewModel);
         meshController.GetBoundingBox().SetViewModel(_viewModel);
 
-        RegisterArtMeshObj(ID, meshController);
+        _meshControllers.TryAdd(ID, meshController);
     }
 
     public void DispatchToMeshViewModel(IIntent intent)
     {
-        if (_viewModel == null && !_appInitializer.GetViewModel(out _viewModel))
-        {
-            Debug.LogError("Couldn't fetch viewModel");
-        }
         _viewModel?.Send(intent);
     }
 

@@ -24,6 +24,7 @@ public class MeshCommandHandler : ICommandHandler
     private void ExecuteInitializeProject(InitializeProjectIntent init, object state, IModelContext context)
     {
         context.Meshes.Clear();
+        MeshManager.Instance.ClearArtMeshObjects();
         foreach (MeshData meshData in init.SaveData.MeshDatas)
         {
             if (!NFPController.LoadImage(meshData.sourcePath, out Texture2D texture))

@@ -5,13 +5,18 @@ using Assets.Scripts.Utility.MVI;
 using Assets.Scripts.States;
 using SFB;
 
-public class NFPController : MonoBehaviour, IView<OperationState>
+public class NFPController : MonoBehaviour
 {
+    [SerializeField] private AppInitializer _appInitializer;
     private IViewModel<OperationState> _viewModel;
 
     void Start()
     {
         RequestPermissionAsynchronously(false);
+        if (!_appInitializer.GetViewModel(out _viewModel))
+        {
+            Debug.LogError("Couldn't fetch viewModel");
+        }
     }
 
     private async void RequestPermissionAsynchronously(bool readPermissionOnly = false)
@@ -40,9 +45,11 @@ public class NFPController : MonoBehaviour, IView<OperationState>
     }, "tda", "MyProject.tda");
 #elif UNITY_STANDALONE_WIN
         var extensionList = new[] { new ExtensionFilter("2DAnimator project", "tda") };
-        var path = StandaloneFileBrowser.SaveFilePanel("Save Project", "", "project", extensionList);
-        if (path != null)
-            _viewModel?.Send(new SaveProjectIntent(path));
+        StandaloneFileBrowser.SaveFilePanelAsync("Save Project", "", "project", extensionList, (path) =>
+        {
+            if (path != null)
+                _viewModel?.Send(new SaveProjectIntent(path));
+        });
 #endif
 
     }
@@ -90,15 +97,5 @@ public class NFPController : MonoBehaviour, IView<OperationState>
         }
 
         return false;
-    }
-
-    public void Render(OperationState state)
-    {
-    }
-
-    public void SetViewModel(IViewModel<OperationState> viewModel)
-    {
-        _viewModel = viewModel;
-        _viewModel?.Bind(this);
     }
 }

@@ -50,7 +50,7 @@ public partial class KeyframeLineElement : VisualElement, IView<TimelineState>, 
 
     public void InsertKeyframeAt(int frame, Guid keyID)
     {
-        if (_cells[frame - 1].Q<KeyframeElement>()?._id == keyID) return;
+        if (frame - 1 >= _cells.Count || _cells[frame - 1].Q<KeyframeElement>()?._id == keyID) return;
 
         RemoveKeyframeFrom(frame);
         var keyframe = ViewFactory.Instance.CreateView<KeyframeElement, TimelineState>(keyID, frame, this);

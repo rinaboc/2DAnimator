@@ -8,13 +8,8 @@ using UnityEngine;
 public class AnimationManager : ManagerBase<AnimationManager>
 {
     private Dictionary<Guid, float> _currentCurveSliderValues = new();
-    public bool GetCurrentCurveSliderValue(Guid id, out float value) => _currentCurveSliderValues.TryGetValue(id, out value);
-
-    [SerializeField] private TimelineWidgetController _timelineWidget;
-
     [SerializeField] private AppInitializer _appInitializer;
     private IViewModel<ParameterStates> _viewModel;
-
 
     void Start()
     {
@@ -62,20 +57,6 @@ public class AnimationManager : ManagerBase<AnimationManager>
             InterpolateParameter(interpolatedValue, parameter.ID);
             _viewModel?.Send(new ParameterValueInterpolatedIntent(parameter.ID, interpolatedValue));
         }
-    }
-
-    public KeyFrame CreateKeyframe(Guid paramID, float value)
-    {
-        Debug.Log("Creating new keyframe");
-        int CurrentFrame = _timelineWidget.Currentframe;
-
-        KeyFrame keyFrame = new(paramID, value, CurrentFrame);
-        return keyFrame;
-    }
-
-    public void RemoveKeyFrame(Guid id)
-    {
-        KeyFrameRegistry.Instance.Remove(id);
     }
 
     /// <summary>
