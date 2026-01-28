@@ -11,23 +11,27 @@ public class MeshCommandHandler : ICommandHandler
     {
         switch (intent)
         {
-            case SaveTransformIntent save:
-                ExecuteSaveTransform(save, state, context);
-                break;
-            case CreateMeshLayerIntent create:
-                ExecuteCreateMeshLayer(create, state, context);
-                break;
-            case MoveLayerUpIntent _:
-                ExecuteMoveLayerUp(state, context);
-                break;
-            case MoveLayerDownIntent _:
-                ExecuteMoveLayerDown(state, context);
-                break;
-            case DeleteLayerIntent _:
-                ExecuteDeleteLayer(state, context);
-                break;
+            case SaveTransformIntent save: ExecuteSaveTransform(save, state, context); break;
+            case CreateMeshLayerIntent create: ExecuteCreateMeshLayer(create, state, context); break;
+            case MoveLayerUpIntent _: ExecuteMoveLayerUp(state, context); break;
+            case MoveLayerDownIntent _: ExecuteMoveLayerDown(state, context); break;
+            case DeleteLayerIntent _: ExecuteDeleteLayer(state, context); break;
+            case InitializeProjectIntent init: ExecuteInitializeProject(init, state, context); break;
         }
         ;
+    }
+
+    private void ExecuteInitializeProject(InitializeProjectIntent init, object state, IModelContext context)
+    {
+        context.Meshes.Clear();
+        foreach (MeshData meshData in init.SaveData.MeshDatas)
+        {
+            if (!NFPController.LoadImage(meshData.sourcePath, out Texture2D texture))
+            { Debug.LogError("couldn't load image"); continue; }
+
+            context.Meshes.Register(meshData);
+            MeshManager.Instance.CreateArtMeshObj(texture, meshData.ID);
+        }
     }
 
     private void ExecuteDeleteLayer(object state, IModelContext context)

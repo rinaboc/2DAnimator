@@ -3,6 +3,7 @@ using System.IO;
 using System;
 using Assets.Scripts.Utility.MVI;
 using Assets.Scripts.States;
+using SFB;
 
 public class NFPController : MonoBehaviour, IView<OperationState>
 {
@@ -17,6 +18,33 @@ public class NFPController : MonoBehaviour, IView<OperationState>
     {
         NativeFilePicker.Permission permission = await NativeFilePicker.RequestPermissionAsync(readPermissionOnly);
         Debug.Log("Permission result: " + permission);
+    }
+
+    public void OpenProject()
+    {
+        string[] fileTypes = new string[] { "tda" };
+
+        NativeFilePicker.PickFile((path) =>
+        {
+            _viewModel?.Send(new OpenProjectIntent(path));
+        }, fileTypes);
+    }
+
+    public void SaveProject()
+    {
+#if UNITY_ANDROID || UNITY_IOS
+    NativeFilePicker.ExportFile((path) =>
+    {
+        if (!string.IsNullOrEmpty(path))
+            _viewModel?.Send(new SaveProjectIntent(path));
+    }, "tda", "MyProject.tda");
+#elif UNITY_STANDALONE_WIN
+        var extensionList = new[] { new ExtensionFilter("2DAnimator project", "tda") };
+        var path = StandaloneFileBrowser.SaveFilePanel("Save Project", "", "project", extensionList);
+        if (path != null)
+            _viewModel?.Send(new SaveProjectIntent(path));
+#endif
+
     }
 
     public void OpenImageFile()
@@ -36,10 +64,7 @@ public class NFPController : MonoBehaviour, IView<OperationState>
             if (LoadImage(path, out Texture2D texture))
             {
                 // create new artmesh
-                _viewModel.Send(new CreateMeshLayerIntent(Guid.NewGuid(), texture, path));
-
-                // MeshData meshData = MeshManager.Instance.CreateArtMeshObj(texture, path);
-                // LayerManager.Instance.CreateUIArtLayer(meshData);
+                _viewModel?.Send(new CreateMeshLayerIntent(Guid.NewGuid(), texture, path));
             }
 
         }, fileTypes);
@@ -74,6 +99,6 @@ public class NFPController : MonoBehaviour, IView<OperationState>
     public void SetViewModel(IViewModel<OperationState> viewModel)
     {
         _viewModel = viewModel;
-        _viewModel.Bind(this);
+        _viewModel?.Bind(this);
     }
 }

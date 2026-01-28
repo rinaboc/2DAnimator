@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IRegistry<T, L> : ISaveable
+public interface IRegistry<T, L>
     where T : EntityBase
     where L : RegistryBase<T, L>
 {
@@ -34,7 +34,6 @@ public abstract class RegistryBase<T, L> : ScriptableObject, IRegistry<T, L>
             if (_instance == null)
             {
                 _instance = Resources.Load<L>(typeof(L).Name);
-                _instance.RegisterSaveable();
 
                 if (_instance == null)
                 {
@@ -73,12 +72,5 @@ public abstract class RegistryBase<T, L> : ScriptableObject, IRegistry<T, L>
         }
 
         return retEntries;
-    }
-
-    public abstract void SaveState(SaveData saveData);
-
-    public void RegisterSaveable()
-    {
-        SaveController.Register(this);
     }
 }

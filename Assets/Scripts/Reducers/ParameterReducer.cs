@@ -20,25 +20,56 @@ public class ParameterReducer : IReducer<ParameterStates>
             OpenParameterEditorIntent _ => ReduceOpenParameterEditor(previous),
             CreateParamPointsIntent _ => ReduceCreateParamPoints(previous),
             ParameterValueInterpolatedIntent interpolate => ReduceParameterValueInterpolated(previous, interpolate),
+            InitializeProjectIntent init => ReduceInitializeProject(previous, init),
             _ => previous
         };
+    }
+
+    private ParameterStates ReduceInitializeProject(ParameterStates previous, InitializeProjectIntent init)
+    {
+        ParameterStates next = new();
+
+        foreach (Parameter parameter in init.SaveData.Parameters)
+        {
+            next.Parameters.Add(parameter.ID, new ParameterState()
+            {
+                ID = parameter.ID,
+                MinValue = parameter.MinValue,
+                MaxValue = parameter.MaxValue,
+                DefaultValue = parameter.DefaultValue,
+                Name = parameter.Name,
+                IsSelected = false,
+                CurValue = parameter.DefaultValue,
+                ParamPointValues = { parameter.DefaultValue }
+            });
+        }
+
+        foreach (ParamCurve curve in init.SaveData.ParamCurves)
+        {
+            next.Parameters[curve.ParamID].ParamPointValues = init.SaveData.ParamPoints
+            .Where(p => curve.ParamPoints.Contains(p.ID))
+            .Select(p => p.ParamValue)
+            .ToList();
+        }
+
+        return next;
+    }
+
+    private List<float> GetParamPointValues(float min, float max, float def)
+    {
+        List<float> ret = new() { min, max };
+
+        if (Math.Abs(min - def) > 0.1f && Math.Abs(max - def) > 0.1f)
+            ret.Add(def);
+
+        return ret;
     }
 
     private ParameterStates ReduceCreateParamPoints(ParameterStates previous)
     {
         var ret = previous.Clone();
         var selectedParam = ret.Parameters[ret.SelectedParamID];
-        List<float> paramValues = new()
-        {
-            selectedParam.MinValue,
-            selectedParam.MaxValue
-        };
-
-        if (Math.Abs(selectedParam.MinValue - selectedParam.DefaultValue) > 0.1f
-        && Math.Abs(selectedParam.MaxValue - selectedParam.DefaultValue) > 0.1f)
-        {
-            paramValues.Add(selectedParam.DefaultValue);
-        }
+        List<float> paramValues = GetParamPointValues(selectedParam.MinValue, selectedParam.MaxValue, selectedParam.CurValue);
 
         selectedParam.ParamPointValues = paramValues;
         return ret;

@@ -59,21 +59,4 @@ public class MeshManager : ManagerBase<MeshManager>
             .SetMeshID(ID);
         return meshController;
     }
-
-
-    public override void LoadState(SaveData saveData)
-    {
-        MeshRegistry.Instance.Clear();
-
-        foreach (var item in saveData.MeshDatas)
-        {
-            if (NFPController.LoadImage(item.sourcePath, out Texture2D texture))
-            {
-                MeshRegistry.Instance.Register(item);
-                MeshController meshController = SetupMeshController(texture, item.ID);
-                meshController.LoadTransformationFromMeshData();
-                RegisterArtMeshObj(item.ID, meshController);
-            }
-        }
-    }
 }

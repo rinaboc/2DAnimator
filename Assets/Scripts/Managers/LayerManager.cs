@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using System;
 using System.Linq;
@@ -110,13 +109,12 @@ public class LayerManager : ManagerBase<LayerManager>
         return false;
     }
 
-    public override void LoadState(SaveData saveData)
+    public void DeleteAllUILayers()
     {
-        MeshData[] sortedMeshDatas = saveData.MeshDatas;
-        sortedMeshDatas.ToList().OrderBy(meshData => meshData.drawOrder).ToArray();
-        foreach (var item in sortedMeshDatas)
+        foreach (var item in _layerControllers)
         {
-            CreateUIArtLayer(item.ID);
+            Destroy(item.Value.ParentObj);
         }
+        _layerControllers.Clear();
     }
 }

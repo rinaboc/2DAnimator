@@ -64,27 +64,6 @@ public class MeshController : MonoBehaviour, IView<MeshStates>
         return this;
     }
 
-    public void LoadTransformationFromMeshData()
-    {
-        if (MeshRegistry.Instance.TryGet(ID, out MeshData meshData))
-        {
-            this.transform.localPosition = meshData.transform.Position;
-            ArtMeshObject.transform.localScale = meshData.transform.Scale;
-            UpdateBoundingBox();
-            this.transform.localRotation = meshData.transform.Rotation;
-        }
-        else
-        {
-            Debug.LogError("Couldn't find mesh data to load transformation from.");
-        }
-    }
-
-    private void UpdateBoundingBox()
-    {
-        BoxCollider boxCollider = ArtMeshObject.GetComponent<BoxCollider>();
-        BoundingBox.CreateBoundingBox(boxCollider.center, Vector3.Scale(boxCollider.size, ArtMeshObject.transform.localScale));
-    }
-
     public void ScaleArtMesh(Vector3 scale)
     {
         ArtMeshObject.transform.localScale = scale;

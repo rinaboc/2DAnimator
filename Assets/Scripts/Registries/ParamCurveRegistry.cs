@@ -44,10 +44,4 @@ public class ParamCurveRegistry : RegistryBase<ParamCurve, ParamCurveRegistry>, 
 
         return ret;
     }
-
-    public override void SaveState(SaveData saveData)
-    {
-        saveData.ParamCurves = new ParamCurve[_map.Count];
-        saveData.ParamCurves = _map.Values.ToArray();
-    }
 }

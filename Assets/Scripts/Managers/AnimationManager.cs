@@ -93,7 +93,7 @@ public class AnimationManager : ManagerBase<AnimationManager>
         ApplyAccumulatedTransforms(accumTransforms);
     }
 
-    private void CollectParameterDeltas(float value, Guid paramID, Dictionary<Guid, TransformData> accumTransforms)
+    public void CollectParameterDeltas(float value, Guid paramID, Dictionary<Guid, TransformData> accumTransforms)
     {
         ParameterRegistry parameterRegistry = ParameterRegistry.Instance;
         ParamPointRegistry paramPointRegistry = ParamPointRegistry.Instance;
@@ -164,20 +164,6 @@ public class AnimationManager : ManagerBase<AnimationManager>
             // artMesh.MoveArtMesh(meshData.transform.Position + delta.Position);
             // artMesh.ScaleArtMesh(meshData.transform.Scale + delta.Scale);
             // artMesh.RotateArtMesh(meshData.transform.Rotation * delta.Rotation);
-        }
-    }
-
-    public override void LoadState(SaveData saveData)
-    {
-        GeneralSettings.Instance.MaxFrames = saveData.AnimationSetting.maxFrames;
-        GeneralSettings.Instance.FramePerSec = saveData.AnimationSetting.framePerSec;
-
-        KeyFrameRegistry keyFrameRegistry = KeyFrameRegistry.Instance;
-        keyFrameRegistry.Clear();
-        if (saveData.KeyFrames == null) return;
-        foreach (var item in saveData.KeyFrames)
-        {
-            keyFrameRegistry.Register(item);
         }
     }
 }

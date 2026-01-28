@@ -13,8 +13,26 @@ public class LayerReducer : IReducer<LayerStates>
             ChangeLayerNameIntent change => ReduceChangeLayerName(previous, change),
             SelectLayerIntent select => ReduceSelectLayer(previous, select),
             DeleteLayerIntent _ => ReduceDeleteLayer(previous),
+            InitializeProjectIntent init => ReduceInitializeProject(previous, init),
             _ => previous
         };
+    }
+
+    private LayerStates ReduceInitializeProject(LayerStates previous, InitializeProjectIntent init)
+    {
+        var next = new LayerStates();
+
+        foreach (MeshData meshData in init.SaveData.MeshDatas)
+        {
+            next.Layers.Add(meshData.ID, new LayerState()
+            {
+                ID = meshData.ID,
+                Name = meshData.name,
+                IsSelected = false
+            });
+        }
+
+        return next;
     }
 
     private LayerStates ReduceCreateMeshLayer(LayerStates previous, CreateMeshLayerIntent create)

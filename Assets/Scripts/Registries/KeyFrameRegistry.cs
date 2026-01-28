@@ -56,10 +56,4 @@ public class KeyFrameRegistry : RegistryBase<KeyFrame, KeyFrameRegistry>, IKeyFr
         }
         return ret;
     }
-
-    public override void SaveState(SaveData saveData)
-    {
-        saveData.KeyFrames = new KeyFrame[_map.Count];
-        saveData.KeyFrames = _map.Values.ToArray();
-    }
 }

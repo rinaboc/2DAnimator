@@ -16,6 +16,40 @@ public class ParameterCommandHandler : ICommandHandler
             case OpenParameterCreatorIntent _: ExecuteOpenParameterCreator(state, context); break;
             case SelectLayerIntent select: ExecuteSelectLayer(select, state, context); break;
             case DeleteLayerIntent _: ExecuteDeleteLayer(state, context); break;
+            case InitializeProjectIntent init: ExecuteInitializeProject(init, state, context); break;
+        }
+    }
+
+    private void ExecuteInitializeProject(InitializeProjectIntent init, object state, IModelContext context)
+    {
+        context.Parameters.Clear();
+        context.ParamCurves.Clear();
+        context.ParamPoints.Clear();
+
+        ParameterManager.Instance.ClearParamSliders();
+        foreach (Parameter parameter in init.SaveData.Parameters)
+        {
+            context.Parameters.Register(parameter);
+            ParameterManager.Instance.CreateParameterSlider(parameter.ID);
+        }
+
+        foreach (ParamPoint point in init.SaveData.ParamPoints)
+        {
+            context.ParamPoints.Register(point);
+        }
+
+        foreach (ParamCurve curve in init.SaveData.ParamCurves)
+        {
+            context.ParamCurves.Register(curve);
+            List<float> paramValues = new();
+            foreach (var pointID in curve.ParamPoints)
+            {
+                if (context.ParamPoints.TryGet(pointID, out ParamPoint point))
+                {
+                    paramValues.Add(point.ParamValue);
+                }
+            }
+            ParameterManager.Instance.GetParamSlider(curve.ParamID).CreateParamPointHandles(paramValues);
         }
     }
 

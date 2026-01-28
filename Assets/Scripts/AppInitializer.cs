@@ -45,6 +45,7 @@ public class AppInitializer : MonoBehaviour
         _dispatcher.Register(new ParameterCommandHandler());
         _dispatcher.Register(new LayerCommandHandler());
         _dispatcher.Register(new TimelineCommandHandler());
+        _dispatcher.Register(new OperationCommandHandler());
 
         _dispatcher.Register(new MeshReducer());
         _dispatcher.Register(new ParameterReducer());

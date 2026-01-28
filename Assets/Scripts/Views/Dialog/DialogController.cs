@@ -1,4 +1,3 @@
-using UnityEngine;
 using UnityEngine.UIElements;
 
 public class DialogController<T> : BaseUIController where T : DialogElement

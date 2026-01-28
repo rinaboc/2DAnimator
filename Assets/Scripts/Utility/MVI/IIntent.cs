@@ -24,6 +24,12 @@ namespace Assets.Scripts.Utility.MVI
     }
 }
 
+#region Workspace Operations
+public record SaveProjectIntent(string Path) : IIntent;
+public record OpenProjectIntent(string Path) : IIntent;
+[GlobalIntent] public record InitializeProjectIntent(SaveData SaveData) : IIntent;
+#endregion
+
 #region Mesh Transformation
 public record UpdateTransformIntent(Guid MeshID, TransformData Data, TransformType Type) : IIntent;
 public record SaveTransformIntent(Guid MeshID, TransformType Type) : IIntent;

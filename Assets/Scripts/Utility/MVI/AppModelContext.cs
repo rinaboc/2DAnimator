@@ -26,10 +26,5 @@ namespace Assets.Scripts.Utility.MVI
             KeyFrames = keyFrames;
             GeneralSettings = generalSettings;
         }
-
-        public void Save()
-        {
-
-        }
     }
 }

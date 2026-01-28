@@ -65,14 +65,13 @@ public class ParameterManager : ManagerBase<ParameterManager>
         }
     }
 
-    private void ClearParamSliders()
+    public void ClearParamSliders()
     {
         foreach (var item in _paramSliders)
         {
             Destroy(item.Value);
         }
         _paramSliders.Clear();
-        ParameterRegistry.Instance.Clear();
     }
 
 
@@ -92,39 +91,5 @@ public class ParameterManager : ManagerBase<ParameterManager>
     public void DispatchToParameterStore(IIntent intent)
     {
         _viewModel?.Send(intent);
-    }
-
-    public override void LoadState(SaveData saveData)
-    {
-        ParameterRegistry.Instance.Clear();
-        ParamCurveRegistry.Instance.Clear();
-        ParamPointRegistry.Instance.Clear();
-        ClearParamSliders();
-
-        foreach (var item in saveData.Parameters)
-        {
-            ParameterRegistry.Instance.Register(item);
-            CreateParameterSlider(item.ID);
-        }
-
-        foreach (var item in saveData.ParamPoints)
-        {
-            ParamPointRegistry.Instance.Register(item);
-        }
-
-        foreach (var item in saveData.ParamCurves)
-        {
-            ParamCurveRegistry.Instance.Register(item);
-            List<float> paramValues = new();
-            foreach (var pointID in item.ParamPoints)
-            {
-                if (ParamPointRegistry.Instance.TryGet(pointID, out ParamPoint point))
-                {
-                    paramValues.Add(point.ParamValue);
-                }
-            }
-            GetParamSlider(item.ParamID).CreateParamPointHandles(paramValues);
-        }
-
     }
 }

@@ -12,7 +12,7 @@ public interface IGeneralSettings
 }
 
 [CreateAssetMenu(fileName = "GeneralSettings", menuName = "Scriptable Objects/GeneralSettings")]
-public class GeneralSettings : ScriptableObject, ISaveable, IGeneralSettings
+public class GeneralSettings : ScriptableObject, IGeneralSettings
 {
     public int MaxFrames { get; set; }
     public int FramePerSec { get; set; }
@@ -29,7 +29,6 @@ public class GeneralSettings : ScriptableObject, ISaveable, IGeneralSettings
             if (_instance == null)
             {
                 _instance = Resources.Load<GeneralSettings>("GeneralSettings");
-                _instance.RegisterSaveable();
                 _instance.MaxFrames = 24;
                 _instance.FramePerSec = 16;
                 _instance.SelectedParamID = Guid.Empty;
@@ -44,17 +43,5 @@ public class GeneralSettings : ScriptableObject, ISaveable, IGeneralSettings
 
             return _instance;
         }
-    }
-
-
-    public void RegisterSaveable()
-    {
-        SaveController.Register(this);
-    }
-
-    public void SaveState(SaveData saveData)
-    {
-        AnimationSettings animation = new(MaxFrames, FramePerSec);
-        saveData.AnimationSetting = animation;
     }
 }

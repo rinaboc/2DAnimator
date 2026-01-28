@@ -4,7 +4,7 @@ using Unity.Properties;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class TimelineSettingsController : DialogController<TimelineSettingsElement>, ILoadable, IView<TimelineState>
+public class TimelineSettingsController : DialogController<TimelineSettingsElement>, IView<TimelineState>
 {
     [SerializeField] TimelineWidgetController m_TimelineWidgetController;
 
@@ -12,17 +12,6 @@ public class TimelineSettingsController : DialogController<TimelineSettingsEleme
     [SerializeField, CreateProperty] private int m_framePerSec;
 
     private IViewModel<TimelineState> _viewModel;
-
-    public void LoadState(SaveData saveData)
-    {
-        m_maxFrames = GeneralSettings.Instance.MaxFrames;
-        m_framePerSec = GeneralSettings.Instance.FramePerSec;
-    }
-
-    public void RegisterLoadable()
-    {
-        SaveController.Register(this);
-    }
 
     public void Render(TimelineState state)
     {

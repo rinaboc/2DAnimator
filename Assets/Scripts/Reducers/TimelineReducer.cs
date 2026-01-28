@@ -19,8 +19,34 @@ public class TimelineReducer : IReducer<TimelineState>
             DeleteKeyframeIntent _ => ReduceDeleteKeyframe(previous),
             CurrentFrameChangedIntent change => ReduceCurrentFrameChanged(change, previous),
             TimelineParameterSliderChangedIntent change => ReduceTimelineParameterSliderChanged(change, previous),
+            InitializeProjectIntent init => ReduceInitializeProject(previous, init),
             _ => previous
         };
+    }
+
+    private TimelineState ReduceInitializeProject(TimelineState previous, InitializeProjectIntent init)
+    {
+        var next = new TimelineState
+        {
+            FramePerSec = init.SaveData.AnimationSetting?.framePerSec ?? 24,
+            MaxFrames = init.SaveData.AnimationSetting?.maxFrames ?? 24,
+        };
+
+        foreach (Parameter parameter in init.SaveData.Parameters)
+        {
+            next.Keyframes.Add(parameter.ID, new Dictionary<Guid, KeyframeState>());
+        }
+
+        foreach (KeyFrame keyFrame in init.SaveData.KeyFrames)
+        {
+            next.Keyframes[keyFrame.ParamID][keyFrame.ID] = new KeyframeState()
+            {
+                Frame = keyFrame.Frame,
+                IsSelected = false
+            };
+        }
+
+        return next;
     }
 
     private TimelineState ReduceDeleteKeyframe(TimelineState previous)

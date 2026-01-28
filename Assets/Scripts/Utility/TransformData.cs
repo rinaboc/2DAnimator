@@ -32,6 +32,13 @@ public class TransformData
         Scale = Vector3.zero;
     }
 
+    public TransformData Clone() => new()
+    {
+        Position = Position,
+        Rotation = Rotation,
+        Scale = Scale,
+    };
+
     public static TransformData operator +(TransformData a, TransformData b)
     {
         TransformData result = new()

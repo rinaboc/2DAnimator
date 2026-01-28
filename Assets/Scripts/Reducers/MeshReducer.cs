@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
@@ -19,8 +20,43 @@ public class MeshReducer : IReducer<MeshStates>
             MoveLayerDownIntent _ => ReduceMoveLayerDown(previous),
             MoveLayerUpIntent _ => ReduceMoveLayerUp(previous),
             DeleteLayerIntent _ => ReduceDeleteLayer(previous),
+            InitializeProjectIntent init => ReduceInitializeProject(previous, init),
             _ => previous
         };
+    }
+
+    private MeshStates ReduceInitializeProject(MeshStates previous, InitializeProjectIntent init)
+    {
+        var next = new MeshStates();
+        foreach (MeshData meshData in init.SaveData.MeshDatas)
+        {
+            next.Meshes[meshData.ID] = new()
+            {
+                ID = meshData.ID,
+                MeshTransform = meshData.transform,
+                AnimationTransform = new TransformData(),
+                DrawOrder = meshData.drawOrder
+            };
+        }
+
+        foreach (ParamCurve curve in init.SaveData.ParamCurves)
+        {
+            Parameter parameter = init.SaveData.Parameters.FirstOrDefault(p => p.ID == curve.ParamID);
+
+            List<ParamPoint> paramPoints = init.SaveData.ParamPoints
+            .Where(p => curve.ParamPoints.Contains(p.ID))
+            .Select(p => p)
+            .ToList();
+
+            ParamPoint defaultPoint = paramPoints
+            .Where(p => Math.Abs(parameter.DefaultValue - p.ParamValue) < 0.1f)
+            .Select(p => p)
+            .FirstOrDefault();
+
+            next.Meshes[curve.MeshID].AnimationTransform = defaultPoint.transform.Clone();
+        }
+
+        return next;
     }
 
     private MeshStates ReduceDeleteLayer(MeshStates previous)

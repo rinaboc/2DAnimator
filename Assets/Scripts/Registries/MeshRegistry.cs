@@ -44,10 +44,4 @@ public class MeshRegistry : RegistryBase<MeshData, MeshRegistry>
 
         return TryGet(retID, out next);
     }
-
-    public override void SaveState(SaveData saveData)
-    {
-        saveData.MeshDatas = new MeshData[_map.Count];
-        saveData.MeshDatas = _map.Values.ToArray();
-    }
 }
