@@ -17,7 +17,13 @@ public class ParameterCommandHandler : ICommandHandler
             case SelectLayerIntent select: ExecuteSelectLayer(select, state, context); break;
             case DeleteLayerIntent _: ExecuteDeleteLayer(state, context); break;
             case InitializeProjectIntent init: ExecuteInitializeProject(init, state, context); break;
+            case InterpolateParameterIntent interpolate: ExecuteInterpolateParameter(interpolate, state, context); break;
         }
+    }
+
+    private void ExecuteInterpolateParameter(InterpolateParameterIntent interpolate, object state, IModelContext context)
+    {
+        AnimationManager.Instance.InterpolateParameter(interpolate.Value, interpolate.ParamID, context);
     }
 
     private void ExecuteInitializeProject(InitializeProjectIntent init, object state, IModelContext context)

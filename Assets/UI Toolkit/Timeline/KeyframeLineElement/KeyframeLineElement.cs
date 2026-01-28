@@ -5,7 +5,7 @@ using Assets.Scripts.Utility.MVI;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class KeyframeLineElement : VisualElement, IView<TimelineState>, IDisposable
+public partial class KeyframeLineElement : VisualElement, IView<TimelineState>
 {
     public Guid ParamID { get; }
     private List<VisualElement> _cells = new();

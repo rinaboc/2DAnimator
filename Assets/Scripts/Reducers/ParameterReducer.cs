@@ -10,7 +10,6 @@ public class ParameterReducer : IReducer<ParameterStates>
     {
         return intent switch
         {
-            InterpolateParameterIntent interpolate => ReduceInterpolateParameter(previous, interpolate),
             SelectParameterIntent select => ReduceSelectParameter(previous, select),
             CreateParameterIntent create => ReduceCreateParameter(previous, create),
             DeleteSelectedParameterIntent _ => ReduceDeleteSelectedParameter(previous),
@@ -186,11 +185,5 @@ public class ParameterReducer : IReducer<ParameterStates>
             SelectedParamID = select.ParamID,
             IsSettingsOpen = previous.IsSettingsOpen
         };
-    }
-
-    private ParameterStates ReduceInterpolateParameter(ParameterStates previous, InterpolateParameterIntent interpolate)
-    {
-        AnimationManager.Instance.InterpolateParameter(interpolate.Value, interpolate.ParamID);
-        return previous;
     }
 }

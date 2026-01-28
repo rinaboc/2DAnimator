@@ -46,12 +46,12 @@ public class TimelineCommandHandler : ICommandHandler
     private void ExecuteCurrentFrameChanged(CurrentFrameChangedIntent change, object state, IModelContext context)
     {
         context.GeneralSettings.CurrentFrame = change.Frame;
-        AnimationManager.Instance.AnimateTimeline(change.Frame);
+        AnimationManager.Instance.AnimateTimeline(change.Frame, context);
     }
 
     private void ExecuteTimelineParameterSliderChanged(TimelineParameterSliderChangedIntent change, object state, IModelContext context)
     {
-        AnimationManager.Instance.InterpolateParameter(change.Value, change.ParamID);
+        AnimationManager.Instance.InterpolateParameter(change.Value, change.ParamID, context);
         KeyFrame keyFrame = new(change.ParamID, change.Value, context.GeneralSettings.CurrentFrame, autoRegister: false);
         keyFrame.ID = change.KeyID;
         context.KeyFrames.Register(keyFrame);

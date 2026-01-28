@@ -19,13 +19,13 @@ public class AnimationManager : ManagerBase<AnimationManager>
         }
     }
 
-    public void AnimateTimeline(int currentFrame)
+    public void AnimateTimeline(int currentFrame, IModelContext context)
     {
-        var parameters = ParameterRegistry.Instance.GetAll();
+        var parameters = context.Parameters.GetAll();
 
         foreach (Parameter parameter in parameters)
         {
-            List<KeyFrame> parameterKeys = KeyFrameRegistry.Instance.GetKeyFramesOfParam(parameter.ID);
+            List<KeyFrame> parameterKeys = context.KeyFrames.GetKeyFramesOfParam(parameter.ID);
             if (parameterKeys.Count < 2) continue;
 
             parameterKeys.Sort((a, b) => a.Frame.CompareTo(b.Frame));
@@ -54,7 +54,7 @@ public class AnimationManager : ManagerBase<AnimationManager>
                 interpolatedValue = Mathf.Lerp(minFrame.ParamValue, maxFrame.ParamValue, t);
             }
 
-            InterpolateParameter(interpolatedValue, parameter.ID);
+            InterpolateParameter(interpolatedValue, parameter.ID, context);
             _viewModel?.Send(new ParameterValueInterpolatedIntent(parameter.ID, interpolatedValue));
         }
     }
@@ -62,28 +62,26 @@ public class AnimationManager : ManagerBase<AnimationManager>
     /// <summary>
     /// Interpolate parameter point values assigned to the selected parameter and set the interpolated transformations on the meshes.
     /// </summary>
-    public void InterpolateParameter(float value, Guid paramID)
+    public void InterpolateParameter(float value, Guid paramID, IModelContext context)
     {
         _currentCurveSliderValues[paramID] = value;
         var accumTransforms = new Dictionary<Guid, TransformData>();
         foreach (var curveValue in _currentCurveSliderValues)
         {
-            CollectParameterDeltas(curveValue.Value, curveValue.Key, accumTransforms);
+            CollectParameterDeltas(curveValue.Value, curveValue.Key, accumTransforms, context);
         }
 
-        ApplyAccumulatedTransforms(accumTransforms);
+        ApplyAccumulatedTransforms(accumTransforms, context);
     }
 
-    public void CollectParameterDeltas(float value, Guid paramID, Dictionary<Guid, TransformData> accumTransforms)
+    public void CollectParameterDeltas(float value, Guid paramID, Dictionary<Guid, TransformData> accumTransforms, IModelContext context)
     {
-        ParameterRegistry parameterRegistry = ParameterRegistry.Instance;
-        ParamPointRegistry paramPointRegistry = ParamPointRegistry.Instance;
-        if (!parameterRegistry.TryGet(paramID, out Parameter parameter)) return;
-        List<ParamCurve> paramCurves = ParamCurveRegistry.Instance.GetEntries(parameter.ParamCurves);
+        if (!context.Parameters.TryGet(paramID, out Parameter parameter)) return;
+        List<ParamCurve> paramCurves = context.ParamCurves.GetEntries(parameter.ParamCurves);
 
         foreach (ParamCurve paramCurve in paramCurves)
         {
-            List<ParamPoint> paramPoints = paramPointRegistry.GetEntries(paramCurve.ParamPoints);
+            List<ParamPoint> paramPoints = context.ParamPoints.GetEntries(paramCurve.ParamPoints);
             if (paramPoints.Count == 0) continue;
 
             paramPoints.Sort((p1, p2) => p1.ParamValue.CompareTo(p2.ParamValue));
@@ -126,7 +124,7 @@ public class AnimationManager : ManagerBase<AnimationManager>
         }
     }
 
-    private void ApplyAccumulatedTransforms(Dictionary<Guid, TransformData> accum)
+    private void ApplyAccumulatedTransforms(Dictionary<Guid, TransformData> accum, IModelContext context)
     {
         foreach (var kv in accum)
         {
@@ -134,7 +132,7 @@ public class AnimationManager : ManagerBase<AnimationManager>
             var delta = kv.Value;
 
             MeshManager.Instance.GetMeshObject(meshId, out MeshController artMesh);
-            MeshRegistry.Instance.TryGet(meshId, out MeshData meshData);
+            context.Meshes.TryGet(meshId, out MeshData meshData);
             if (artMesh == null || meshData == null)
             {
                 Debug.LogError("artmesh or meshdata null in apply accumulated transforms");

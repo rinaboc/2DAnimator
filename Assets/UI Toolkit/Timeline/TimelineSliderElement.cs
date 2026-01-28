@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
@@ -11,7 +10,7 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
 {
     private float _sliderContainerWidth;
     private float _sliderWidth;
-    private int m_maxFrames = GeneralSettings.Instance.MaxFrames;
+    private int m_maxFrames = 24;
 
     private int m_currentFrame = 1;
     public int CurrentFrame
@@ -135,7 +134,7 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
         m_keyframeContainer.AddToClassList("keyframe-container");
         m_keyframeContainer.verticalScrollerVisibility = ScrollerVisibility.Hidden;
 
-        this.Add(m_keyframeContainer);
+        Add(m_keyframeContainer);
     }
 
     public void ClearKeyframeContainer()

@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class ParameterSliderElement : VisualElement, IView<ParameterStates>, IDisposable
+public partial class ParameterSliderElement : VisualElement, IView<ParameterStates>
 {
     public Guid _paramID { get; set; }
     Slider _slider;
@@ -33,11 +33,6 @@ public partial class ParameterSliderElement : VisualElement, IView<ParameterStat
 
         _handle = _slider.Q<VisualElement>("unity-dragger");
         _handle.AddToClassList("param-slider-handle");
-    }
-
-    public void Dispose()
-    {
-        _viewModel?.Unbind(this);
     }
 
     private void OnSliderChange(ChangeEvent<float> evt)
