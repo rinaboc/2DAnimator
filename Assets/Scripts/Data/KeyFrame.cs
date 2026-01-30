@@ -7,16 +7,11 @@ public class KeyFrame : EntityBase
     public float ParamValue;
     public int Frame;
 
-    public KeyFrame(Guid ParamID, float ParamValue, int Frame, bool autoRegister = true) : base(autoRegister)
+    public KeyFrame(Guid ParamID, float ParamValue, int Frame)
     {
         this.ParamID = ParamID;
         this.ParamValue = ParamValue;
         this.Frame = Frame;
-    }
-
-    protected override void Register()
-    {
-        KeyFrameRegistry.Instance.Register(this);
     }
 
     public bool IsSameCell(KeyFrame kf) => this.ParamID.Equals(kf.ParamID) && this.Frame == kf.Frame;

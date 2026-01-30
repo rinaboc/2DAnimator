@@ -52,7 +52,7 @@ public class TimelineCommandHandler : ICommandHandler
     private void ExecuteTimelineParameterSliderChanged(TimelineParameterSliderChangedIntent change, object state, IModelContext context)
     {
         AnimationManager.Instance.InterpolateParameter(change.Value, change.ParamID, context);
-        KeyFrame keyFrame = new(change.ParamID, change.Value, context.GeneralSettings.CurrentFrame, autoRegister: false);
+        KeyFrame keyFrame = new(change.ParamID, change.Value, context.GeneralSettings.CurrentFrame);
         keyFrame.ID = change.KeyID;
         context.KeyFrames.Register(keyFrame);
     }

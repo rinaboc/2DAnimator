@@ -12,7 +12,7 @@ public class MeshData : EntityBase
 
     public TransformData transform;
 
-    public MeshData(string sourcePath, bool autoRegister = true) : base(autoRegister)
+    public MeshData(string sourcePath)
     {
         drawOrder = ++_objCounter;
         this.sourcePath = sourcePath;
@@ -27,11 +27,6 @@ public class MeshData : EntityBase
     private void OnDeserialized(StreamingContext context)
     {
         _objCounter++;
-    }
-
-    protected override void Register()
-    {
-        MeshRegistry.Instance.Register(this);
     }
 
     public override string ToString() => $"{ID}: {name}, {drawOrder}, {sourcePath}";

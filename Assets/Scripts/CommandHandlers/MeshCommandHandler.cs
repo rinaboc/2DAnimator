@@ -68,7 +68,7 @@ public class MeshCommandHandler : ICommandHandler
 
     private void ExecuteCreateMeshLayer(CreateMeshLayerIntent create, object state, IModelContext context)
     {
-        MeshData newMesh = new(create.Path, autoRegister: false)
+        MeshData newMesh = new(create.Path)
         {
             ID = create.ID
         };

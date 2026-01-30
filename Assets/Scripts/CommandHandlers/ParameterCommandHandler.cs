@@ -103,9 +103,9 @@ public class ParameterCommandHandler : ICommandHandler
         if (!context.Parameters.TryGet(context.GeneralSettings.SelectedParamID, out Parameter parameter)) return;
         if (context.GeneralSettings.SelectedMeshID == Guid.Empty) return;
 
-        ParamCurve paramCurve = new(context.GeneralSettings.SelectedMeshID, parameter.ID, autoRegister: false);
-        ParamPoint minPoint = new(parameter.MinValue, autoRegister: false);
-        ParamPoint maxPoint = new(parameter.MaxValue, autoRegister: false);
+        ParamCurve paramCurve = new(context.GeneralSettings.SelectedMeshID, parameter.ID);
+        ParamPoint minPoint = new(parameter.MinValue);
+        ParamPoint maxPoint = new(parameter.MaxValue);
 
         context.ParamCurves.Register(paramCurve);
         context.ParamPoints.Register(minPoint);
@@ -125,7 +125,7 @@ public class ParameterCommandHandler : ICommandHandler
         if (Math.Abs(parameter.MinValue - parameter.DefaultValue) > 0.1f
         && Math.Abs(parameter.MaxValue - parameter.DefaultValue) > 0.1f)
         {
-            ParamPoint midPoint = new(parameter.DefaultValue, autoRegister: false);
+            ParamPoint midPoint = new(parameter.DefaultValue);
 
             context.ParamPoints.Register(midPoint);
 
@@ -140,7 +140,7 @@ public class ParameterCommandHandler : ICommandHandler
 
     private void ExecuteCreateParameter(CreateParameterIntent create, object state, IModelContext context)
     {
-        Parameter parameter = new(create.Min, create.Max, create.Default, create.Name, autoRegister: false)
+        Parameter parameter = new(create.Min, create.Max, create.Default, create.Name)
         {
             ID = create.ParamID
         };

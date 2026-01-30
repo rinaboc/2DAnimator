@@ -6,15 +6,10 @@ public class ParamPoint : EntityBase
     public float ParamValue;
     public TransformData transform;
 
-    public ParamPoint(float paramValue, bool autoRegister = true) : base(autoRegister)
+    public ParamPoint(float paramValue)
     {
-        this.ParamValue = paramValue;
+        ParamValue = paramValue;
         transform = new();
-    }
-
-    protected override void Register()
-    {
-        ParamPointRegistry.Instance.Register(this);
     }
 
     public override string ToString() => $"{ID}: paramValue {ParamValue}, {transform}";

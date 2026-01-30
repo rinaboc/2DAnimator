@@ -1,17 +1,12 @@
 using System;
-using System.Runtime.Serialization;
 
 [Serializable]
 public abstract class EntityBase
 {
     public Guid ID;
 
-    protected EntityBase(bool autoRegister = true)
+    protected EntityBase()
     {
-        ID = Guid.NewGuid();
-
-        if (autoRegister) Register();
+        ID = new Guid();
     }
-
-    protected abstract void Register();
 }

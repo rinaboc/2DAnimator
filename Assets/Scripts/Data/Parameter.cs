@@ -39,7 +39,7 @@ public class Parameter : EntityBase
 
     public readonly List<Guid> ParamCurves;
 
-    public Parameter(float min, float max, float defaultValue, string name = "parameter", bool autoRegister = true) : base(autoRegister)
+    public Parameter(float min, float max, float defaultValue, string name = "parameter")
     {
         MinValue = min;
         MaxValue = max;
@@ -47,10 +47,5 @@ public class Parameter : EntityBase
         Name = name;
 
         ParamCurves = new();
-    }
-
-    protected override void Register()
-    {
-        ParameterRegistry.Instance.Register(this);
     }
 }

@@ -33,20 +33,11 @@ public class MeshController : MonoBehaviour, IView<MeshStates>
 
     public MeshController SetDrawOrder(ushort newDrawOrder)
     {
-        if (MeshRegistry.Instance.TryGet(ID, out MeshData meshData))
-        {
-            meshData.drawOrder = newDrawOrder;
+        Material _meshMaterial = ArtMeshObject.GetComponent<MeshRenderer>().material;
 
-            Material _meshMaterial = ArtMeshObject.GetComponent<MeshRenderer>().material;
-
-            if (_meshMaterial != null)
-            {
-                _meshMaterial.renderQueue = 2000 + meshData.drawOrder;
-            }
-        }
-        else
+        if (_meshMaterial != null)
         {
-            Debug.LogError("Couldn't find mesh data to change draw order.");
+            _meshMaterial.renderQueue = 2000 + newDrawOrder;
         }
 
         return this;
