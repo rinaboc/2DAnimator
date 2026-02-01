@@ -3,14 +3,14 @@ using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
-public class MeshController : MonoBehaviour, IView<MeshStates>
+public class MeshController : MonoBehaviour, IView<MeshLayerStates, MeshStates>
 {
     public GameObject ArtMeshObject { get; private set; }
     [SerializeField] private Material ArtMeshMaterial;
     [SerializeField] private BoundingBox BoundingBox;
     public Guid ID { get; private set; }
 
-    private IViewModel<MeshStates> _viewModel;
+    private IViewModel<MeshLayerStates, MeshStates> _viewModel;
 
 
     private void Awake()
@@ -125,7 +125,7 @@ public class MeshController : MonoBehaviour, IView<MeshStates>
         _viewModel?.Send(new ResetInterpolationIntent(ID));
     }
 
-    public void SetViewModel(IViewModel<MeshStates> viewModel)
+    public void SetViewModel(IViewModel<MeshLayerStates, MeshStates> viewModel)
     {
         _viewModel = viewModel;
         _viewModel?.Bind(this);

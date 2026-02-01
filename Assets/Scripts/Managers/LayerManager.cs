@@ -17,14 +17,18 @@ public class LayerManager : ManagerBase<LayerManager>
 
     private Dictionary<Guid, LayerController> _layerControllers = new();
 
-    private IViewModel<LayerStates> _viewModel;
+    [SerializeField] private AppInitializer _appInitializer;
+    private IViewModel<MeshLayerStates, LayerStates> _viewModel;
 
     private InputAction CancelAction;
 
 
     void Start()
     {
-        _viewModel = ViewModelFactory.Instance.CreateViewModel<LayersViewModel, LayerStates>(gameObject);
+        if (!_appInitializer.GetViewModel(out _viewModel))
+        {
+            Debug.LogError("Couldn't fetch viewModel");
+        }
     }
 
     void OnEnable()
@@ -90,12 +94,21 @@ public class LayerManager : ManagerBase<LayerManager>
         }
     }
 
+    public void SetSiblingIndex(Guid ID, int index)
+    {
+        if (!GetUILayer(ID, out LayerController layer)) return;
+        layer.ParentObj.transform.SetSiblingIndex(index);
+    }
+
     public void DeleteSelectedArtObject()
     {
         _viewModel?.Send(new DeleteLayerIntent());
     }
 
     private bool GetUILayer(Guid id, out LayerController layer) => _layerControllers.TryGetValue(id, out layer);
+    public bool ContainsUILayer(Guid id) => _layerControllers.ContainsKey(id);
+    public List<Guid> GetUILayerIDs() => _layerControllers.Keys.ToList();
+
 
     public bool DeleteUILayer(Guid id)
     {

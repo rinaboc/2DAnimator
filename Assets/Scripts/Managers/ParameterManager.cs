@@ -10,7 +10,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
     [SerializeField] private Transform ParamWidgetContent;
 
     private readonly Dictionary<Guid, GameObject> _paramSliders = new();
-    private IViewModel<ParameterStates> _viewModel;
+    private IViewModel<ParameterStates, ParameterStates> _viewModel;
     [SerializeField] private AppInitializer _appInitializer;
 
     public ParameterSlider GetParamSlider(Guid id) => _paramSliders[id].GetComponent<ParameterSlider>();

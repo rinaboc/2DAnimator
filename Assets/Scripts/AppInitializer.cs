@@ -22,8 +22,6 @@ public class AppInitializer : MonoBehaviour
 
     private readonly Dictionary<Type, List<object>> _typedViewModels = new();
 
-
-    [SerializeField] private NFPController _nfpController;
     [SerializeField] private TimelineWidgetController _timelineWidgetController;
     [SerializeField] private TimelineSettingsController _timelineSettingsController;
     [SerializeField] private ParameterSettingsView _parameterSettingsView;
@@ -41,15 +39,13 @@ public class AppInitializer : MonoBehaviour
 
         _dispatcher = new Dispatcher(_context);
 
-        _dispatcher.Register(new MeshCommandHandler());
-        _dispatcher.Register(new ParameterCommandHandler());
-        _dispatcher.Register(new LayerCommandHandler());
-        _dispatcher.Register(new TimelineCommandHandler());
         _dispatcher.Register(new OperationCommandHandler());
+        _dispatcher.Register(new ParameterCommandHandler());
+        _dispatcher.Register(new TimelineCommandHandler());
+        _dispatcher.Register(new MeshLayerCommandHandler());
 
-        _dispatcher.Register(new MeshReducer());
+        _dispatcher.Register(new MeshLayerReducer());
         _dispatcher.Register(new ParameterReducer());
-        _dispatcher.Register(new LayerReducer());
         _dispatcher.Register(new TimelineReducer());
     }
 
@@ -61,13 +57,13 @@ public class AppInitializer : MonoBehaviour
 
     private void BindViews()
     {
-        if (GetViewModel<TimelineState>(out var timelineViewModel))
+        if (GetViewModel<TimelineState, TimelineState>(out var timelineViewModel))
         {
             _timelineWidgetController.SetViewModel(timelineViewModel);
             _timelineSettingsController.SetViewModel(timelineViewModel);
         }
 
-        if (GetViewModel<ParameterStates>(out var parameterViewModel))
+        if (GetViewModel<ParameterStates, ParameterStates>(out var parameterViewModel))
         {
             _parameterSettingsView.SetViewModel(parameterViewModel);
         }
@@ -75,22 +71,26 @@ public class AppInitializer : MonoBehaviour
 
     private void CreateViewModels()
     {
-        var operationViewModel = ViewModelFactory.Instance.CreateViewModel<OperationViewModel, OperationState>(gameObject);
+        var operationViewModel = ViewModelFactory.Instance.CreateViewModel<OperationViewModel, OperationState, OperationState>(gameObject);
         Register(operationViewModel);
 
-        var timelineViewModel = ViewModelFactory.Instance.CreateViewModel<TimelineViewModel, TimelineState>(gameObject);
+        var timelineViewModel = ViewModelFactory.Instance.CreateViewModel<TimelineViewModel, TimelineState, TimelineState>(gameObject);
         Register(timelineViewModel);
 
-        var parameterViewModel = ViewModelFactory.Instance.CreateViewModel<ParametersViewModel, ParameterStates>(gameObject);
+        var parameterViewModel = ViewModelFactory.Instance.CreateViewModel<ParametersViewModel, ParameterStates, ParameterStates>(gameObject);
         Register(parameterViewModel);
 
-        var meshViewModel = ViewModelFactory.Instance.CreateViewModel<MeshViewModel, MeshStates>(gameObject);
+        var meshViewModel = ViewModelFactory.Instance.CreateViewModel<MeshViewModel, MeshLayerStates, MeshStates>(gameObject);
         Register(meshViewModel);
+
+        var layerViewModel = ViewModelFactory.Instance.CreateViewModel<LayersViewModel, MeshLayerStates, LayerStates>(gameObject);
+        Register(layerViewModel);
+
     }
 
-    private void Register<TState>(IViewModel<TState> viewModel)
+    private void Register<TDomain, TView>(IViewModel<TDomain, TView> viewModel)
     {
-        var stateType = typeof(TState);
+        var stateType = typeof(TDomain);
         if (!_typedViewModels.ContainsKey(stateType))
         {
             _typedViewModels[stateType] = new List<object>();
@@ -98,16 +98,20 @@ public class AppInitializer : MonoBehaviour
         _typedViewModels[stateType].Add(viewModel);
     }
 
-    public bool GetViewModel<TState>(out IViewModel<TState> viewModel) where TState : class
+    public bool GetViewModel<TDomain, TView>(out IViewModel<TDomain, TView> viewModel) where TDomain : class
     {
         viewModel = null;
-        var stateType = typeof(TState);
+        var stateType = typeof(TDomain);
         if (_typedViewModels.TryGetValue(stateType, out var viewModels))
         {
             foreach (var viewModelObj in viewModels)
             {
-                viewModel = (IViewModel<TState>)viewModelObj;
-                return true;
+                var viewType = typeof(IViewModel<TDomain, TView>);
+                if (viewType.IsAssignableFrom(viewModelObj.GetType()))
+                {
+                    viewModel = (IViewModel<TDomain, TView>)viewModelObj;
+                    return true;
+                }
             }
         }
         return false;

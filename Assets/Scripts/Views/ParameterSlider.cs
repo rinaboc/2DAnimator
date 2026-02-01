@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-public class ParameterSlider : Clickable, IView<ParameterStates>
+public class ParameterSlider : Clickable, IView<ParameterStates, ParameterStates>
 {
     private Guid paramID;
 
@@ -34,7 +34,7 @@ public class ParameterSlider : Clickable, IView<ParameterStates>
     private float sliderValue;
     private string paramName;
 
-    private IViewModel<ParameterStates> _viewModel;
+    private IViewModel<ParameterStates, ParameterStates> _viewModel;
 
     void OnEnable()
     {
@@ -161,7 +161,7 @@ public class ParameterSlider : Clickable, IView<ParameterStates>
         SetValue(parameterState.DefaultValue);
     }
 
-    public void SetViewModel(IViewModel<ParameterStates> viewModel)
+    public void SetViewModel(IViewModel<ParameterStates, ParameterStates> viewModel)
     {
         _viewModel = viewModel;
         _viewModel?.Bind(this);

@@ -7,7 +7,7 @@ using UnityEngine;
 public class MeshManager : ManagerBase<MeshManager>
 {
     [SerializeField] private Dictionary<Guid, MeshController> _meshControllers = new();
-    private IViewModel<MeshStates> _viewModel;
+    private IViewModel<MeshLayerStates, MeshStates> _viewModel;
     [SerializeField] private AppInitializer _appInitializer;
 
     [Header("Art Mesh creation")]

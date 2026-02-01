@@ -4,7 +4,7 @@ using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
-public class BoundingBox : MonoBehaviour, IView<MeshStates>
+public class BoundingBox : MonoBehaviour, IView<MeshLayerStates, MeshStates>
 {
     [SerializeField] private GameObject Center;
     [SerializeField] private GameObject Corners;
@@ -13,7 +13,7 @@ public class BoundingBox : MonoBehaviour, IView<MeshStates>
     public Guid ID { get; private set; }
     public void SetID(Guid id) => ID = id;
 
-    private IViewModel<MeshStates> _viewModel;
+    private IViewModel<MeshLayerStates, MeshStates> _viewModel;
 
     private void Awake()
     {
@@ -103,7 +103,7 @@ public class BoundingBox : MonoBehaviour, IView<MeshStates>
         SetSelected(meshState.IsSelected);
     }
 
-    public void SetViewModel(IViewModel<MeshStates> viewModel)
+    public void SetViewModel(IViewModel<MeshLayerStates, MeshStates> viewModel)
     {
         _viewModel = viewModel;
         _viewModel?.Bind(this);

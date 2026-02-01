@@ -7,7 +7,7 @@ public class ProjectManager : ManagerBase<ProjectManager>
 {
     private IProjectService _projectService;
     [SerializeField] private AppInitializer _appInitializer;
-    private IViewModel<OperationState> _viewModel;
+    private IViewModel<OperationState, OperationState> _viewModel;
 
     void Start()
     {
@@ -38,14 +38,14 @@ public class ProjectManager : ManagerBase<ProjectManager>
 
     public void LoadProject(string path)
     {
-        // try
-        // {
-        SaveData saveData = _projectService.Load(path);
-        _viewModel?.Send(new InitializeProjectIntent(saveData));
-        // }
-        // catch (Exception ex)
-        // {
-        //     Debug.LogError($"Failed to load project: {ex.Message}");
-        // }
+        try
+        {
+            SaveData saveData = _projectService.Load(path);
+            _viewModel?.Send(new InitializeProjectIntent(saveData));
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to load project: {ex.StackTrace}");
+        }
     }
 }

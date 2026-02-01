@@ -1,10 +1,10 @@
 namespace Assets.Scripts.Utility.MVI
 {
-    public interface IViewModel<T>
+    public interface IViewModel<TDomain, TView>
     {
-        void Bind(Store<T> store);
-        void Bind(IView<T> view);
-        void Unbind(IView<T> view);
+        void Bind(Store<TDomain> store);
+        void Bind(IView<TDomain, TView> view);
+        void Unbind(IView<TDomain, TView> view);
         void Unbind();
         void Send(IIntent intent);
     }

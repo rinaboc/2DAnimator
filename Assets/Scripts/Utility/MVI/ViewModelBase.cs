@@ -2,24 +2,26 @@ using System.Collections.Generic;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
-public class ViewModelBase<TState> : MonoBehaviour, IViewModel<TState>
+public abstract class ViewModelBase<TDomainState, TViewState> : MonoBehaviour, IViewModel<TDomainState, TViewState>
 {
-    protected Store<TState> _store;
-    protected List<IView<TState>> _views = new();
+    protected Store<TDomainState> _store;
+    protected List<IView<TDomainState, TViewState>> _views = new();
 
-    public void Bind(Store<TState> store)
+    protected abstract TViewState Project(TDomainState domain);
+
+    public void Bind(Store<TDomainState> store)
     {
         _store = store;
         _store.StateChanged += OnStateChanged;
     }
 
-    public void Bind(IView<TState> view)
+    public void Bind(IView<TDomainState, TViewState> view)
     {
         _views.Add(view);
-        view.Render(_store.State);
+        view.Render(Project(_store.State));
     }
 
-    public void Unbind(IView<TState> view)
+    public void Unbind(IView<TDomainState, TViewState> view)
     {
         _views.Remove(view);
     }
@@ -34,13 +36,13 @@ public class ViewModelBase<TState> : MonoBehaviour, IViewModel<TState>
         _store.Dispatch(intent);
     }
 
-    protected void OnStateChanged(TState state)
+    protected void OnStateChanged(TDomainState state)
     {
-        var views = new List<IView<TState>>(_views);
+        var views = new List<IView<TDomainState, TViewState>>(_views);
         foreach (var view in views)
         {
             if (_views.Contains(view))
-                view.Render(state);
+                view.Render(Project(state));
         }
     }
 

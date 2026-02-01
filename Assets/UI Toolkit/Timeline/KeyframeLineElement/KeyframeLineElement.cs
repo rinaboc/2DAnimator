@@ -5,12 +5,12 @@ using Assets.Scripts.Utility.MVI;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class KeyframeLineElement : VisualElement, IView<TimelineState>
+public partial class KeyframeLineElement : VisualElement, IView<TimelineState, TimelineState>
 {
     public Guid ParamID { get; }
     private List<VisualElement> _cells = new();
     private ParameterSliderElement _paramSlider;
-    private IViewModel<TimelineState> _viewModel;
+    private IViewModel<TimelineState, TimelineState> _viewModel;
     public KeyframeLineElement()
     {
         AddToClassList("animation-cell-container");
@@ -20,7 +20,7 @@ public partial class KeyframeLineElement : VisualElement, IView<TimelineState>
     {
         ParamID = paramID;
 
-        _paramSlider = ViewFactory.Instance.CreateView<ParameterSliderElement, ParameterStates>(ParamID);
+        _paramSlider = ViewFactory.Instance.CreateView<ParameterSliderElement, ParameterStates, ParameterStates>(ParamID);
         Add(_paramSlider);
 
         for (int j = 1; j <= MaxFrames; j++)
@@ -53,7 +53,7 @@ public partial class KeyframeLineElement : VisualElement, IView<TimelineState>
         if (frame - 1 >= _cells.Count || _cells[frame - 1].Q<KeyframeElement>()?._id == keyID) return;
 
         RemoveKeyframeFrom(frame);
-        var keyframe = ViewFactory.Instance.CreateView<KeyframeElement, TimelineState>(keyID, frame, this);
+        var keyframe = ViewFactory.Instance.CreateView<KeyframeElement, TimelineState, TimelineState>(keyID, frame, this);
         _cells[frame - 1].Add(keyframe);
     }
 
@@ -90,7 +90,7 @@ public partial class KeyframeLineElement : VisualElement, IView<TimelineState>
         }
     }
 
-    public void SetViewModel(IViewModel<TimelineState> viewModel)
+    public void SetViewModel(IViewModel<TimelineState, TimelineState> viewModel)
     {
         _viewModel = viewModel;
         _viewModel?.Bind(this);

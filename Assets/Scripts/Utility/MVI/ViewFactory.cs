@@ -20,22 +20,22 @@ public class ViewFactory : MonoBehaviour
 
     [SerializeField] private AppInitializer _appInitializer;
 
-    public TView CreateView<TView, TState>()
-        where TView : IView<TState>, new()
-        where TState : class
+    public TView CreateView<TView, TDomain, TViewState>()
+        where TView : IView<TDomain, TViewState>, new()
+        where TDomain : class
     {
         var view = new TView();
-        _appInitializer.GetViewModel(out IViewModel<TState> viewModel);
+        _appInitializer.GetViewModel(out IViewModel<TDomain, TViewState> viewModel);
         view.SetViewModel(viewModel);
         return view;
     }
 
-    public TView CreateView<TView, TState>(params object[] constructorArgs)
-        where TView : IView<TState>
-        where TState : class
+    public TView CreateView<TView, TDomain, TViewState>(params object[] constructorArgs)
+        where TView : IView<TDomain, TViewState>
+        where TDomain : class
     {
         var view = (TView)Activator.CreateInstance(typeof(TView), constructorArgs);
-        _appInitializer.GetViewModel(out IViewModel<TState> viewModel);
+        _appInitializer.GetViewModel(out IViewModel<TDomain, TViewState> viewModel);
         view.SetViewModel(viewModel);
         return view;
     }

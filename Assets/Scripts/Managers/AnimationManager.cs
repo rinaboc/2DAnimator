@@ -9,7 +9,7 @@ public class AnimationManager : ManagerBase<AnimationManager>
 {
     private Dictionary<Guid, float> _currentCurveSliderValues = new();
     [SerializeField] private AppInitializer _appInitializer;
-    private IViewModel<ParameterStates> _viewModel;
+    private IViewModel<ParameterStates, ParameterStates> _viewModel;
 
     void Start()
     {
@@ -140,9 +140,6 @@ public class AnimationManager : ManagerBase<AnimationManager>
             }
 
             MeshManager.Instance.DispatchToMeshViewModel(new InterpolateTransformIntent(meshId, delta));
-            // artMesh.MoveArtMesh(meshData.transform.Position + delta.Position);
-            // artMesh.ScaleArtMesh(meshData.transform.Scale + delta.Scale);
-            // artMesh.RotateArtMesh(meshData.transform.Rotation * delta.Rotation);
         }
     }
 }

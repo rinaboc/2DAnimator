@@ -6,17 +6,18 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-public class LayerController : Clickable, IView<LayerStates>
+public class LayerController : Clickable, IView<MeshLayerStates, LayerStates>
 {
     public GameObject ParentObj;
     [SerializeField] private Color SelectedColor;
 
     public Guid ID { get; private set; }
     [SerializeField] private TMP_InputField LayerInput;
+    [SerializeField] private TMP_Text DrawOrderText;
 
     private InputAction DoubleClickAction;
 
-    private IViewModel<LayerStates> _viewModel;
+    private IViewModel<MeshLayerStates, LayerStates> _viewModel;
 
     protected override void Start()
     {
@@ -73,6 +74,7 @@ public class LayerController : Clickable, IView<LayerStates>
         {
             SetSelected(layer.IsSelected);
             LayerInput.text = layer.Name;
+            DrawOrderText.text = layer.DrawOrder.ToString();
         }
         else
         {
@@ -80,7 +82,7 @@ public class LayerController : Clickable, IView<LayerStates>
         }
     }
 
-    public void SetViewModel(IViewModel<LayerStates> viewModel)
+    public void SetViewModel(IViewModel<MeshLayerStates, LayerStates> viewModel)
     {
         _viewModel = viewModel;
         _viewModel?.Bind(this);

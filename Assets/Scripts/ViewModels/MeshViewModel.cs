@@ -1,8 +1,18 @@
+using System.Linq;
 using Assets.Scripts.States;
-using Assets.Scripts.Utility.MVI;
 
-public sealed class MeshViewModel : ViewModelBase<MeshStates>
+public sealed class MeshViewModel : ViewModelBase<MeshLayerStates, MeshStates>
 {
-    public Store<MeshStates> GetStore() => _store;
+    protected override MeshStates Project(MeshLayerStates domain)
+    {
+        return new MeshStates()
+        {
+            Meshes = domain.MeshLayers.ToDictionary(
+                p => p.Value.ID,
+                p => p.Value.BuildMeshState(domain.MeshLayers.Count)
+            ),
+            SelectedMeshID = domain.SelectedMeshLayerID
+        };
+    }
 }
 

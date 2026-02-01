@@ -8,7 +8,7 @@ using SFB;
 public class NFPController : MonoBehaviour
 {
     [SerializeField] private AppInitializer _appInitializer;
-    private IViewModel<OperationState> _viewModel;
+    private IViewModel<MeshLayerStates, LayerStates> _viewModel;
 
     void Start()
     {

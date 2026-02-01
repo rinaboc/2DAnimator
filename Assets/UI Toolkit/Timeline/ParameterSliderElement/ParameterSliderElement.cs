@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class ParameterSliderElement : VisualElement, IView<ParameterStates>
+public partial class ParameterSliderElement : VisualElement, IView<ParameterStates, ParameterStates>
 {
     public Guid _paramID { get; set; }
     Slider _slider;
@@ -14,7 +14,7 @@ public partial class ParameterSliderElement : VisualElement, IView<ParameterStat
     VisualElement _container;
     VisualElement _handle;
 
-    private IViewModel<ParameterStates> _viewModel;
+    private IViewModel<ParameterStates, ParameterStates> _viewModel;
 
     public ParameterSliderElement()
     {
@@ -118,7 +118,7 @@ public partial class ParameterSliderElement : VisualElement, IView<ParameterStat
         AddKeys(parameter.ParamPointValues);
     }
 
-    public void SetViewModel(IViewModel<ParameterStates> viewModel)
+    public void SetViewModel(IViewModel<ParameterStates, ParameterStates> viewModel)
     {
         _viewModel = viewModel;
         _viewModel?.Bind(this);

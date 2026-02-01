@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
+public partial class TimelineSliderElement : VisualElement, IView<TimelineState, TimelineState>
 {
     private float _sliderContainerWidth;
     private float _sliderWidth;
@@ -44,7 +44,7 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
 
     List<List<VisualElement>> m_frameBars;
 
-    private IViewModel<TimelineState> _viewModel;
+    private IViewModel<TimelineState, TimelineState> _viewModel;
 
     private bool m_widgetOpen = false;
 
@@ -150,7 +150,7 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
 
     public void CreateKeyFrameLine(Guid paramID, int maxFrames)
     {
-        var keyframeLine = ViewFactory.Instance.CreateView<KeyframeLineElement, TimelineState>(maxFrames, m_frameBars, paramID);
+        var keyframeLine = ViewFactory.Instance.CreateView<KeyframeLineElement, TimelineState, TimelineState>(maxFrames, m_frameBars, paramID);
         m_keyframeContainer.Add(keyframeLine);
         m_keyframeLineElements.Add(paramID, keyframeLine);
     }
@@ -361,7 +361,7 @@ public partial class TimelineSliderElement : VisualElement, IView<TimelineState>
         m_widgetOpen = state.IsOpen;
     }
 
-    public void SetViewModel(IViewModel<TimelineState> viewModel)
+    public void SetViewModel(IViewModel<TimelineState, TimelineState> viewModel)
     {
         _viewModel = viewModel;
         _viewModel?.Bind(this);

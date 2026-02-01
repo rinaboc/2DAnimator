@@ -1,8 +1,8 @@
 namespace Assets.Scripts.Utility.MVI
 {
-    public interface IView<TState>
+    public interface IView<TDomain, TView>
     {
-        void Render(TState state);
-        void SetViewModel(IViewModel<TState> viewModel);
+        void Render(TView state);
+        void SetViewModel(IViewModel<TDomain, TView> viewModel);
     }
 }

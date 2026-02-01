@@ -2929,6 +2929,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UIArtLayerPrefab: {fileID: 6070374671290091294, guid: f68554b2b1923634f9f0c2d6cc4377ff, type: 3}
   UILayersContent: {fileID: 2089455473}
+  _appInitializer: {fileID: 856699105}
 --- !u!1 &994627438
 GameObject:
   m_ObjectHideFlags: 0

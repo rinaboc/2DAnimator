@@ -9,6 +9,7 @@ namespace Assets.Scripts.States
         public Guid ID { get; set; }
         public string Name { get; set; }
         public bool IsSelected { get; set; }
+        public int DrawOrder { get; set; }
 
         public LayerState() { }
         public LayerState(LayerState ls)
@@ -16,6 +17,7 @@ namespace Assets.Scripts.States
             ID = ls.ID;
             Name = ls.Name;
             IsSelected = ls.IsSelected;
+            DrawOrder = ls.DrawOrder;
         }
     }
 

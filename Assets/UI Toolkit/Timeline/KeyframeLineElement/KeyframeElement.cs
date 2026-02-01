@@ -5,13 +5,13 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class KeyframeElement : VisualElement, IView<TimelineState>, IDisposable
+public partial class KeyframeElement : VisualElement, IView<TimelineState, TimelineState>, IDisposable
 {
     public Guid _id;
     private int _frame;
     private bool _isSelected = false;
     private KeyframeLineElement _parentElement;
-    private IViewModel<TimelineState> _viewModel;
+    private IViewModel<TimelineState, TimelineState> _viewModel;
 
     public KeyframeElement()
     {
@@ -52,7 +52,7 @@ public partial class KeyframeElement : VisualElement, IView<TimelineState>, IDis
         }
     }
 
-    public void SetViewModel(IViewModel<TimelineState> viewModel)
+    public void SetViewModel(IViewModel<TimelineState, TimelineState> viewModel)
     {
         _viewModel = viewModel;
         _viewModel?.Bind(this);
