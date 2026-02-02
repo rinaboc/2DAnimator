@@ -14,9 +14,13 @@ namespace Assets.Scripts.States
         public bool IsSelected { get; set; }
         public float CurValue { get; set; }
         public List<float> ParamPointValues { get; set; }
+        public List<Guid> LinkedMeshLayers { get; set; }
 
-
-        public ParameterState() { ParamPointValues = new(); }
+        public ParameterState()
+        {
+            ParamPointValues = new();
+            LinkedMeshLayers = new();
+        }
         public ParameterState(ParameterState ps)
         {
             ID = ps.ID;
@@ -27,6 +31,7 @@ namespace Assets.Scripts.States
             IsSelected = ps.IsSelected;
             CurValue = ps.CurValue;
             ParamPointValues = ps.ParamPointValues;
+            LinkedMeshLayers = ps.LinkedMeshLayers;
         }
     }
 
@@ -34,12 +39,14 @@ namespace Assets.Scripts.States
     {
         public Dictionary<Guid, ParameterState> Parameters { get; set; }
         public Guid SelectedParamID { get; set; }
+        public Guid SelectedMeshLayerID { get; set; }
         public bool IsSettingsOpen { get; set; }
 
         public ParameterStates()
         {
             Parameters = new();
             SelectedParamID = Guid.Empty;
+            SelectedMeshLayerID = Guid.Empty;
             IsSettingsOpen = false;
         }
 
@@ -50,8 +57,8 @@ namespace Assets.Scripts.States
                 p => new ParameterState(p.Value)
             ),
             SelectedParamID = SelectedParamID,
+            SelectedMeshLayerID = SelectedMeshLayerID,
             IsSettingsOpen = IsSettingsOpen
         };
-
     }
 }

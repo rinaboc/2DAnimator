@@ -152,12 +152,22 @@ public class MeshLayerCommandHandler : ICommandHandler
                 }
                 context.ParamCurves.Remove(paramCurve.ID);
             }
+
+            if (context.GeneralSettings.SelectedMeshID == id)
+            {
+                ParameterManager.Instance.HighlightCurves(new());
+            }
         }
+
+        context.GeneralSettings.SelectedMeshID = state.SelectedMeshLayerID;
     }
 
     private void ExecuteSelectLayer(MeshLayerStates state, IModelContext context)
     {
         context.GeneralSettings.SelectedMeshID = state.SelectedMeshLayerID;
+
+        List<Guid> paramIDs = context.ParamCurves.GetAssignedParamIDsOfMesh(state.SelectedMeshLayerID);
+        ParameterManager.Instance.HighlightCurves(paramIDs);
     }
 
     private void ExecuteChangeLayerName(MeshLayerStates state, IModelContext context)

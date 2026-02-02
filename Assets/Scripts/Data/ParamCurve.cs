@@ -9,7 +9,7 @@ public class ParamCurve : EntityBase
 
     public readonly List<Guid> ParamPoints;
 
-    public ParamCurve(Guid meshID, Guid paramID)
+    public ParamCurve(Guid meshID, Guid paramID) : base()
     {
         MeshID = meshID;
         ParamID = paramID;

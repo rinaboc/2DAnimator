@@ -1,32 +1,34 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 
 public class ParameterCommandHandler : ICommandHandler
 {
     public void Execute(IIntent intent, object state, IModelContext context)
     {
+        var parameterStates = state as ParameterStates;
+
         switch (intent)
         {
-            case SelectParameterIntent select: ExecuteSelectParameter(select, state, context); break;
-            case CreateParameterIntent create: ExecuteCreateParameter(create, state, context); break;
-            case CreateParamPointsIntent _: ExecuteCreateParamPoints(state, context); break;
-            case DeleteSelectedParameterIntent _: ExecuteDeleteSelectedParameter(state, context); break;
-            case UpdateParameterIntent update: ExecuteUpdateParameter(update, state, context); break;
-            case OpenParameterCreatorIntent _: ExecuteOpenParameterCreator(state, context); break;
-            case SelectLayerIntent select: ExecuteSelectLayer(select, state, context); break;
-            case DeleteLayerIntent _: ExecuteDeleteLayer(state, context); break;
-            case InitializeProjectIntent init: ExecuteInitializeProject(init, state, context); break;
-            case InterpolateParameterIntent interpolate: ExecuteInterpolateParameter(interpolate, state, context); break;
+            case SelectParameterIntent _: ExecuteSelectParameter(parameterStates, context); break;
+            case CreateParameterIntent _: ExecuteParameterStateChanged(parameterStates, context); break;
+            case CreateParamPointsIntent _: ExecuteCreateParamPoints(parameterStates, context); break;
+            case DeleteSelectedParameterIntent _: ExecuteParameterStateChanged(parameterStates, context); break;
+            case UpdateParameterIntent _: ExecuteParameterStateChanged(parameterStates, context); break;
+            case OpenParameterCreatorIntent _: ExecuteOpenParameterCreator(parameterStates, context); break;
+            case InitializeProjectIntent init: ExecuteInitializeProject(init, context); break;
+            case InterpolateParameterIntent interpolate: ExecuteInterpolateParameter(interpolate, context); break;
         }
     }
 
-    private void ExecuteInterpolateParameter(InterpolateParameterIntent interpolate, object state, IModelContext context)
+    private void ExecuteInterpolateParameter(InterpolateParameterIntent interpolate, IModelContext context)
     {
         AnimationManager.Instance.InterpolateParameter(interpolate.Value, interpolate.ParamID, context);
     }
 
-    private void ExecuteInitializeProject(InitializeProjectIntent init, object state, IModelContext context)
+    private void ExecuteInitializeProject(InitializeProjectIntent init, IModelContext context)
     {
         context.Parameters.Clear();
         context.ParamCurves.Clear();
@@ -59,105 +61,92 @@ public class ParameterCommandHandler : ICommandHandler
         }
     }
 
-    private void ExecuteDeleteLayer(object state, IModelContext context)
+    private void ExecuteOpenParameterCreator(ParameterStates state, IModelContext context)
     {
-        ParameterManager.Instance.HighlightCurves(new());
+        context.GeneralSettings.SelectedParamID = state.SelectedParamID;
     }
 
-    private void ExecuteSelectLayer(SelectLayerIntent select, object state, IModelContext context)
+    private void ExecuteParameterStateChanged(ParameterStates state, IModelContext context)
     {
-        List<Guid> paramIDs = context.ParamCurves.GetAssignedParamIDsOfMesh(select.LayerID);
-        ParameterManager.Instance.HighlightCurves(paramIDs);
-    }
-
-    private void ExecuteOpenParameterCreator(object state, IModelContext context)
-    {
-        context.GeneralSettings.SelectedParamID = Guid.Empty;
-    }
-
-    private void ExecuteUpdateParameter(UpdateParameterIntent update, object state, IModelContext context)
-    {
-        if (context.Parameters.TryGet(update.ParamID, out Parameter parameter))
+        var parameters = ParameterManager.Instance.GetParamSliderIDs();
+        foreach ((var id, var parameterState) in state.Parameters)
         {
-            parameter.MinValue = update.Min;
-            parameter.MaxValue = update.Max;
-            parameter.DefaultValue = update.Default;
-            parameter.Name = update.Name;
-        }
-    }
+            if (!parameters.Contains(id)) // create action
+            {
+                Parameter parameter = new(parameterState.MinValue, parameterState.MaxValue,
+                    parameterState.DefaultValue, parameterState.Name)
+                {
+                    ID = id
+                };
 
-    private void ExecuteDeleteSelectedParameter(object state, IModelContext context)
-    {
-        if (context.GeneralSettings.SelectedParamID == Guid.Empty) return;
+                context.Parameters.Register(parameter);
+                ParameterManager.Instance.CreateParameterSlider(parameterState.ID);
+            }
+            else // update action
+            {
+                parameters.Remove(id);
 
-        Guid selectedParamID = context.GeneralSettings.SelectedParamID;
-        context.Parameters.Remove(selectedParamID);
-        ParameterManager.Instance.DeleteParameterSlider(selectedParamID);
-
-        ParameterManager.Instance.DispatchToParameterStore(new DeletedParameterIntent(selectedParamID));
-        context.GeneralSettings.SelectedParamID = Guid.Empty;
-    }
-
-    private void ExecuteCreateParamPoints(object state, IModelContext context)
-    {
-        if (!context.Parameters.TryGet(context.GeneralSettings.SelectedParamID, out Parameter parameter)) return;
-        if (context.GeneralSettings.SelectedMeshID == Guid.Empty) return;
-
-        ParamCurve paramCurve = new(context.GeneralSettings.SelectedMeshID, parameter.ID);
-        ParamPoint minPoint = new(parameter.MinValue);
-        ParamPoint maxPoint = new(parameter.MaxValue);
-
-        context.ParamCurves.Register(paramCurve);
-        context.ParamPoints.Register(minPoint);
-        context.ParamPoints.Register(maxPoint);
-
-        paramCurve.ParamPoints.Add(minPoint.ID);
-        paramCurve.ParamPoints.Add(maxPoint.ID);
-
-        parameter.ParamCurves.Add(paramCurve.ID);
-
-        List<float> paramValues = new()
-        {
-            minPoint.ParamValue,
-            maxPoint.ParamValue
-        };
-
-        if (Math.Abs(parameter.MinValue - parameter.DefaultValue) > 0.1f
-        && Math.Abs(parameter.MaxValue - parameter.DefaultValue) > 0.1f)
-        {
-            ParamPoint midPoint = new(parameter.DefaultValue);
-
-            context.ParamPoints.Register(midPoint);
-
-            paramCurve.ParamPoints.Add(midPoint.ID);
-            paramValues.Add(midPoint.ParamValue);
+                context.Parameters.TryGet(id, out Parameter parameter);
+                parameter.MinValue = parameterState.MinValue;
+                parameter.MaxValue = parameterState.MaxValue;
+                parameter.DefaultValue = parameterState.DefaultValue;
+                parameter.Name = parameterState.Name;
+            }
         }
 
-        ParameterManager.Instance.GetParamSlider(parameter.ID).CreateParamPointHandles(paramValues);
+        foreach (Guid id in parameters) // delete action
+        {
+            ParameterManager.Instance.DeleteParameterSlider(id);
+            context.Parameters.Remove(id);
+            ParameterManager.Instance.DispatchToParameterStore(new DeletedParameterIntent(id)); // TODO: remove this
+        }
+
+        context.GeneralSettings.SelectedParamID = state.SelectedParamID;
+    }
+
+    private void ExecuteCreateParamPoints(ParameterStates state, IModelContext context)
+    {
+        var curves = context.ParamCurves.GetAll().ToList();
+        foreach ((var id, var parameterState) in state.Parameters)
+        {
+            foreach (var meshID in parameterState.LinkedMeshLayers)
+                if (!curves.Any(c => c.MeshID == meshID && c.ParamID == id)) // create action
+                {
+                    ParamCurve paramCurve = new(meshID, id);
+                    context.ParamCurves.Register(paramCurve);
+
+                    foreach (var value in parameterState.ParamPointValues)
+                    {
+                        ParamPoint point = new(value);
+                        context.ParamPoints.Register(point);
+                        paramCurve.ParamPoints.Add(point.ID);
+                    }
+
+                    context.Parameters.TryGet(id, out Parameter param);
+                    param.ParamCurves.Add(paramCurve.ID);
+
+                    ParameterManager.Instance.GetParamSlider(id).CreateParamPointHandles(parameterState.ParamPointValues);
+                }
+                else // update action
+                {
+                    curves.Remove(curves.FirstOrDefault(c => c.MeshID == meshID && c.ParamID == id));
+                }
+        }
+
+        foreach (var curve in curves) // delete action
+        {
+            context.ParamCurves.Remove(curve.ID);
+            foreach (var pointID in curve.ParamPoints)
+                context.ParamPoints.Remove(pointID);
+        }
+        if (state.SelectedMeshLayerID == Guid.Empty) return;
+
         List<Guid> assignedParams = context.ParamCurves.GetAssignedParamIDsOfMesh(context.GeneralSettings.SelectedMeshID);
         ParameterManager.Instance.HighlightCurves(assignedParams);
     }
 
-    private void ExecuteCreateParameter(CreateParameterIntent create, object state, IModelContext context)
+    private void ExecuteSelectParameter(ParameterStates state, IModelContext context)
     {
-        Parameter parameter = new(create.Min, create.Max, create.Default, create.Name)
-        {
-            ID = create.ParamID
-        };
-        context.Parameters.Register(parameter);
-        ParameterManager.Instance.CreateParameterSlider(create.ParamID);
-    }
-
-    private void ExecuteSelectParameter(SelectParameterIntent select, object state, IModelContext context)
-    {
-        if (context.Parameters.TryGet(select.ParamID, out _))
-        {
-            context.GeneralSettings.SelectedParamID = select.ParamID;
-        }
-        else
-        {
-            context.GeneralSettings.SelectedParamID = Guid.Empty;
-        }
-
+        context.GeneralSettings.SelectedParamID = state.SelectedParamID;
     }
 }

@@ -20,8 +20,24 @@ public class ParameterReducer : IReducer<ParameterStates>
             CreateParamPointsIntent _ => ReduceCreateParamPoints(previous),
             ParameterValueInterpolatedIntent interpolate => ReduceParameterValueInterpolated(previous, interpolate),
             InitializeProjectIntent init => ReduceInitializeProject(previous, init),
+            SelectLayerIntent select => ReduceSelectLayer(previous, select),
+            DeleteLayerIntent _ => ReduceDeleteLayer(previous),
             _ => previous
         };
+    }
+
+    private ParameterStates ReduceDeleteLayer(ParameterStates previous)
+    {
+        var next = previous.Clone();
+        next.SelectedMeshLayerID = Guid.Empty;
+        return next;
+    }
+
+    private ParameterStates ReduceSelectLayer(ParameterStates previous, SelectLayerIntent select)
+    {
+        var next = previous.Clone();
+        next.SelectedMeshLayerID = select.LayerID;
+        return next;
     }
 
     private ParameterStates ReduceInitializeProject(ParameterStates previous, InitializeProjectIntent init)
@@ -39,7 +55,8 @@ public class ParameterReducer : IReducer<ParameterStates>
                 Name = parameter.Name,
                 IsSelected = false,
                 CurValue = parameter.DefaultValue,
-                ParamPointValues = { parameter.DefaultValue }
+                ParamPointValues = { parameter.DefaultValue },
+                LinkedMeshLayers = new()
             });
         }
 
@@ -49,6 +66,8 @@ public class ParameterReducer : IReducer<ParameterStates>
             .Where(p => curve.ParamPoints.Contains(p.ID))
             .Select(p => p.ParamValue)
             .ToList();
+
+            next.Parameters[curve.ParamID].LinkedMeshLayers.Add(curve.MeshID);
         }
 
         return next;
@@ -68,9 +87,13 @@ public class ParameterReducer : IReducer<ParameterStates>
     {
         var ret = previous.Clone();
         var selectedParam = ret.Parameters[ret.SelectedParamID];
-        List<float> paramValues = GetParamPointValues(selectedParam.MinValue, selectedParam.MaxValue, selectedParam.CurValue);
+        List<float> paramValues = GetParamPointValues(selectedParam.MinValue, selectedParam.MaxValue, selectedParam.DefaultValue);
 
         selectedParam.ParamPointValues = paramValues;
+
+        if (ret.SelectedMeshLayerID != Guid.Empty && !selectedParam.LinkedMeshLayers.Contains(ret.SelectedMeshLayerID))
+            selectedParam.LinkedMeshLayers.Add(ret.SelectedMeshLayerID);
+
         return ret;
     }
 
@@ -90,6 +113,7 @@ public class ParameterReducer : IReducer<ParameterStates>
                 p => new ParameterState(p.Value)
             ),
             SelectedParamID = previous.SelectedParamID,
+            SelectedMeshLayerID = previous.SelectedMeshLayerID,
             IsSettingsOpen = true
         };
     }
@@ -106,6 +130,7 @@ public class ParameterReducer : IReducer<ParameterStates>
                 }
             ),
             SelectedParamID = Guid.Empty,
+            SelectedMeshLayerID = previous.SelectedMeshLayerID,
             IsSettingsOpen = true
         };
     }
@@ -119,6 +144,7 @@ public class ParameterReducer : IReducer<ParameterStates>
                 p => new ParameterState(p.Value)
             ),
             SelectedParamID = previous.SelectedParamID,
+            SelectedMeshLayerID = previous.SelectedMeshLayerID,
             IsSettingsOpen = false
         };
     }
@@ -163,7 +189,8 @@ public class ParameterReducer : IReducer<ParameterStates>
             Name = create.Name,
             IsSelected = false,
             CurValue = create.Default,
-            ParamPointValues = new() { create.Default }
+            ParamPointValues = new() { create.Default },
+            LinkedMeshLayers = new()
         });
 
         return next;
@@ -183,6 +210,7 @@ public class ParameterReducer : IReducer<ParameterStates>
                 }
             ),
             SelectedParamID = select.ParamID,
+            SelectedMeshLayerID = previous.SelectedMeshLayerID,
             IsSettingsOpen = previous.IsSettingsOpen
         };
     }

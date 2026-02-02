@@ -7,7 +7,7 @@ public class KeyFrame : EntityBase
     public float ParamValue;
     public int Frame;
 
-    public KeyFrame(Guid ParamID, float ParamValue, int Frame)
+    public KeyFrame(Guid ParamID, float ParamValue, int Frame) : base()
     {
         this.ParamID = ParamID;
         this.ParamValue = ParamValue;

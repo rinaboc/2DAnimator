@@ -6,17 +6,17 @@ public class OperationCommandHandler : ICommandHandler
     {
         switch (intent)
         {
-            case OpenProjectIntent open: ExecuteOpenProject(open, state, context); break;
-            case SaveProjectIntent save: ExecuteSaveProject(save, state, context); break;
+            case OpenProjectIntent open: ExecuteOpenProject(open); break;
+            case SaveProjectIntent save: ExecuteSaveProject(save, context); break;
         }
     }
 
-    private void ExecuteSaveProject(SaveProjectIntent save, object state, IModelContext context)
+    private void ExecuteSaveProject(SaveProjectIntent save, IModelContext context)
     {
-        ProjectManager.Instance.SaveProject(save.Path);
+        ProjectManager.Instance.SaveProject(save.Path, context);
     }
 
-    private void ExecuteOpenProject(OpenProjectIntent open, object state, IModelContext context)
+    private void ExecuteOpenProject(OpenProjectIntent open)
     {
         ProjectManager.Instance.LoadProject(open.Path);
     }

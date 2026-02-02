@@ -24,11 +24,11 @@ public class ProjectManager : ManagerBase<ProjectManager>
     }
 
 
-    public void SaveProject(string path)
+    public void SaveProject(string path, IModelContext context)
     {
         try
         {
-            _projectService.Save(path, _appInitializer.Context);
+            _projectService.Save(path, context);
         }
         catch (Exception ex)
         {

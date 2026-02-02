@@ -12,7 +12,7 @@ public class MeshData : EntityBase
 
     public TransformData transform;
 
-    public MeshData(string sourcePath)
+    public MeshData(string sourcePath) : base()
     {
         drawOrder = ++_objCounter;
         this.sourcePath = sourcePath;

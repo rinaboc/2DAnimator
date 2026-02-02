@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
@@ -14,6 +15,8 @@ public class ParameterManager : ManagerBase<ParameterManager>
     [SerializeField] private AppInitializer _appInitializer;
 
     public ParameterSlider GetParamSlider(Guid id) => _paramSliders[id].GetComponent<ParameterSlider>();
+    public List<Guid> GetParamSliderIDs() => _paramSliders.Keys.ToList();
+
 
     void Start()
     {
