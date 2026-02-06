@@ -5,7 +5,7 @@ using Unity.Properties;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class ParameterSettingsView : BaseUIController, IView<ParameterStates, ParameterStates>
+public class ParameterSettingsView : BaseUIController, IView<ParameterTimelineState, ParameterStates>
 {
     private Button submitButton;
 
@@ -21,7 +21,7 @@ public class ParameterSettingsView : BaseUIController, IView<ParameterStates, Pa
 
     private Guid _editedParamID;
 
-    private IViewModel<ParameterStates, ParameterStates> _viewModel;
+    private IViewModel<ParameterTimelineState, ParameterStates> _viewModel;
 
     void OnEnable()
     {
@@ -102,7 +102,7 @@ public class ParameterSettingsView : BaseUIController, IView<ParameterStates, Pa
         ShowPanel(state.IsSettingsOpen);
     }
 
-    public void SetViewModel(IViewModel<ParameterStates, ParameterStates> viewModel)
+    public void SetViewModel(IViewModel<ParameterTimelineState, ParameterStates> viewModel)
     {
         _viewModel = viewModel;
         _viewModel?.Bind(this);

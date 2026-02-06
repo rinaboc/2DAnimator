@@ -8,12 +8,14 @@ namespace Assets.Scripts.States
     {
         public int Frame { get; set; }
         public bool IsSelected { get; set; }
+        public float Value { get; set; }
 
         public KeyframeState() { }
         public KeyframeState(KeyframeState ks)
         {
             Frame = ks.Frame;
             IsSelected = ks.IsSelected;
+            Value = ks.Value;
         }
     }
 

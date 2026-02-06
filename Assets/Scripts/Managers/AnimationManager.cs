@@ -9,7 +9,7 @@ public class AnimationManager : ManagerBase<AnimationManager>
 {
     private Dictionary<Guid, float> _currentCurveSliderValues = new();
     [SerializeField] private AppInitializer _appInitializer;
-    private IViewModel<ParameterStates, ParameterStates> _viewModel;
+    private IViewModel<ParameterTimelineState, ParameterStates> _viewModel;
 
     void Start()
     {

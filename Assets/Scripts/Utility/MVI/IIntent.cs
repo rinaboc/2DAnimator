@@ -72,5 +72,5 @@ public record TimelineSettingsOpenIntent() : IIntent;
 public record SelectKeyframeIntent(Guid ID) : IIntent;
 public record DeleteKeyframeIntent() : IIntent;
 public record CurrentFrameChangedIntent(int Frame) : IIntent;
-[GlobalIntent] public record TimelineParameterSliderChangedIntent(Guid ParamID, float Value, Guid KeyID) : IIntent;
+public record TimelineParameterSliderChangedIntent(Guid ParamID, float Value) : IIntent;
 #endregion

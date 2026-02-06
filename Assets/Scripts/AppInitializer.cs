@@ -45,8 +45,7 @@ public class AppInitializer : MonoBehaviour
         _dispatcher.Register(new MeshLayerCommandHandler());
 
         _dispatcher.Register(new MeshLayerReducer());
-        _dispatcher.Register(new ParameterReducer());
-        _dispatcher.Register(new TimelineReducer());
+        _dispatcher.Register(new ParameterTimelineReducer(new ParameterReducer(), new TimelineReducer()));
     }
 
     void Start()
@@ -57,13 +56,13 @@ public class AppInitializer : MonoBehaviour
 
     private void BindViews()
     {
-        if (GetViewModel<TimelineState, TimelineState>(out var timelineViewModel))
+        if (GetViewModel<ParameterTimelineState, TimelineState>(out var timelineViewModel))
         {
             _timelineWidgetController.SetViewModel(timelineViewModel);
             _timelineSettingsController.SetViewModel(timelineViewModel);
         }
 
-        if (GetViewModel<ParameterStates, ParameterStates>(out var parameterViewModel))
+        if (GetViewModel<ParameterTimelineState, ParameterStates>(out var parameterViewModel))
         {
             _parameterSettingsView.SetViewModel(parameterViewModel);
         }
@@ -74,16 +73,16 @@ public class AppInitializer : MonoBehaviour
         var operationViewModel = ViewModelFactory.Instance.CreateViewModel<OperationViewModel, OperationState, OperationState>(gameObject);
         Register(operationViewModel);
 
-        var timelineViewModel = ViewModelFactory.Instance.CreateViewModel<TimelineViewModel, TimelineState, TimelineState>(gameObject);
+        var timelineViewModel = ViewModelFactory.Instance.CreateViewModel<TimelineViewModel, ParameterTimelineState, TimelineState>(gameObject);
         Register(timelineViewModel);
 
-        var parameterViewModel = ViewModelFactory.Instance.CreateViewModel<ParametersViewModel, ParameterStates, ParameterStates>(gameObject);
+        var parameterViewModel = ViewModelFactory.Instance.CreateSharedViewModel<ParametersViewModel, ParameterTimelineState, ParameterStates>(gameObject);
         Register(parameterViewModel);
 
         var meshViewModel = ViewModelFactory.Instance.CreateViewModel<MeshViewModel, MeshLayerStates, MeshStates>(gameObject);
         Register(meshViewModel);
 
-        var layerViewModel = ViewModelFactory.Instance.CreateViewModel<LayersViewModel, MeshLayerStates, LayerStates>(gameObject);
+        var layerViewModel = ViewModelFactory.Instance.CreateSharedViewModel<LayersViewModel, MeshLayerStates, LayerStates>(gameObject);
         Register(layerViewModel);
 
     }

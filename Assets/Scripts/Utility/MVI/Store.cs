@@ -6,6 +6,7 @@ namespace Assets.Scripts.Utility.MVI
     {
         void Reduce(IIntent intent);
         void Execute(IIntent intent);
+        Type GetStateType();
     }
 
     public sealed class Store<TState> : IStore
@@ -19,6 +20,11 @@ namespace Assets.Scripts.Utility.MVI
             State = state;
             _dispatcher = dispatcher;
             _dispatcher.Register(this);
+        }
+
+        public Type GetStateType()
+        {
+            return typeof(TState);
         }
 
         public void Dispatch(IIntent intent)

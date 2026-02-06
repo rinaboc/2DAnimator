@@ -4,7 +4,7 @@ using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class TimelineWidgetController : BaseUIController, IView<TimelineState, TimelineState>
+public class TimelineWidgetController : BaseUIController, IView<ParameterTimelineState, TimelineState>
 {
     private VisualElement m_TimelineDrawer;
     private VisualElement m_Timeline;
@@ -16,7 +16,7 @@ public class TimelineWidgetController : BaseUIController, IView<TimelineState, T
     private Button m_PlayButton;
     bool isPlaybackRunning = false;
 
-    private IViewModel<TimelineState, TimelineState> _viewModel;
+    private IViewModel<ParameterTimelineState, TimelineState> _viewModel;
 
     protected override void Awake()
     {
@@ -131,7 +131,7 @@ public class TimelineWidgetController : BaseUIController, IView<TimelineState, T
             CloseTimeline();
         }
     }
-    public void SetViewModel(IViewModel<TimelineState, TimelineState> viewModel)
+    public void SetViewModel(IViewModel<ParameterTimelineState, TimelineState> viewModel)
     {
         _viewModel = viewModel;
         _viewModel?.Bind(this);

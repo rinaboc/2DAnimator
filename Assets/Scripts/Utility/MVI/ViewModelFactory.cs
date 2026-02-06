@@ -50,4 +50,14 @@ public class ViewModelFactory : MonoBehaviour
         viewModel.Bind(store);
         return viewModel;
     }
+
+    public IViewModel<TDomain, TView> CreateSharedViewModel<TViewModel, TDomain, TView>(GameObject parent)
+    where TViewModel : MonoBehaviour, IViewModel<TDomain, TView>
+    where TDomain : new()
+    {
+        if (!_appInitializer.Dispatcher.TryGetStore<TDomain>(out var store)) { Debug.LogError("Couldn't fetch store"); return null; }
+        var viewModel = parent.AddComponent<TViewModel>();
+        viewModel.Bind(store);
+        return viewModel;
+    }
 }

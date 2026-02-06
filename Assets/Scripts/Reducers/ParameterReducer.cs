@@ -19,11 +19,19 @@ public class ParameterReducer : IReducer<ParameterStates>
             OpenParameterEditorIntent _ => ReduceOpenParameterEditor(previous),
             CreateParamPointsIntent _ => ReduceCreateParamPoints(previous),
             ParameterValueInterpolatedIntent interpolate => ReduceParameterValueInterpolated(previous, interpolate),
+            TimelineParameterSliderChangedIntent slider => ReduceTimelineParameterSliderChanged(previous, slider),
             InitializeProjectIntent init => ReduceInitializeProject(previous, init),
             SelectLayerIntent select => ReduceSelectLayer(previous, select),
             DeleteLayerIntent _ => ReduceDeleteLayer(previous),
             _ => previous
         };
+    }
+
+    private ParameterStates ReduceTimelineParameterSliderChanged(ParameterStates previous, TimelineParameterSliderChangedIntent slider)
+    {
+        var next = previous.Clone();
+        next.Parameters[slider.ParamID].CurValue = slider.Value;
+        return next;
     }
 
     private ParameterStates ReduceDeleteLayer(ParameterStates previous)

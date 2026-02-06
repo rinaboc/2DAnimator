@@ -4,14 +4,14 @@ using Unity.Properties;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class TimelineSettingsController : DialogController<TimelineSettingsElement>, IView<TimelineState, TimelineState>
+public class TimelineSettingsController : DialogController<TimelineSettingsElement>, IView<ParameterTimelineState, TimelineState>
 {
     [SerializeField] TimelineWidgetController m_TimelineWidgetController;
 
     [SerializeField, CreateProperty] private int m_maxFrames;
     [SerializeField, CreateProperty] private int m_framePerSec;
 
-    private IViewModel<TimelineState, TimelineState> _viewModel;
+    private IViewModel<ParameterTimelineState, TimelineState> _viewModel;
 
     public void Render(TimelineState state)
     {
@@ -24,7 +24,7 @@ public class TimelineSettingsController : DialogController<TimelineSettingsEleme
         }
     }
 
-    public void SetViewModel(IViewModel<TimelineState, TimelineState> viewModel)
+    public void SetViewModel(IViewModel<ParameterTimelineState, TimelineState> viewModel)
     {
         _viewModel = viewModel;
         _viewModel?.Bind(this);

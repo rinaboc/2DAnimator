@@ -1,10 +1,10 @@
 using Assets.Scripts.States;
 
-public sealed class ParametersViewModel : ViewModelBase<ParameterStates, ParameterStates>
+public sealed class ParametersViewModel : ViewModelBase<ParameterTimelineState, ParameterStates>
 {
-    protected override ParameterStates Project(ParameterStates domain)
+    protected override ParameterStates Project(ParameterTimelineState domain)
     {
-        return domain;
+        return domain.Parameters;
     }
 }
 

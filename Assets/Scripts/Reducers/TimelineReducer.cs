@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 
@@ -42,7 +43,8 @@ public class TimelineReducer : IReducer<TimelineState>
             next.Keyframes[keyFrame.ParamID][keyFrame.ID] = new KeyframeState()
             {
                 Frame = keyFrame.Frame,
-                IsSelected = false
+                IsSelected = false,
+                Value = keyFrame.ParamValue
             };
         }
 
@@ -64,7 +66,19 @@ public class TimelineReducer : IReducer<TimelineState>
     private TimelineState ReduceTimelineParameterSliderChanged(TimelineParameterSliderChangedIntent change, TimelineState previous)
     {
         var next = previous.Clone();
-        next.Keyframes[change.ParamID][change.KeyID] = new KeyframeState() { Frame = next.CurrentFrame, IsSelected = false };
+        if (next.Keyframes[change.ParamID].Any(kf => kf.Value.Frame == next.CurrentFrame))
+        {
+            var update = next.Keyframes[change.ParamID].FirstOrDefault(kf => kf.Value.Frame == next.CurrentFrame);
+            update.Value.Value = change.Value;
+            return next;
+        }
+
+        next.Keyframes[change.ParamID][Guid.NewGuid()] = new KeyframeState()
+        {
+            Frame = next.CurrentFrame,
+            IsSelected = false,
+            Value = change.Value
+        };
         return next;
     }
 

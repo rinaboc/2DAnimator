@@ -72,5 +72,19 @@ namespace Assets.Scripts.Utility.MVI
         {
             _stores.Remove(store);
         }
+
+        public bool TryGetStore<TState>(out Store<TState> store)
+        {
+            store = null;
+            foreach (var s in _stores)
+            {
+                if (s.GetStateType() == typeof(TState))
+                {
+                    store = (Store<TState>)s;
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

@@ -1,3 +1,5 @@
+using System;
+
 namespace Assets.Scripts.Utility.MVI
 {
     public interface IDispatcher
@@ -9,5 +11,6 @@ namespace Assets.Scripts.Utility.MVI
         TState Reduce<TState>(TState currentState, IIntent intent);
         void Execute(IIntent intent, object state);
         void Dispatch(IIntent intent);
+        bool TryGetStore<TState>(out Store<TState> store);
     }
 }

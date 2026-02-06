@@ -2,15 +2,16 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class KeyframeLineElement : VisualElement, IView<TimelineState, TimelineState>
+public partial class KeyframeLineElement : VisualElement, IView<ParameterTimelineState, TimelineState>
 {
     public Guid ParamID { get; }
     private List<VisualElement> _cells = new();
     private ParameterSliderElement _paramSlider;
-    private IViewModel<TimelineState, TimelineState> _viewModel;
+    private IViewModel<ParameterTimelineState, TimelineState> _viewModel;
     public KeyframeLineElement()
     {
         AddToClassList("animation-cell-container");
@@ -20,7 +21,7 @@ public partial class KeyframeLineElement : VisualElement, IView<TimelineState, T
     {
         ParamID = paramID;
 
-        _paramSlider = ViewFactory.Instance.CreateView<ParameterSliderElement, ParameterStates, ParameterStates>(ParamID);
+        _paramSlider = ViewFactory.Instance.CreateView<ParameterSliderElement, ParameterTimelineState, ParameterStates>(ParamID);
         Add(_paramSlider);
 
         for (int j = 1; j <= MaxFrames; j++)
@@ -53,7 +54,7 @@ public partial class KeyframeLineElement : VisualElement, IView<TimelineState, T
         if (frame - 1 >= _cells.Count || _cells[frame - 1].Q<KeyframeElement>()?._id == keyID) return;
 
         RemoveKeyframeFrom(frame);
-        var keyframe = ViewFactory.Instance.CreateView<KeyframeElement, TimelineState, TimelineState>(keyID, frame, this);
+        var keyframe = ViewFactory.Instance.CreateView<KeyframeElement, ParameterTimelineState, TimelineState>(keyID, frame, this);
         _cells[frame - 1].Add(keyframe);
     }
 
@@ -70,6 +71,7 @@ public partial class KeyframeLineElement : VisualElement, IView<TimelineState, T
 
     public void Render(TimelineState state)
     {
+        Debug.Log($"received current frame: {state.CurrentFrame} in keyframe line");
         for (int i = 0; i < _cells.Count; i++)
         {
             if (_cells[i].childCount > 0)
@@ -90,7 +92,7 @@ public partial class KeyframeLineElement : VisualElement, IView<TimelineState, T
         }
     }
 
-    public void SetViewModel(IViewModel<TimelineState, TimelineState> viewModel)
+    public void SetViewModel(IViewModel<ParameterTimelineState, TimelineState> viewModel)
     {
         _viewModel = viewModel;
         _viewModel?.Bind(this);

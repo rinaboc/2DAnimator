@@ -8,7 +8,7 @@ public class ParameterCommandHandler : ICommandHandler
 {
     public void Execute(IIntent intent, object state, IModelContext context)
     {
-        var parameterStates = state as ParameterStates;
+        var parameterStates = (state as ParameterTimelineState)?.Parameters;
 
         switch (intent)
         {
@@ -20,7 +20,13 @@ public class ParameterCommandHandler : ICommandHandler
             case OpenParameterCreatorIntent _: ExecuteOpenParameterCreator(parameterStates, context); break;
             case InitializeProjectIntent init: ExecuteInitializeProject(init, context); break;
             case InterpolateParameterIntent interpolate: ExecuteInterpolateParameter(interpolate, context); break;
+            case TimelineParameterSliderChangedIntent slider: ExecuteTimelineParameterSliderChanged(slider, context); break;
         }
+    }
+
+    private void ExecuteTimelineParameterSliderChanged(TimelineParameterSliderChangedIntent slider, IModelContext context)
+    {
+        AnimationManager.Instance.InterpolateParameter(slider.Value, slider.ParamID, context);
     }
 
     private void ExecuteInterpolateParameter(InterpolateParameterIntent interpolate, IModelContext context)

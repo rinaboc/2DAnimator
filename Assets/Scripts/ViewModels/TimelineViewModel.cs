@@ -1,9 +1,9 @@
 using Assets.Scripts.States;
 
-public class TimelineViewModel : ViewModelBase<TimelineState, TimelineState>
+public class TimelineViewModel : ViewModelBase<ParameterTimelineState, TimelineState>
 {
-    protected override TimelineState Project(TimelineState domain)
+    protected override TimelineState Project(ParameterTimelineState domain)
     {
-        return domain;
+        return domain.Timeline;
     }
 }
