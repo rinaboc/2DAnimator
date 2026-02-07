@@ -71,7 +71,6 @@ public partial class KeyframeLineElement : VisualElement, IView<ParameterTimelin
 
     public void Render(TimelineState state)
     {
-        Debug.Log($"received current frame: {state.CurrentFrame} in keyframe line");
         for (int i = 0; i < _cells.Count; i++)
         {
             if (_cells[i].childCount > 0)

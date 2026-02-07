@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
@@ -15,7 +16,19 @@ public class TimelineCommandHandler : ICommandHandler
             case TimelineParameterSliderChangedIntent _: ExecuteKeyframeStateChanged(timelineState, context); break;
             case DeleteKeyframeIntent _: ExecuteKeyframeStateChanged(timelineState, context); break;
             case InitializeProjectIntent init: ExecuteInitializeProject(init, context); break;
+            case UpdateFramePerSecIntent _: ExecuteUpdateFramePerSec(timelineState, context); break;
+            case UpdateMaxFramesIntent _: ExecuteUpdateMaxFrames(timelineState, context); break;
         }
+    }
+
+    private void ExecuteUpdateMaxFrames(TimelineState timelineState, IModelContext context)
+    {
+        context.GeneralSettings.MaxFrames = timelineState.MaxFrames;
+    }
+
+    private void ExecuteUpdateFramePerSec(TimelineState timelineState, IModelContext context)
+    {
+        context.GeneralSettings.FramePerSec = timelineState.FramePerSec;
     }
 
     private void ExecuteInitializeProject(InitializeProjectIntent init, IModelContext context)

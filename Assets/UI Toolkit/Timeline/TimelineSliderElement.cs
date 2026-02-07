@@ -29,7 +29,6 @@ public partial class TimelineSliderElement : VisualElement, IView<ParameterTimel
             }
 
             m_currentFrame = newValue;
-            Debug.Log($"sending current frame: {CurrentFrame} intent");
             _viewModel?.Send(new CurrentFrameChangedIntent(CurrentFrame));
         }
     }
@@ -357,7 +356,6 @@ public partial class TimelineSliderElement : VisualElement, IView<ParameterTimel
 
         UpdateHandlePosition();
         HighlightBarAt(state.CurrentFrame);
-        Debug.Log($"received {state.CurrentFrame} current frame in timeline slider");
         UpdateFrameField();
 
         m_widgetOpen = state.IsOpen;
