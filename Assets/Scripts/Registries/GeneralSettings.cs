@@ -1,10 +1,24 @@
+using System;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "GeneralSettings", menuName = "Scriptable Objects/GeneralSettings")]
-public class GeneralSettings : ScriptableObject, ISaveable
+public interface IGeneralSettings
 {
-    public int MaxFrames = 24;
-    public int FramePerSec = 16;
+    static GeneralSettings Instance { get; }
+    int MaxFrames { get; set; }
+    int FramePerSec { get; set; }
+    Guid SelectedParamID { get; set; }
+    Guid SelectedMeshID { get; set; }
+    int CurrentFrame { get; set; }
+}
+
+[CreateAssetMenu(fileName = "GeneralSettings", menuName = "Scriptable Objects/GeneralSettings")]
+public class GeneralSettings : ScriptableObject, IGeneralSettings
+{
+    public int MaxFrames { get; set; }
+    public int FramePerSec { get; set; }
+    public Guid SelectedParamID { get; set; }
+    public Guid SelectedMeshID { get; set; }
+    public int CurrentFrame { get; set; }
 
     protected static GeneralSettings _instance;
 
@@ -15,7 +29,11 @@ public class GeneralSettings : ScriptableObject, ISaveable
             if (_instance == null)
             {
                 _instance = Resources.Load<GeneralSettings>("GeneralSettings");
-                _instance.RegisterSaveable();
+                _instance.MaxFrames = 24;
+                _instance.FramePerSec = 16;
+                _instance.SelectedParamID = Guid.Empty;
+                _instance.SelectedMeshID = Guid.Empty;
+                _instance.CurrentFrame = 1;
 
                 if (_instance == null)
                 {
@@ -25,16 +43,5 @@ public class GeneralSettings : ScriptableObject, ISaveable
 
             return _instance;
         }
-    }
-
-    public void RegisterSaveable()
-    {
-        SaveController.Register(this);
-    }
-
-    public void SaveState(SaveData saveData)
-    {
-        AnimationSettings animation = new(MaxFrames, FramePerSec);
-        saveData.AnimationSetting = animation;
     }
 }

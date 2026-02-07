@@ -1,32 +1,31 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.States;
+using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
 public class AnimationManager : ManagerBase<AnimationManager>
 {
     private Dictionary<Guid, float> _currentCurveSliderValues = new();
-    public bool GetCurrentCurveSliderValue(Guid id, out float value) => _currentCurveSliderValues.TryGetValue(id, out value);
-
-    [SerializeField] private TimelineWidgetController _timelineWidget;
+    [SerializeField] private AppInitializer _appInitializer;
+    private IViewModel<ParameterTimelineState, ParameterStates> _viewModel;
 
     void Start()
     {
-        UIEvents.TimelineChangeEvent += AnimateTimeline;
+        if (!_appInitializer.GetViewModel(out _viewModel))
+        {
+            Debug.LogError("Couldn't fetch viewModel");
+        }
     }
 
-    void OnDisable()
+    public void AnimateTimeline(int currentFrame, IModelContext context)
     {
-        UIEvents.TimelineChangeEvent -= AnimateTimeline;
-    }
-
-    private void AnimateTimeline(int currentFrame)
-    {
-        var parameters = ParameterRegistry.Instance.GetAll();
+        var parameters = context.Parameters.GetAll();
 
         foreach (Parameter parameter in parameters)
         {
-            List<KeyFrame> parameterKeys = KeyFrameRegistry.Instance.GetKeyFramesOfParam(parameter.ID);
+            List<KeyFrame> parameterKeys = context.KeyFrames.GetKeyFramesOfParam(parameter.ID);
             if (parameterKeys.Count < 2) continue;
 
             parameterKeys.Sort((a, b) => a.Frame.CompareTo(b.Frame));
@@ -55,50 +54,34 @@ public class AnimationManager : ManagerBase<AnimationManager>
                 interpolatedValue = Mathf.Lerp(minFrame.ParamValue, maxFrame.ParamValue, t);
             }
 
-            InterpolateParameter(interpolatedValue, parameter.ID);
-            UIEvents.RaiseParamInterpolated(parameter.ID, interpolatedValue);
+            InterpolateParameter(interpolatedValue, parameter.ID, context);
+            _viewModel?.Send(new ParameterValueInterpolatedIntent(parameter.ID, interpolatedValue));
         }
-    }
-
-    public KeyFrame CreateKeyframe(Guid paramID, float value)
-    {
-        Debug.Log("Creating new keyframe");
-        int CurrentFrame = _timelineWidget.Currentframe;
-
-        KeyFrame keyFrame = new(paramID, value, CurrentFrame);
-        return keyFrame;
-    }
-
-    public void RemoveKeyFrame(Guid id)
-    {
-        KeyFrameRegistry.Instance.Remove(id);
     }
 
     /// <summary>
     /// Interpolate parameter point values assigned to the selected parameter and set the interpolated transformations on the meshes.
     /// </summary>
-    public void InterpolateParameter(float value, Guid paramID)
+    public void InterpolateParameter(float value, Guid paramID, IModelContext context)
     {
         _currentCurveSliderValues[paramID] = value;
         var accumTransforms = new Dictionary<Guid, TransformData>();
         foreach (var curveValue in _currentCurveSliderValues)
         {
-            CollectParameterDeltas(curveValue.Value, curveValue.Key, accumTransforms);
+            CollectParameterDeltas(curveValue.Value, curveValue.Key, accumTransforms, context);
         }
 
-        ApplyAccumulatedTransforms(accumTransforms);
+        ApplyAccumulatedTransforms(accumTransforms, context);
     }
 
-    private void CollectParameterDeltas(float value, Guid paramID, Dictionary<Guid, TransformData> accumTransforms)
+    public void CollectParameterDeltas(float value, Guid paramID, Dictionary<Guid, TransformData> accumTransforms, IModelContext context)
     {
-        ParameterRegistry parameterRegistry = ParameterRegistry.Instance;
-        ParamPointRegistry paramPointRegistry = ParamPointRegistry.Instance;
-        if (!parameterRegistry.TryGet(paramID, out Parameter parameter)) return;
-        List<ParamCurve> paramCurves = ParamCurveRegistry.Instance.GetEntries(parameter.ParamCurves);
+        if (!context.Parameters.TryGet(paramID, out Parameter parameter)) return;
+        List<ParamCurve> paramCurves = context.ParamCurves.GetEntries(parameter.ParamCurves);
 
         foreach (ParamCurve paramCurve in paramCurves)
         {
-            List<ParamPoint> paramPoints = paramPointRegistry.GetEntries(paramCurve.ParamPoints);
+            List<ParamPoint> paramPoints = context.ParamPoints.GetEntries(paramCurve.ParamPoints);
             if (paramPoints.Count == 0) continue;
 
             paramPoints.Sort((p1, p2) => p1.ParamValue.CompareTo(p2.ParamValue));
@@ -141,7 +124,7 @@ public class AnimationManager : ManagerBase<AnimationManager>
         }
     }
 
-    private void ApplyAccumulatedTransforms(Dictionary<Guid, TransformData> accum)
+    private void ApplyAccumulatedTransforms(Dictionary<Guid, TransformData> accum, IModelContext context)
     {
         foreach (var kv in accum)
         {
@@ -149,30 +132,14 @@ public class AnimationManager : ManagerBase<AnimationManager>
             var delta = kv.Value;
 
             MeshManager.Instance.GetMeshObject(meshId, out MeshController artMesh);
-            MeshRegistry.Instance.TryGet(meshId, out MeshData meshData);
+            context.Meshes.TryGet(meshId, out MeshData meshData);
             if (artMesh == null || meshData == null)
             {
                 Debug.LogError("artmesh or meshdata null in apply accumulated transforms");
                 continue;
             }
 
-            artMesh.MoveArtMesh(meshData.transform.Position + delta.Position);
-            artMesh.ScaleArtMesh(meshData.transform.Scale + delta.Scale);
-            artMesh.RotateArtMesh(meshData.transform.Rotation * delta.Rotation);
-        }
-    }
-
-    public override void LoadState(SaveData saveData)
-    {
-        GeneralSettings.Instance.MaxFrames = saveData.AnimationSetting.maxFrames;
-        GeneralSettings.Instance.FramePerSec = saveData.AnimationSetting.framePerSec;
-
-        KeyFrameRegistry keyFrameRegistry = KeyFrameRegistry.Instance;
-        keyFrameRegistry.Clear();
-        if (saveData.KeyFrames == null) return;
-        foreach (var item in saveData.KeyFrames)
-        {
-            keyFrameRegistry.Register(item);
+            MeshManager.Instance.DispatchToMeshViewModel(new InterpolateTransformIntent(meshId, delta));
         }
     }
 }

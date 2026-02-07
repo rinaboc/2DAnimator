@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 
@@ -15,10 +14,5 @@ public class ParamCurve : EntityBase
         MeshID = meshID;
         ParamID = paramID;
         ParamPoints = new();
-    }
-
-    protected override void Register()
-    {
-        ParamCurveRegistry.Instance.Register(this);
     }
 }

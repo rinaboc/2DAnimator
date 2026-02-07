@@ -48,9 +48,4 @@ public class Parameter : EntityBase
 
         ParamCurves = new();
     }
-
-    protected override void Register()
-    {
-        ParameterRegistry.Instance.Register(this);
-    }
 }

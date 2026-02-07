@@ -1,10 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
+public interface IKeyFrameRegistry : IRegistry<KeyFrame, KeyFrameRegistry>
+{
+    List<KeyFrame> GetKeyFramesOfParam(Guid paramID);
+}
+
+
 [CreateAssetMenu(fileName = "KeyFrameRegistry", menuName = "Global/KeyFrameRegistry")]
-public class KeyFrameRegistry : RegistryBase<KeyFrame, KeyFrameRegistry>
+public class KeyFrameRegistry : RegistryBase<KeyFrame, KeyFrameRegistry>, IKeyFrameRegistry
 {
     public override bool Register(KeyFrame keyframe)
     {
@@ -49,11 +54,5 @@ public class KeyFrameRegistry : RegistryBase<KeyFrame, KeyFrameRegistry>
             ret.Sort((x, y) => x.Frame.CompareTo(y.Frame));
         }
         return ret;
-    }
-
-    public override void SaveState(SaveData saveData)
-    {
-        saveData.KeyFrames = new KeyFrame[_map.Count];
-        saveData.KeyFrames = _map.Values.ToArray();
     }
 }

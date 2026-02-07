@@ -158,6 +158,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Center: {fileID: 2271454830526350703}
   Corners: {fileID: 3510617684745688238}
+  boxCollider: {fileID: 0}
 --- !u!1 &2012077160127762938
 GameObject:
   m_ObjectHideFlags: 0
@@ -208,7 +209,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ParentTransform: {fileID: 6809835954876336752}
-  ArtObjectTransform: {fileID: 6809835954876336752}
 --- !u!65 &6563170548079002652
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -2,12 +2,26 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+public interface IRegistry<T, L>
+    where T : EntityBase
+    where L : RegistryBase<T, L>
+{
+    static L Instance { get; }
+
+    void Clear();
+    IReadOnlyCollection<T> GetAll();
+    List<T> GetEntries(List<Guid> ids);
+    bool Register(T value);
+    bool Remove(Guid id);
+    bool TryGet(Guid id, out T value);
+}
+
 /// <summary>
 /// Base class for registries that store entries of type T
 /// </summary>
 /// <typeparam name="T">Must be a subclass of EntityBase</typeparam>
 /// <typeparam name="L">Is the actual type of the registry object
-public abstract class RegistryBase<T, L> : ScriptableObject, ISaveable
+public abstract class RegistryBase<T, L> : ScriptableObject, IRegistry<T, L>
     where T : EntityBase
     where L : RegistryBase<T, L>
 {
@@ -20,7 +34,6 @@ public abstract class RegistryBase<T, L> : ScriptableObject, ISaveable
             if (_instance == null)
             {
                 _instance = Resources.Load<L>(typeof(L).Name);
-                _instance.RegisterSaveable();
 
                 if (_instance == null)
                 {
@@ -59,12 +72,5 @@ public abstract class RegistryBase<T, L> : ScriptableObject, ISaveable
         }
 
         return retEntries;
-    }
-
-    public abstract void SaveState(SaveData saveData);
-
-    public void RegisterSaveable()
-    {
-        SaveController.Register(this);
     }
 }

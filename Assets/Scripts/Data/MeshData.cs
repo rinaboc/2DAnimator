@@ -29,11 +29,6 @@ public class MeshData : EntityBase
         _objCounter++;
     }
 
-    protected override void Register()
-    {
-        MeshRegistry.Instance.Register(this);
-    }
-
     public override string ToString() => $"{ID}: {name}, {drawOrder}, {sourcePath}";
 
 }

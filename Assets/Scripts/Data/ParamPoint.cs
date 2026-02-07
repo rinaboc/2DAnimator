@@ -8,13 +8,8 @@ public class ParamPoint : EntityBase
 
     public ParamPoint(float paramValue) : base()
     {
-        this.ParamValue = paramValue;
+        ParamValue = paramValue;
         transform = new();
-    }
-
-    protected override void Register()
-    {
-        ParamPointRegistry.Instance.Register(this);
     }
 
     public override string ToString() => $"{ID}: paramValue {ParamValue}, {transform}";

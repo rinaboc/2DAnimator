@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Assets.Scripts.States;
+using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class TimelineSliderElement : VisualElement
+public partial class TimelineSliderElement : VisualElement, IView<ParameterTimelineState, TimelineState>
 {
     private float _sliderContainerWidth;
     private float _sliderWidth;
-    private int m_maxFrames = GeneralSettings.Instance.MaxFrames;
+    private int m_maxFrames = 24;
 
     private int m_currentFrame = 1;
     public int CurrentFrame
@@ -28,10 +29,7 @@ public partial class TimelineSliderElement : VisualElement
             }
 
             m_currentFrame = newValue;
-            UpdateHandlePosition();
-            UpdateFrameField();
-            HighlightBarAt(m_currentFrame);
-            UIEvents.RaiseTimelineChange(CurrentFrame);
+            _viewModel?.Send(new CurrentFrameChangedIntent(CurrentFrame));
         }
     }
 
@@ -46,6 +44,9 @@ public partial class TimelineSliderElement : VisualElement
 
     List<List<VisualElement>> m_frameBars;
 
+    private IViewModel<ParameterTimelineState, TimelineState> _viewModel;
+
+    private bool m_widgetOpen = false;
 
     public TimelineSliderElement()
     {
@@ -82,7 +83,7 @@ public partial class TimelineSliderElement : VisualElement
             // go from backwards and set style display to flex until its hidden
             for (int i = m_frameBars.Count - 1; i >= 0; i--)
             {
-                if (m_frameBars[i][0].style.display == DisplayStyle.Flex)
+                if (0 < m_frameBars[i].Count && m_frameBars[i][0].style.display == DisplayStyle.Flex)
                     break;
 
                 foreach (var key in m_frameBars[i])
@@ -133,32 +134,25 @@ public partial class TimelineSliderElement : VisualElement
         m_keyframeContainer.AddToClassList("keyframe-container");
         m_keyframeContainer.verticalScrollerVisibility = ScrollerVisibility.Hidden;
 
-        this.Add(m_keyframeContainer);
+        Add(m_keyframeContainer);
     }
 
     public void ClearKeyframeContainer()
     {
+        foreach (var line in m_keyframeLineElements.Values)
+        {
+            line.Dispose();
+        }
         m_keyframeContainer.Clear();
         m_keyframeLineElements.Clear();
         ClearFrameBarLists();
     }
 
-    public void CreateKeyFrameLine(Parameter parameter, float paramSliderValue, List<KeyFrame> keyFrames = null)
+    public void CreateKeyFrameLine(Guid paramID, int maxFrames)
     {
-        KeyframeLineElement keyframeLine = new(m_maxFrames, m_frameBars, parameter);
-        keyframeLine.SetSliderValue(paramSliderValue);
+        var keyframeLine = ViewFactory.Instance.CreateView<KeyframeLineElement, ParameterTimelineState, TimelineState>(maxFrames, m_frameBars, paramID);
         m_keyframeContainer.Add(keyframeLine);
-        m_keyframeLineElements.Add(parameter.ID, keyframeLine);
-
-        if (keyFrames != null) foreach (var key in keyFrames)
-        {
-            keyframeLine.InsertKeyframeAt(key.Frame, key);
-        }
-    }
-
-    public void CreateKeyframeAtCurrentFrame(Guid paramID, KeyFrame key)
-    {
-        m_keyframeLineElements[paramID].InsertKeyframeAt(CurrentFrame, key);
+        m_keyframeLineElements.Add(paramID, keyframeLine);
     }
 
     public void LoadKeyframes(KeyFrame[] keyframes)
@@ -168,7 +162,7 @@ public partial class TimelineSliderElement : VisualElement
 
         foreach (KeyFrame key in keyframes)
         {
-            m_keyframeLineElements[key.ParamID].InsertKeyframeAt(key.Frame, key);
+            m_keyframeLineElements[key.ParamID].InsertKeyframeAt(key.Frame, key.ID);
         }
     }
 
@@ -285,10 +279,19 @@ public partial class TimelineSliderElement : VisualElement
         deleteKeyframeButton.AddToClassList("delete-keyframe-button");
         deleteKeyframeButton.clicked += () =>
         {
-            UIEvents.RaiseDeleteSelectedKeyframe();
+            _viewModel?.Send(new DeleteKeyframeIntent());
+        };
+
+        Button settingsButton = new() { text = "Settings" };
+        settingsButton.AddToClassList("delete-keyframe-button");
+        settingsButton.clicked += () =>
+        {
+            Debug.Log("settings clicked");
+            _viewModel?.Send(new TimelineSettingsOpenIntent());
         };
 
         header.Add(m_Label);
+        header.Add(settingsButton);
         header.Add(deleteKeyframeButton);
         header.Add(m_currentFrameField);
 
@@ -318,15 +321,49 @@ public partial class TimelineSliderElement : VisualElement
         m_currentFrameField.value = CurrentFrame;
     }
 
-    public void Redraw()
+    private void RebuildKeyFrameLines(TimelineState state)
     {
-        int value = GeneralSettings.Instance.MaxFrames;
-        if (value == m_maxFrames) return;
+        ClearKeyframeContainer();
 
-        m_maxFrames = value;
-        Debug.Log("max frames changed" + value);
-        BuildFrameBars(m_maxFrames);
-        RecalculateSliderHandle();
+        foreach (var (id, _) in state.Keyframes)
+        {
+            if (!m_keyframeLineElements.ContainsKey(id))
+                CreateKeyFrameLine(id, state.MaxFrames);
+        }
+
         UpdateKeyWidth();
+    }
+
+    public void Render(TimelineState state)
+    {
+        if (!state.IsOpen)
+        {
+            m_widgetOpen = false;
+            return;
+        }
+
+        if (m_maxFrames != state.MaxFrames)
+        {
+            m_maxFrames = state.MaxFrames;
+            BuildFrameBars(state.MaxFrames);
+            RecalculateSliderHandle();
+            RebuildKeyFrameLines(state);
+        }
+        else if (!m_widgetOpen)
+        {
+            RebuildKeyFrameLines(state);
+        }
+
+        UpdateHandlePosition();
+        HighlightBarAt(state.CurrentFrame);
+        UpdateFrameField();
+
+        m_widgetOpen = state.IsOpen;
+    }
+
+    public void SetViewModel(IViewModel<ParameterTimelineState, TimelineState> viewModel)
+    {
+        _viewModel = viewModel;
+        _viewModel?.Bind(this);
     }
 }

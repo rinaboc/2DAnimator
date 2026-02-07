@@ -1,18 +1,57 @@
 using UnityEngine;
 using System.IO;
 using System;
+using Assets.Scripts.Utility.MVI;
+using Assets.Scripts.States;
+using SFB;
 
 public class NFPController : MonoBehaviour
 {
+    [SerializeField] private AppInitializer _appInitializer;
+    private IViewModel<MeshLayerStates, LayerStates> _viewModel;
+
     void Start()
     {
         RequestPermissionAsynchronously(false);
+        if (!_appInitializer.GetViewModel(out _viewModel))
+        {
+            Debug.LogError("Couldn't fetch viewModel");
+        }
     }
 
     private async void RequestPermissionAsynchronously(bool readPermissionOnly = false)
     {
         NativeFilePicker.Permission permission = await NativeFilePicker.RequestPermissionAsync(readPermissionOnly);
         Debug.Log("Permission result: " + permission);
+    }
+
+    public void OpenProject()
+    {
+        string[] fileTypes = new string[] { "tda" };
+
+        NativeFilePicker.PickFile((path) =>
+        {
+            _viewModel?.Send(new OpenProjectIntent(path));
+        }, fileTypes);
+    }
+
+    public void SaveProject()
+    {
+#if UNITY_ANDROID || UNITY_IOS
+    NativeFilePicker.ExportFile((path) =>
+    {
+        if (!string.IsNullOrEmpty(path))
+            _viewModel?.Send(new SaveProjectIntent(path));
+    }, "tda", "MyProject.tda");
+#elif UNITY_STANDALONE_WIN
+        var extensionList = new[] { new ExtensionFilter("2DAnimator project", "tda") };
+        StandaloneFileBrowser.SaveFilePanelAsync("Save Project", "", "project", extensionList, (path) =>
+        {
+            if (path != null)
+                _viewModel?.Send(new SaveProjectIntent(path));
+        });
+#endif
+
     }
 
     public void OpenImageFile()
@@ -32,8 +71,7 @@ public class NFPController : MonoBehaviour
             if (LoadImage(path, out Texture2D texture))
             {
                 // create new artmesh
-                MeshData meshData = MeshManager.Instance.CreateArtMeshObj(texture, path);
-                LayerManager.Instance.CreateUIArtLayer(meshData);
+                _viewModel?.Send(new CreateMeshLayerIntent(Guid.NewGuid(), texture, path));
             }
 
         }, fileTypes);

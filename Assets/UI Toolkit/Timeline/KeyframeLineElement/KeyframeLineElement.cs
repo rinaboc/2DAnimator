@@ -1,24 +1,29 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.States;
+using Assets.Scripts.Utility.MVI;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 [UxmlElement]
-public partial class KeyframeLineElement : VisualElement
+public partial class KeyframeLineElement : VisualElement, IView<ParameterTimelineState, TimelineState>
 {
     public Guid ParamID { get; }
     private List<VisualElement> _cells = new();
     private ParameterSliderElement _paramSlider;
+    private IViewModel<ParameterTimelineState, TimelineState> _viewModel;
     public KeyframeLineElement()
     {
         AddToClassList("animation-cell-container");
     }
 
-    public KeyframeLineElement(int MaxFrames, List<List<VisualElement>> frameBars, Parameter parameter) : this()
+    public KeyframeLineElement(int MaxFrames, List<List<VisualElement>> frameBars, Guid paramID) : this()
     {
-        ParamID = parameter.ID;
+        ParamID = paramID;
 
-        _paramSlider = new ParameterSliderElement(parameter);
+        _paramSlider = ViewFactory.Instance.CreateView<ParameterSliderElement, ParameterTimelineState, ParameterStates>(ParamID);
         Add(_paramSlider);
+
         for (int j = 1; j <= MaxFrames; j++)
         {
             VisualElement cell = new();
@@ -30,32 +35,27 @@ public partial class KeyframeLineElement : VisualElement
 
             frameBars[j - 1].Add(cell);
         }
-
-        UIEvents.ParamInterpolatedEvent += OnParamInterpolated;
     }
 
-    ~KeyframeLineElement()
+    public void Dispose()
     {
-        UIEvents.ParamInterpolatedEvent -= OnParamInterpolated;
+        _viewModel?.Unbind(this);
+        foreach (var cell in _cells)
+        {
+            var key = cell.Q<KeyframeElement>();
+            key?.Dispose();
+            cell.Clear();
+        }
     }
 
-    private void OnParamInterpolated(Guid paramID, float value)
-    {
-        if (!ParamID.Equals(paramID)) return;
 
-        SetSliderValue(value);
-    }
-
-    public void SetSliderValue(float value)
+    public void InsertKeyframeAt(int frame, Guid keyID)
     {
-        _paramSlider.SetSliderValue(value);
-    }
+        if (frame - 1 >= _cells.Count || _cells[frame - 1].Q<KeyframeElement>()?._id == keyID) return;
 
-    public void InsertKeyframeAt(int frame, KeyFrame key)
-    {
         RemoveKeyframeFrom(frame);
-
-        _cells[frame - 1].Add(new KeyframeElement(key, this));
+        var keyframe = ViewFactory.Instance.CreateView<KeyframeElement, ParameterTimelineState, TimelineState>(keyID, frame, this);
+        _cells[frame - 1].Add(keyframe);
     }
 
     public void RemoveKeyframeFrom(int frame)
@@ -64,8 +64,36 @@ public partial class KeyframeLineElement : VisualElement
         if (cell.childCount > 0)
         {
             KeyframeElement keyframe = cell.Q<KeyframeElement>();
-            keyframe.Delete();
+            keyframe.Dispose();
             cell.Clear();
         }
+    }
+
+    public void Render(TimelineState state)
+    {
+        for (int i = 0; i < _cells.Count; i++)
+        {
+            if (_cells[i].childCount > 0)
+            {
+                KeyframeElement keyframe = _cells[i].Q<KeyframeElement>();
+                if (!state.Keyframes[ParamID].ContainsKey(keyframe._id))
+                {
+                    keyframe.Dispose();
+                    _cells[i].Clear();
+                }
+            }
+        }
+
+        if (!state.Keyframes.ContainsKey(ParamID)) return;
+        foreach (var keyframe in state.Keyframes[ParamID])
+        {
+            InsertKeyframeAt(keyframe.Value.Frame, keyframe.Key);
+        }
+    }
+
+    public void SetViewModel(IViewModel<ParameterTimelineState, TimelineState> viewModel)
+    {
+        _viewModel = viewModel;
+        _viewModel?.Bind(this);
     }
 }
