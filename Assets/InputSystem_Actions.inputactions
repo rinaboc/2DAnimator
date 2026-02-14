@@ -1078,7 +1078,7 @@
                     "name": "",
                     "id": "82f5b2b8-56a1-48c7-b7d6-e5988eb2fa70",
                     "path": "<Touchscreen>/touch*/press",
-                    "interactions": "Hold",
+                    "interactions": "Hold,MultiTap",
                     "processors": "",
                     "groups": "Touch",
                     "action": "DoubleClick",

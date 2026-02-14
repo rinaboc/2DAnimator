@@ -127,7 +127,7 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
         next.MeshLayers[create.ID] = new()
         {
             ID = create.ID,
-            Name = create.Path,
+            Name = "Layer " + next.MeshLayers.Count,
             Texture = create.Tex,
             SourcePath = create.Path,
             MeshTransform = new TransformData() { Scale = Vector3.one },

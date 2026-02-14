@@ -59,21 +59,29 @@ public class LayerController : Clickable, IView<MeshLayerStates, LayerStates>
     {
         if (IsInsideCollider())
         {
+            Debug.LogWarning("Double clicked on layer " + ID);
             LayerInput.ActivateInputField();
+        }
+        else
+        {
+            Debug.LogWarning("Double clicked outside of layer " + ID);
         }
     }
 
     public void TextChanged()
     {
+        Debug.Log("Text changed: " + LayerInput.text);
         _viewModel?.Send(new ChangeLayerNameIntent(ID, LayerInput.text));
     }
 
     public void Render(LayerStates state)
     {
+        Debug.Log("Rendering layer " + ID);
         if (state.Layers.TryGetValue(ID, out var layer))
         {
             SetSelected(layer.IsSelected);
-            LayerInput.text = layer.Name;
+            if (!LayerInput.isFocused && LayerInput.text != layer.Name)
+                LayerInput.text = layer.Name;
             DrawOrderText.text = layer.DrawOrder.ToString();
         }
         else
