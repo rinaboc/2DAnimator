@@ -80,7 +80,7 @@ public class MeshLayerCommandHandler : ICommandHandler
         LayerManager.Instance.DeleteAllUILayers();
         foreach (var item in init.SaveData.MeshDatas)
         {
-            if (!NFPController.LoadImage(item.sourcePath, out Texture2D texture))
+            if (!SFBController.LoadImage(item.sourcePath, out Texture2D texture))
             { Debug.LogError("couldn't load image"); continue; }
 
             context.Meshes.Register(item);

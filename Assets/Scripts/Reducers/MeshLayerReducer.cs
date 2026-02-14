@@ -223,7 +223,7 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
             {
                 ID = meshData.ID,
                 Name = meshData.name,
-                Texture = NFPController.LoadImage(meshData.sourcePath, out Texture2D texture) ? texture : null,
+                Texture = SFBController.LoadImage(meshData.sourcePath, out Texture2D texture) ? texture : null,
                 SourcePath = meshData.sourcePath,
                 MeshTransform = meshData.transform,
                 AnimationTransform = new TransformData(),
