@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using Assets.Scripts.Utility;
 using UnityEngine;
 
 [Serializable]
@@ -11,6 +12,7 @@ public class MeshData : EntityBase
     public string name;
 
     public TransformData transform;
+    public SerializableTexture texture;
 
     public MeshData(string sourcePath) : base()
     {

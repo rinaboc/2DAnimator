@@ -46,6 +46,7 @@ public class ProjectManager : ManagerBase<ProjectManager>
         catch (Exception ex)
         {
             Debug.LogError($"Failed to load project: {ex.StackTrace}");
+            Debug.LogError(ex.Message);
         }
     }
 }

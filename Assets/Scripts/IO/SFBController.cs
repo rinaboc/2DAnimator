@@ -105,7 +105,6 @@ public class SFBController : MonoBehaviour
         try
         {
             // load image
-            // byte[] bytes = File.ReadAllBytes(path);
             byte[] bytes = FileBrowserHelpers.ReadBytesFromFile(path);
             texture.filterMode = FilterMode.Trilinear;
             texture.LoadImage(bytes);

@@ -45,7 +45,6 @@ public class LayerController : Clickable, IView<MeshLayerStates, LayerStates>
     public void SetSelected(bool isSelected)
     {
         this.gameObject.GetComponentInParent<Image>().color = isSelected ? SelectedColor : Color.white;
-
         LayerInput.enabled = isSelected;
     }
 
@@ -60,11 +59,7 @@ public class LayerController : Clickable, IView<MeshLayerStates, LayerStates>
         if (IsInsideCollider())
         {
             Debug.LogWarning("Double clicked on layer " + ID);
-            LayerInput.ActivateInputField();
-        }
-        else
-        {
-            Debug.LogWarning("Double clicked outside of layer " + ID);
+            LayerInput.ActivateInputField(); // FIXME: doesn't seem to properly work on android yet
         }
     }
 

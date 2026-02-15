@@ -80,11 +80,10 @@ public class MeshLayerCommandHandler : ICommandHandler
         LayerManager.Instance.DeleteAllUILayers();
         foreach (var item in init.SaveData.MeshDatas)
         {
-            if (!SFBController.LoadImage(item.sourcePath, out Texture2D texture))
-            { Debug.LogError("couldn't load image"); continue; }
-
+            if (item.texture.Data == null)
+            { Debug.LogError("couldn't load image texture"); continue; }
             context.Meshes.Register(item);
-            MeshManager.Instance.CreateArtMeshObj(texture, item.ID);
+            MeshManager.Instance.CreateArtMeshObj(item.texture.Data, item.ID);
 
             LayerManager.Instance.CreateUIArtLayer(item.ID);
         }
@@ -121,7 +120,9 @@ public class MeshLayerCommandHandler : ICommandHandler
                     ID = meshLayerState.ID,
                     drawOrder = (ushort)meshLayerState.DrawOrder,
                     transform = meshLayerState.MeshTransform,
-                    sourcePath = meshLayerState.SourcePath
+                    sourcePath = meshLayerState.SourcePath,
+                    texture = new(meshLayerState.Texture),
+                    name = meshLayerState.Name
                 };
 
                 context.Meshes.Register(newMesh);
@@ -132,6 +133,10 @@ public class MeshLayerCommandHandler : ICommandHandler
                 layers.Remove(meshLayerState.ID);
                 context.Meshes.TryGet(meshLayerState.ID, out MeshData meshData);
                 meshData.drawOrder = (ushort)meshLayerState.DrawOrder;
+                meshData.transform = meshLayerState.MeshTransform;
+                meshData.sourcePath = meshLayerState.SourcePath;
+                meshData.texture = new(meshLayerState.Texture);
+                meshData.name = meshLayerState.Name;
             }
         }
 
