@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
@@ -11,67 +13,92 @@ public class AnimationManager : ManagerBase<AnimationManager>
     [SerializeField] private AppInitializer _appInitializer;
     private IViewModel<ParameterTimelineState, ParameterStates> _viewModel;
 
+    private SynchronizationContext _unityContext;
+
     void Start()
     {
+        _unityContext = SynchronizationContext.Current;
         if (!_appInitializer.GetViewModel(out _viewModel))
         {
             Debug.LogError("Couldn't fetch viewModel");
         }
     }
 
-    public void AnimateTimeline(int currentFrame, IModelContext context)
+    public async Task AnimateTimeline(int currentFrame, IModelContext context)
     {
         var parameters = context.Parameters.GetAll();
 
+        var tasks = new List<Task<KeyValuePair<Guid, float>>>();
+
         foreach (Parameter parameter in parameters)
         {
-            List<KeyFrame> parameterKeys = context.KeyFrames.GetKeyFramesOfParam(parameter.ID);
-            if (parameterKeys.Count < 2) continue;
-
-            parameterKeys.Sort((a, b) => a.Frame.CompareTo(b.Frame));
-
-            KeyFrame minFrame = parameterKeys.LastOrDefault(k => k.Frame <= currentFrame);
-            KeyFrame maxFrame = parameterKeys.FirstOrDefault(k => k.Frame >= currentFrame);
-
-            // current frame is outside the range of keyframes
-            if (minFrame == null) // Before the first keyframe
+            tasks.Add(Task.Run(() =>
             {
-                minFrame = maxFrame;
-            }
-            else if (maxFrame == null) // After the last keyframe
-            {
-                maxFrame = minFrame;
-            }
+                List<KeyFrame> parameterKeys = context.KeyFrames.GetKeyFramesOfParam(parameter.ID);
+                if (parameterKeys.Count < 2 && parameterKeys.Count > 0)
+                    return new KeyValuePair<Guid, float>(parameter.ID, parameterKeys[0].ParamValue);
+                else if (parameterKeys.Count == 0) return new KeyValuePair<Guid, float>(parameter.ID, parameter.DefaultValue);
 
-            float interpolatedValue;
-            if (minFrame.Frame == maxFrame.Frame)
-            {
-                interpolatedValue = minFrame.ParamValue;
-            }
-            else
-            {
-                float t = (float)(currentFrame - minFrame.Frame) / (maxFrame.Frame - minFrame.Frame);
-                interpolatedValue = Mathf.Lerp(minFrame.ParamValue, maxFrame.ParamValue, t);
-            }
+                parameterKeys.Sort((a, b) => a.Frame.CompareTo(b.Frame));
 
-            InterpolateParameter(interpolatedValue, parameter.ID, context);
-            _viewModel?.Send(new ParameterValueInterpolatedIntent(parameter.ID, interpolatedValue));
+                KeyFrame minFrame = parameterKeys.LastOrDefault(k => k.Frame <= currentFrame);
+                KeyFrame maxFrame = parameterKeys.FirstOrDefault(k => k.Frame >= currentFrame);
+
+                // current frame is outside the range of keyframes
+                if (minFrame == null) // Before the first keyframe
+                {
+                    minFrame = maxFrame;
+                }
+                else if (maxFrame == null) // After the last keyframe
+                {
+                    maxFrame = minFrame;
+                }
+
+                float interpolatedValue;
+                if (minFrame.Frame == maxFrame.Frame)
+                {
+                    interpolatedValue = minFrame.ParamValue;
+                }
+                else
+                {
+                    float t = (float)(currentFrame - minFrame.Frame) / (maxFrame.Frame - minFrame.Frame);
+                    interpolatedValue = Mathf.Lerp(minFrame.ParamValue, maxFrame.ParamValue, t);
+                }
+
+                InterpolateParameter(interpolatedValue, parameter.ID, context);
+                return new KeyValuePair<Guid, float>(parameter.ID, interpolatedValue);
+            }));
         }
+
+        var results = await Task.WhenAll(tasks);
+        await Task.CompletedTask;
+        _unityContext?.Post(_ =>
+        {
+            foreach (KeyValuePair<Guid, float> result in results)
+                _viewModel?.Send(new ParameterValueInterpolatedIntent(result.Key, result.Value));
+        }, null);
     }
 
     /// <summary>
     /// Interpolate parameter point values assigned to the selected parameter and set the interpolated transformations on the meshes.
     /// </summary>
-    public void InterpolateParameter(float value, Guid paramID, IModelContext context)
+    public async void InterpolateParameter(float value, Guid paramID, IModelContext context)
     {
+        var tasks = new List<Task>();
         _currentCurveSliderValues[paramID] = value;
         var accumTransforms = new Dictionary<Guid, TransformData>();
-        foreach (var curveValue in _currentCurveSliderValues)
+        foreach (var curveValue in _currentCurveSliderValues.ToList())
         {
-            CollectParameterDeltas(curveValue.Value, curveValue.Key, accumTransforms, context);
+            tasks.Add(Task.Run(() =>
+            CollectParameterDeltas(curveValue.Value, curveValue.Key, accumTransforms, context)
+            ));
         }
 
-        ApplyAccumulatedTransforms(accumTransforms, context);
+        await Task.WhenAll(tasks);
+        _unityContext?.Post(_ =>
+        {
+            ApplyAccumulatedTransforms(accumTransforms, context);
+        }, null);
     }
 
     public void CollectParameterDeltas(float value, Guid paramID, Dictionary<Guid, TransformData> accumTransforms, IModelContext context)
@@ -116,26 +143,28 @@ public class AnimationManager : ManagerBase<AnimationManager>
             Quaternion interpRotation = Quaternion.Lerp(minPoint.transform.Rotation, maxPoint.transform.Rotation, t);
 
             // accumulate per mesh
-            if (!accumTransforms.TryGetValue(paramCurve.MeshID, out TransformData cur)) cur = new TransformData();
-            cur.Position += interpPos;
-            cur.Scale += interpScale;
-            cur.Rotation *= interpRotation;
-            accumTransforms[paramCurve.MeshID] = cur;
+            _unityContext?.Post(_ =>
+            {
+                if (!accumTransforms.TryGetValue(paramCurve.MeshID, out TransformData cur)) cur = new TransformData();
+                cur.Position += interpPos;
+                cur.Scale += interpScale;
+                cur.Rotation *= interpRotation;
+                accumTransforms[paramCurve.MeshID] = cur;
+            }, null);
         }
     }
 
     private void ApplyAccumulatedTransforms(Dictionary<Guid, TransformData> accum, IModelContext context)
     {
-        foreach (var kv in accum)
+        foreach (var kv in accum.ToList())
         {
             var meshId = kv.Key;
             var delta = kv.Value;
 
-            MeshManager.Instance.GetMeshObject(meshId, out MeshController artMesh);
             context.Meshes.TryGet(meshId, out MeshData meshData);
-            if (artMesh == null || meshData == null)
+            if (meshData == null)
             {
-                Debug.LogError("artmesh or meshdata null in apply accumulated transforms");
+                Debug.LogError("meshdata null in apply accumulated transforms");
                 continue;
             }
 

@@ -107,8 +107,6 @@ public partial class ParameterSliderElement : VisualElement, IView<ParameterTime
     {
         if (_paramID == Guid.Empty) return;
 
-        Debug.Log("parameter slider draw");
-
         var parameter = state.Parameters[_paramID];
         _label.text = parameter.Name;
         _slider.lowValue = parameter.MinValue;

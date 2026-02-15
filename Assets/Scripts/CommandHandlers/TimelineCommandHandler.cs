@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 
@@ -76,10 +77,10 @@ public class TimelineCommandHandler : ICommandHandler
 
     }
 
-    private void ExecuteCurrentFrameChanged(TimelineState state, IModelContext context)
+    private async void ExecuteCurrentFrameChanged(TimelineState state, IModelContext context)
     {
         context.GeneralSettings.CurrentFrame = state.CurrentFrame;
-        AnimationManager.Instance.AnimateTimeline(state.CurrentFrame, context);
+        await AnimationManager.Instance.AnimateTimeline(state.CurrentFrame, context);
     }
 
     private void ExecuteOpenTimeline(TimelineState state)

@@ -15,6 +15,8 @@ public class TimelineWidgetController : BaseUIController, IView<ParameterTimelin
 
     private Button m_PlayButton;
     bool isPlaybackRunning = false;
+    private float _playbackInterval;
+    private int _maxFrames;
 
     private IViewModel<ParameterTimelineState, TimelineState> _viewModel;
 
@@ -40,11 +42,6 @@ public class TimelineWidgetController : BaseUIController, IView<ParameterTimelin
         m_Timeline.AddToClassList("hide");
 
         m_PlayButton.clicked += OnPlayButtonClicked;
-    }
-
-    public void LoadKeyframes(KeyFrame[] keyframes)
-    {
-        m_TimelineSlider.LoadKeyframes(keyframes);
     }
 
     /// <summary>
@@ -78,20 +75,19 @@ public class TimelineWidgetController : BaseUIController, IView<ParameterTimelin
     {
         do
         {
-            m_TimelineSlider.CurrentFrame = Currentframe >= GeneralSettings.Instance.MaxFrames ? 1 : Currentframe + 1;
-            yield return new WaitForSecondsRealtime(1f / GeneralSettings.Instance.FramePerSec);
+            m_TimelineSlider.CurrentFrame = Currentframe >= _maxFrames ? 1 : Currentframe + 1;
+            yield return new WaitForSecondsRealtime(_playbackInterval);
         } while (isPlaybackRunning);
     }
 
     public void SetMaxFrames(int maxFrames)
     {
-        GeneralSettings.Instance.MaxFrames = maxFrames;
-        // m_TimelineSlider.Redraw();
+        _maxFrames = maxFrames;
     }
 
     public void SetFramePerSec(int framePerSec)
     {
-        GeneralSettings.Instance.FramePerSec = framePerSec;
+        _playbackInterval = 1f / framePerSec;
     }
 
     private void CloseTimeline()

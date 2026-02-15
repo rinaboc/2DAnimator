@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using TMPro;
@@ -71,18 +72,12 @@ public class LayerController : Clickable, IView<MeshLayerStates, LayerStates>
 
     public void Render(LayerStates state)
     {
-        Debug.Log("Rendering layer " + ID);
-        if (state.Layers.TryGetValue(ID, out var layer))
-        {
-            SetSelected(layer.IsSelected);
-            if (!LayerInput.isFocused && LayerInput.text != layer.Name)
-                LayerInput.text = layer.Name;
-            DrawOrderText.text = layer.DrawOrder.ToString();
-        }
-        else
-        {
-            Debug.Log("Couldn't fetch layer state");
-        }
+        if (!state.Layers.TryGetValue(ID, out var layer)) return;
+
+        SetSelected(layer.IsSelected);
+        if (!LayerInput.isFocused && LayerInput.text != layer.Name)
+            LayerInput.text = layer.Name;
+        DrawOrderText.text = layer.DrawOrder.ToString();
     }
 
     public void SetViewModel(IViewModel<MeshLayerStates, LayerStates> viewModel)
