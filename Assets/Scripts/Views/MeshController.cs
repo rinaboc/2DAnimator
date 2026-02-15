@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
@@ -11,7 +12,6 @@ public class MeshController : MonoBehaviour, IView<MeshLayerStates, MeshStates>
     public Guid ID { get; private set; }
 
     private IViewModel<MeshLayerStates, MeshStates> _viewModel;
-
 
     private void Awake()
     {
@@ -114,7 +114,6 @@ public class MeshController : MonoBehaviour, IView<MeshLayerStates, MeshStates>
         MoveArtMesh(transform.Position);
         RotateArtMesh(transform.Rotation);
         ScaleArtMesh(transform.Scale);
-
         SetDrawOrder(meshState.DrawOrder);
     }
 

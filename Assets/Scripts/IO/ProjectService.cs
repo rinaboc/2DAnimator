@@ -2,6 +2,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using Assets.Scripts.Utility.MVI;
+using SimpleFileBrowser;
 using UnityEngine;
 
 public interface IProjectService
@@ -18,10 +19,11 @@ public class ProjectService : IProjectService
         Debug.Log(path);
 
         // serialize savedata
-        FileStream fs = File.Create(path);
         BinaryFormatter binaryFormatter = new();
-        binaryFormatter.Serialize(fs, saveData);
-        fs.Close();
+        using MemoryStream ms = new();
+        binaryFormatter.Serialize(ms, saveData);
+        byte[] data = ms.ToArray();
+        FileBrowserHelpers.WriteBytesToFile(path, data);
     }
 
     private SaveData CreateSaveData(IModelContext context)
@@ -39,14 +41,13 @@ public class ProjectService : IProjectService
 
     public SaveData Load(string path)
     {
-        if (!File.Exists(path))
+        if (!FileBrowserHelpers.FileExists(path))
             throw new FileNotFoundException($"Project file not found: {path}");
 
-        FileStream fs = File.Open(path, FileMode.Open);
+        byte[] data = FileBrowserHelpers.ReadBytesFromFile(path);
         BinaryFormatter binaryFormatter = new();
-        SaveData save = (SaveData)binaryFormatter.Deserialize(fs);
-        fs.Close();
-
+        using MemoryStream ms = new(data);
+        SaveData save = (SaveData)binaryFormatter.Deserialize(ms);
         return save;
     }
 }

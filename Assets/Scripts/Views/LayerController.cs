@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using TMPro;
@@ -45,7 +46,6 @@ public class LayerController : Clickable, IView<MeshLayerStates, LayerStates>
     public void SetSelected(bool isSelected)
     {
         this.gameObject.GetComponentInParent<Image>().color = isSelected ? SelectedColor : Color.white;
-
         LayerInput.enabled = isSelected;
     }
 
@@ -59,27 +59,25 @@ public class LayerController : Clickable, IView<MeshLayerStates, LayerStates>
     {
         if (IsInsideCollider())
         {
-            LayerInput.ActivateInputField();
+            Debug.LogWarning("Double clicked on layer " + ID);
+            LayerInput.ActivateInputField(); // FIXME: doesn't seem to properly work on android yet
         }
     }
 
     public void TextChanged()
     {
+        Debug.Log("Text changed: " + LayerInput.text);
         _viewModel?.Send(new ChangeLayerNameIntent(ID, LayerInput.text));
     }
 
     public void Render(LayerStates state)
     {
-        if (state.Layers.TryGetValue(ID, out var layer))
-        {
-            SetSelected(layer.IsSelected);
+        if (!state.Layers.TryGetValue(ID, out var layer)) return;
+
+        SetSelected(layer.IsSelected);
+        if (!LayerInput.isFocused && LayerInput.text != layer.Name)
             LayerInput.text = layer.Name;
-            DrawOrderText.text = layer.DrawOrder.ToString();
-        }
-        else
-        {
-            Debug.Log("Couldn't fetch layer state");
-        }
+        DrawOrderText.text = layer.DrawOrder.ToString();
     }
 
     public void SetViewModel(IViewModel<MeshLayerStates, LayerStates> viewModel)

@@ -19,15 +19,11 @@ public partial class TimelineSliderElement : VisualElement, IView<ParameterTimel
         set
         {
             int newValue = value;
-            if (newValue >= m_maxFrames)
-            {
-                newValue = m_maxFrames;
-            }
-            else if (newValue <= 0)
-            {
-                newValue = 1;
-            }
 
+            if (newValue > m_maxFrames) newValue = m_maxFrames;
+            else if (newValue < 1) newValue = 1;
+
+            if (newValue == m_currentFrame) return;
             m_currentFrame = newValue;
             _viewModel?.Send(new CurrentFrameChangedIntent(CurrentFrame));
         }
@@ -153,17 +149,6 @@ public partial class TimelineSliderElement : VisualElement, IView<ParameterTimel
         var keyframeLine = ViewFactory.Instance.CreateView<KeyframeLineElement, ParameterTimelineState, TimelineState>(maxFrames, m_frameBars, paramID);
         m_keyframeContainer.Add(keyframeLine);
         m_keyframeLineElements.Add(paramID, keyframeLine);
-    }
-
-    public void LoadKeyframes(KeyFrame[] keyframes)
-    {
-        m_keyframeLineElements.Clear();
-        ClearFrameBarLists();
-
-        foreach (KeyFrame key in keyframes)
-        {
-            m_keyframeLineElements[key.ParamID].InsertKeyframeAt(key.Frame, key.ID);
-        }
     }
 
     public void UpdateKeyWidth()
@@ -357,6 +342,7 @@ public partial class TimelineSliderElement : VisualElement, IView<ParameterTimel
         UpdateHandlePosition();
         HighlightBarAt(state.CurrentFrame);
         UpdateFrameField();
+
 
         m_widgetOpen = state.IsOpen;
     }

@@ -127,7 +127,7 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
         next.MeshLayers[create.ID] = new()
         {
             ID = create.ID,
-            Name = create.Path,
+            Name = "Layer " + next.MeshLayers.Count,
             Texture = create.Tex,
             SourcePath = create.Path,
             MeshTransform = new TransformData() { Scale = Vector3.one },
@@ -223,7 +223,7 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
             {
                 ID = meshData.ID,
                 Name = meshData.name,
-                Texture = NFPController.LoadImage(meshData.sourcePath, out Texture2D texture) ? texture : null,
+                Texture = meshData.texture.Data,
                 SourcePath = meshData.sourcePath,
                 MeshTransform = meshData.transform,
                 AnimationTransform = new TransformData(),
