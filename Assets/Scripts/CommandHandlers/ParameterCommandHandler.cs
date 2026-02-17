@@ -69,11 +69,13 @@ public class ParameterCommandHandler : ICommandHandler
 
     private void ExecuteOpenParameterCreator(ParameterStates state, IModelContext context)
     {
+        if (state == null) return;
         context.GeneralSettings.SelectedParamID = state.SelectedParamID;
     }
 
     private void ExecuteParameterStateChanged(ParameterStates state, IModelContext context)
     {
+        if (state == null) return;
         var parameters = ParameterManager.Instance.GetParamSliderIDs();
         foreach ((var id, var parameterState) in state.Parameters)
         {
@@ -112,6 +114,7 @@ public class ParameterCommandHandler : ICommandHandler
 
     private void ExecuteCreateParamPoints(ParameterStates state, IModelContext context)
     {
+        if (state == null) return;
         var curves = context.ParamCurves.GetAll().ToList();
         foreach ((var id, var parameterState) in state.Parameters)
         {
@@ -153,6 +156,7 @@ public class ParameterCommandHandler : ICommandHandler
 
     private void ExecuteSelectParameter(ParameterStates state, IModelContext context)
     {
+        if (state == null) return;
         context.GeneralSettings.SelectedParamID = state.SelectedParamID;
     }
 }

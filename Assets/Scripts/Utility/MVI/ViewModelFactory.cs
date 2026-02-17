@@ -21,7 +21,7 @@ public class ViewModelFactory : MonoBehaviour
 
     public IViewModel<TDomain, TView> CreateViewModel<TViewModel, TDomain, TView>(GameObject parent)
     where TViewModel : MonoBehaviour, IViewModel<TDomain, TView>
-    where TDomain : new()
+    where TDomain : IState<TDomain>, new()
     {
         var state = new TDomain();
         var store = new Store<TDomain>(state, _appInitializer.Dispatcher);
@@ -32,7 +32,7 @@ public class ViewModelFactory : MonoBehaviour
 
     public IViewModel<TDomain, TView> CreateViewModel<TViewModel, TDomain, TView>(GameObject parent, AppInitializer appInitializer)
     where TViewModel : MonoBehaviour, IViewModel<TDomain, TView>
-    where TDomain : new()
+    where TDomain : IState<TDomain>, new()
     {
         var state = new TDomain();
         var store = new Store<TDomain>(state, appInitializer.Dispatcher);
@@ -43,7 +43,7 @@ public class ViewModelFactory : MonoBehaviour
 
     public IViewModel<TDomain, TView> CreateViewModel<TViewModel, TDomain, TView>(GameObject parent, TDomain state)
     where TViewModel : MonoBehaviour, IViewModel<TDomain, TView>
-    where TDomain : new()
+    where TDomain : IState<TDomain>, new()
     {
         var store = new Store<TDomain>(state, _appInitializer.Dispatcher);
         var viewModel = parent.AddComponent<TViewModel>();
@@ -53,7 +53,7 @@ public class ViewModelFactory : MonoBehaviour
 
     public IViewModel<TDomain, TView> CreateSharedViewModel<TViewModel, TDomain, TView>(GameObject parent)
     where TViewModel : MonoBehaviour, IViewModel<TDomain, TView>
-    where TDomain : new()
+    where TDomain : IState<TDomain>, new()
     {
         if (!_appInitializer.Dispatcher.TryGetStore<TDomain>(out var store)) { Debug.LogError("Couldn't fetch store"); return null; }
         var viewModel = parent.AddComponent<TViewModel>();

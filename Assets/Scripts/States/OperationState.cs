@@ -1,7 +1,7 @@
 namespace Assets.Scripts.States
 {
-    public class OperationState
+    public class OperationState : IState<OperationState>
     {
-
+        public OperationState Clone() => new();
     }
 }

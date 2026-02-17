@@ -4,3 +4,8 @@ using System;
 public sealed class GlobalIntentAttribute : Attribute
 {
 }
+
+[AttributeUsage(AttributeTargets.Class, Inherited = false)]
+public sealed class NonUndoableIntentAttribute : Attribute
+{
+}

@@ -26,6 +26,7 @@ public class MeshLayerCommandHandler : ICommandHandler
 
     private void ExecuteSaveTransform(MeshLayerStates state, IModelContext context)
     {
+        if (state == null) return;
         if (!context.Parameters.TryGet(context.GeneralSettings.SelectedParamID, out Parameter currentParam)) return;
         foreach ((var _, var mesh) in state.MeshLayers)
         {
@@ -96,6 +97,7 @@ public class MeshLayerCommandHandler : ICommandHandler
 
     private void ExecuteLayerOrderChanged(MeshLayerStates state, IModelContext context)
     {
+        if (state == null) return;
         foreach ((var _, var meshLayerState) in state.MeshLayers)
         {
             LayerManager.Instance.SetSiblingIndex(meshLayerState.ID, meshLayerState.DrawOrder);
@@ -107,6 +109,7 @@ public class MeshLayerCommandHandler : ICommandHandler
 
     private void ExecuteLayerStateChanged(MeshLayerStates state, IModelContext context)
     {
+        if (state == null) return;
         var layers = LayerManager.Instance.GetUILayerIDs();
         foreach ((var _, var meshLayerState) in state.MeshLayers)
         {
@@ -169,6 +172,7 @@ public class MeshLayerCommandHandler : ICommandHandler
 
     private void ExecuteSelectLayer(MeshLayerStates state, IModelContext context)
     {
+        if (state == null) return;
         context.GeneralSettings.SelectedMeshID = state.SelectedMeshLayerID;
 
         List<Guid> paramIDs = context.ParamCurves.GetAssignedParamIDsOfMesh(state.SelectedMeshLayerID);
@@ -177,6 +181,7 @@ public class MeshLayerCommandHandler : ICommandHandler
 
     private void ExecuteChangeLayerName(MeshLayerStates state, IModelContext context)
     {
+        if (state == null) return;
         foreach ((var id, var meshLayerState) in state.MeshLayers)
         {
             context.Meshes.TryGet(id, out MeshData meshData);

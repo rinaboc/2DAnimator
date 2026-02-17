@@ -21,7 +21,7 @@ namespace Assets.Scripts.States
         }
     }
 
-    public class LayerStates
+    public class LayerStates : IState<LayerStates>
     {
         public Dictionary<Guid, LayerState> Layers { get; set; }
         public Guid SelectedLayerID { get; set; }

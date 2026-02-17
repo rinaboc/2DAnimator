@@ -73,7 +73,7 @@ namespace Assets.Scripts.Utility.MVI
             _stores.Remove(store);
         }
 
-        public bool TryGetStore<TState>(out Store<TState> store)
+        public bool TryGetStore<TState>(out Store<TState> store) where TState : IState<TState>
         {
             store = null;
             foreach (var s in _stores)
@@ -85,6 +85,22 @@ namespace Assets.Scripts.Utility.MVI
                 }
             }
             return false;
+        }
+
+        public void Undo()
+        {
+            foreach (var store in _stores)
+            {
+                store.Undo();
+            }
+        }
+
+        public void Redo()
+        {
+            foreach (var store in _stores)
+            {
+                store.Redo();
+            }
         }
     }
 }

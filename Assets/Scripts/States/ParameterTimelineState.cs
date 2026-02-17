@@ -1,6 +1,6 @@
 namespace Assets.Scripts.States
 {
-    public class ParameterTimelineState
+    public class ParameterTimelineState : IState<ParameterTimelineState>
     {
         public ParameterStates Parameters { get; set; }
         public TimelineState Timeline { get; set; }

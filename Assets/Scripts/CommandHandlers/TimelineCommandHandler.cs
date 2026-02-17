@@ -22,14 +22,16 @@ public class TimelineCommandHandler : ICommandHandler
         }
     }
 
-    private void ExecuteUpdateMaxFrames(TimelineState timelineState, IModelContext context)
+    private void ExecuteUpdateMaxFrames(TimelineState state, IModelContext context)
     {
-        context.GeneralSettings.MaxFrames = timelineState.MaxFrames;
+        if (state == null) return;
+        context.GeneralSettings.MaxFrames = state.MaxFrames;
     }
 
-    private void ExecuteUpdateFramePerSec(TimelineState timelineState, IModelContext context)
+    private void ExecuteUpdateFramePerSec(TimelineState state, IModelContext context)
     {
-        context.GeneralSettings.FramePerSec = timelineState.FramePerSec;
+        if (state == null) return;
+        context.GeneralSettings.FramePerSec = state.FramePerSec;
     }
 
     private void ExecuteInitializeProject(InitializeProjectIntent init, IModelContext context)
@@ -47,6 +49,7 @@ public class TimelineCommandHandler : ICommandHandler
 
     private void ExecuteKeyframeStateChanged(TimelineState state, IModelContext context)
     {
+        if (state == null) return;
         var keyframes = context.KeyFrames.GetAll().ToList();
         foreach ((var paramID, var keyframeLine) in state.Keyframes)
         {
@@ -79,12 +82,14 @@ public class TimelineCommandHandler : ICommandHandler
 
     private async void ExecuteCurrentFrameChanged(TimelineState state, IModelContext context)
     {
+        if (state == null) return;
         context.GeneralSettings.CurrentFrame = state.CurrentFrame;
         await AnimationManager.Instance.AnimateTimeline(state.CurrentFrame, context);
     }
 
     private void ExecuteOpenTimeline(TimelineState state)
     {
+        if (state == null) return;
         ParameterManager.Instance.ParameterWidgetVisibility = !state.IsOpen;
     }
 }

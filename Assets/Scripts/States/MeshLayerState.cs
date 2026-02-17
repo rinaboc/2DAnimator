@@ -81,7 +81,7 @@ namespace Assets.Scripts.States
         }
     }
 
-    public class MeshLayerStates
+    public class MeshLayerStates : IState<MeshLayerStates>
     {
         public Dictionary<Guid, MeshLayerState> MeshLayers { get; set; }
         public Guid SelectedMeshLayerID { get; set; }

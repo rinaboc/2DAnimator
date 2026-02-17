@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using Unity.Android.Gradle.Manifest;
 
 namespace Assets.Scripts.Utility.MVI
 {
@@ -7,13 +9,18 @@ namespace Assets.Scripts.Utility.MVI
         void Reduce(IIntent intent);
         void Execute(IIntent intent);
         Type GetStateType();
+        void Undo();
+        void Redo();
     }
 
-    public sealed class Store<TState> : IStore
+    public sealed class Store<TState> : IStore where TState : IState<TState>
     {
         public TState State { get; private set; }
         public event Action<TState> StateChanged;
         private readonly IDispatcher _dispatcher;
+
+        readonly BoundedStack<TState> _stateHistory = new(40);
+        readonly Stack<KeyValuePair<IIntent, TState>> _futureStates = new();
 
         public Store(TState state, IDispatcher dispatcher)
         {
@@ -29,6 +36,9 @@ namespace Assets.Scripts.Utility.MVI
 
         public void Dispatch(IIntent intent)
         {
+            if (intent is IIntentUndo) { _dispatcher.Undo(); return; }
+            else if (intent is IIntentRedo) { _dispatcher.Redo(); return; }
+
             if (IntentHelper.IsGlobalIntent(intent))
                 _dispatcher.Dispatch(intent);
             else
@@ -45,17 +55,55 @@ namespace Assets.Scripts.Utility.MVI
 
         public void Reduce(IIntent intent)
         {
+            _stateHistory.Push(new(intent, State.Clone()));
+
             var newState = _dispatcher.Reduce(State, intent);
             bool stateChanged = !Equals(State, newState);
             State = newState;
 
-            if (stateChanged)
-                StateChanged?.Invoke(State);
+            if (_futureStates.Count > 0)
+            {
+                _futureStates.Clear();
+                _futureStates.TrimExcess();
+            }
+
+            if (!stateChanged) return;
+
+            StateChanged?.Invoke(State);
+
         }
 
         public void Unbind()
         {
             _dispatcher.Remove(this);
+        }
+
+        public void Undo()
+        {
+            do
+            {
+                if (!_stateHistory.TryPop(out var prevState)) return;
+                var (intent, state) = prevState;
+                _futureStates.Push(new(intent, State.Clone()));
+                State = state;
+                Execute(intent);
+            } while (_stateHistory.Count > 0 && !IntentHelper.IsUndoableIntent(_futureStates.Peek().Key));
+
+            StateChanged?.Invoke(State);
+        }
+
+        public void Redo()
+        {
+            do
+            {
+                if (!_futureStates.TryPop(out var nextState)) return;
+                var (intent, state) = nextState;
+                _stateHistory.Push(new(intent, State.Clone()));
+                State = state;
+                Execute(intent);
+            } while (_futureStates.Count > 0 && !IntentHelper.IsUndoableIntent(_futureStates.Peek().Key));
+
+            StateChanged?.Invoke(State);
         }
     }
 }

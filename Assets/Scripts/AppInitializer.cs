@@ -25,6 +25,7 @@ public class AppInitializer : MonoBehaviour
     [SerializeField] private TimelineWidgetController _timelineWidgetController;
     [SerializeField] private TimelineSettingsController _timelineSettingsController;
     [SerializeField] private ParameterSettingsView _parameterSettingsView;
+    [SerializeField] private WorkspaceView _workspaceView;
 
     void Awake()
     {
@@ -66,6 +67,11 @@ public class AppInitializer : MonoBehaviour
         {
             _parameterSettingsView.SetViewModel(parameterViewModel);
         }
+
+        if (GetViewModel<OperationState, OperationState>(out var operationViewModel))
+        {
+            _workspaceView.SetViewModel(operationViewModel);
+        }
     }
 
     private void CreateViewModels()
@@ -87,7 +93,7 @@ public class AppInitializer : MonoBehaviour
 
     }
 
-    private void Register<TDomain, TView>(IViewModel<TDomain, TView> viewModel)
+    private void Register<TDomain, TView>(IViewModel<TDomain, TView> viewModel) where TDomain : IState<TDomain>
     {
         var stateType = typeof(TDomain);
         if (!_typedViewModels.ContainsKey(stateType))
@@ -97,7 +103,7 @@ public class AppInitializer : MonoBehaviour
         _typedViewModels[stateType].Add(viewModel);
     }
 
-    public bool GetViewModel<TDomain, TView>(out IViewModel<TDomain, TView> viewModel) where TDomain : class
+    public bool GetViewModel<TDomain, TView>(out IViewModel<TDomain, TView> viewModel) where TDomain : IState<TDomain>
     {
         viewModel = null;
         var stateType = typeof(TDomain);

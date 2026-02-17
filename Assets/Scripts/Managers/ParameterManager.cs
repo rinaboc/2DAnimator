@@ -24,7 +24,7 @@ public class ParameterManager : ManagerBase<ParameterManager>
         {
             Debug.LogError("Couldn't fetch viewModel");
         }
-        CreateDebugParam();
+        // CreateDebugParam();
     }
 
     private bool _parameterWidgetVisibility = true;

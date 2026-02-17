@@ -6,10 +6,13 @@ using UnityEngine;
 namespace Assets.Scripts.Utility.MVI
 {
     public interface IIntent { }
+    public interface IIntentUndo : IIntent { }
+    public interface IIntentRedo : IIntent { }
 
     public class IntentHelper
     {
         private static readonly Dictionary<Type, bool> _globalCache = new();
+        private static readonly Dictionary<Type, bool> _undoableCache = new();
 
         public static bool IsGlobalIntent(IIntent intent)
         {
@@ -21,20 +24,33 @@ namespace Assets.Scripts.Utility.MVI
             _globalCache[type] = isGlobal;
             return isGlobal;
         }
+
+        public static bool IsUndoableIntent(IIntent intent)
+        {
+            var type = intent.GetType();
+            if (_undoableCache.TryGetValue(type, out var isUndoable))
+                return isUndoable;
+
+            isUndoable = !Attribute.IsDefined(type, typeof(NonUndoableIntentAttribute));
+            _undoableCache[type] = isUndoable;
+            return isUndoable;
+        }
     }
 }
 
 #region Workspace Operations
-public record SaveProjectIntent(string Path) : IIntent;
-public record OpenProjectIntent(string Path) : IIntent;
-[GlobalIntent] public record InitializeProjectIntent(SaveData SaveData) : IIntent;
+[NonUndoableIntent] public record SaveProjectIntent(string Path) : IIntent;
+[NonUndoableIntent] public record OpenProjectIntent(string Path) : IIntent;
+[GlobalIntent, NonUndoableIntent] public record InitializeProjectIntent(SaveData SaveData) : IIntent;
+public record UndoIntent() : IIntentUndo;
+public record RedoIntent() : IIntentRedo;
 #endregion
 
 #region Mesh Transformation
-public record UpdateTransformIntent(Guid MeshID, TransformData Data, TransformType Type) : IIntent;
+[NonUndoableIntent] public record UpdateTransformIntent(Guid MeshID, TransformData Data, TransformType Type) : IIntent;
 public record SaveTransformIntent(Guid MeshID, TransformType Type) : IIntent;
-public record InterpolateTransformIntent(Guid MeshID, TransformData Delta) : IIntent;
-public record ResetInterpolationIntent(Guid MeshID) : IIntent;
+[NonUndoableIntent] public record InterpolateTransformIntent(Guid MeshID, TransformData Delta) : IIntent;
+[NonUndoableIntent] public record ResetInterpolationIntent(Guid MeshID) : IIntent;
 #endregion
 
 #region Layer Operations
@@ -47,9 +63,9 @@ public record ChangeLayerNameIntent(Guid LayerID, string NewName) : IIntent;
 #endregion
 
 #region Parameter Operations
-public record OpenParameterCreatorIntent() : IIntent;
-public record OpenParameterEditorIntent() : IIntent;
-public record CloseParameterSettingsIntent() : IIntent;
+[NonUndoableIntent] public record OpenParameterCreatorIntent() : IIntent;
+[NonUndoableIntent] public record OpenParameterEditorIntent() : IIntent;
+[NonUndoableIntent] public record CloseParameterSettingsIntent() : IIntent;
 public record SelectParameterIntent(Guid ParamID) : IIntent;
 public record DeselectParameterIntent() : IIntent;
 [GlobalIntent] public record CreateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
@@ -57,20 +73,20 @@ public record UpdateParameterIntent(Guid ParamID, float Min, float Max, float De
 public record DeleteSelectedParameterIntent() : IIntent;
 [GlobalIntent] public record DeletedParameterIntent(Guid ParamID) : IIntent;
 public record CreateParamPointsIntent() : IIntent;
-public record ParameterValueInterpolatedIntent(Guid ParamID, float Value) : IIntent;
+[NonUndoableIntent] public record ParameterValueInterpolatedIntent(Guid ParamID, float Value) : IIntent;
 #endregion
 
 #region Animation
-public record InterpolateParameterIntent(Guid ParamID, float Value) : IIntent;
+[NonUndoableIntent] public record InterpolateParameterIntent(Guid ParamID, float Value) : IIntent;
 #endregion
 
 #region Timeline Operations
-public record TimelineOpenIntent() : IIntent;
+[NonUndoableIntent] public record TimelineOpenIntent() : IIntent;
 public record UpdateFramePerSecIntent(int FPS) : IIntent;
 public record UpdateMaxFramesIntent(int MaxFrames) : IIntent;
-public record TimelineSettingsOpenIntent() : IIntent;
+[NonUndoableIntent] public record TimelineSettingsOpenIntent() : IIntent;
 public record SelectKeyframeIntent(Guid ID) : IIntent;
 public record DeleteKeyframeIntent() : IIntent;
-public record CurrentFrameChangedIntent(int Frame) : IIntent;
+[NonUndoableIntent] public record CurrentFrameChangedIntent(int Frame) : IIntent;
 public record TimelineParameterSliderChangedIntent(Guid ParamID, float Value) : IIntent;
 #endregion
