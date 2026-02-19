@@ -15,14 +15,22 @@ public class TimelineReducer : IReducer<TimelineState>
             UpdateMaxFramesIntent update => ReduceUpdateMaxFrames(update, previous),
             TimelineSettingsOpenIntent _ => ReduceOpenTimelineSettings(previous),
             CreateParameterIntent create => ReduceCreateParameter(previous, create),
-            DeletedParameterIntent delete => ReduceDeleteParameter(previous, delete),
+            DeleteSelectedParameterIntent delete => ReduceDeleteSelectedParameter(previous, delete),
             SelectKeyframeIntent select => ReduceSelectKeyframe(previous, select),
             DeleteKeyframeIntent _ => ReduceDeleteKeyframe(previous),
             CurrentFrameChangedIntent change => ReduceCurrentFrameChanged(change, previous),
             TimelineParameterSliderChangedIntent change => ReduceTimelineParameterSliderChanged(change, previous),
             InitializeProjectIntent init => ReduceInitializeProject(previous, init),
+            SelectParameterIntent select => ReduceSelectParameter(previous, select),
             _ => previous
         };
+    }
+
+    private TimelineState ReduceSelectParameter(TimelineState previous, SelectParameterIntent select)
+    {
+        var next = previous.Clone();
+        next.SelectedParamID = select.ParamID;
+        return next;
     }
 
     private TimelineState ReduceInitializeProject(TimelineState previous, InitializeProjectIntent init)
@@ -113,10 +121,13 @@ public class TimelineReducer : IReducer<TimelineState>
         return next;
     }
 
-    private TimelineState ReduceDeleteParameter(TimelineState previous, DeletedParameterIntent delete)
+    private TimelineState ReduceDeleteSelectedParameter(TimelineState previous, DeleteSelectedParameterIntent delete)
     {
+        if (previous.SelectedParamID == Guid.Empty) return previous;
+
         var next = previous.Clone();
-        next.Keyframes.Remove(delete.ParamID);
+        next.Keyframes.Remove(previous.SelectedParamID);
+        next.SelectedParamID = Guid.Empty;
         return next;
     }
 

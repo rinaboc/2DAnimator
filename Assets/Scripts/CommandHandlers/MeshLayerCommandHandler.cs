@@ -67,7 +67,7 @@ public class MeshLayerCommandHandler : ICommandHandler
                 Debug.Log("no point was updated");
                 int minIndex = Array.IndexOf(distFromPointValues, distFromPointValues.Min());
                 ParameterManager.Instance.GetParamSlider(paramCurve.ParamID).SetValue(paramPoints[minIndex].ParamValue);
-                ParameterManager.Instance.DispatchToParameterStore(new InterpolateParameterIntent(paramCurve.ParamID, paramPoints[minIndex].ParamValue));
+                AnimationManager.Instance.InterpolateParameter(paramPoints[minIndex].ParamValue, paramCurve.ParamID, context);
             }
 
         }

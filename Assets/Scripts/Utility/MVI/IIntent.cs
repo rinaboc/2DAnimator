@@ -14,26 +14,18 @@ namespace Assets.Scripts.Utility.MVI
         private static readonly Dictionary<Type, bool> _globalCache = new();
         private static readonly Dictionary<Type, bool> _undoableCache = new();
 
-        public static bool IsGlobalIntent(IIntent intent)
+        public static bool IsGlobalIntent(IIntent intent) => HasAttribute(intent, typeof(GlobalIntentAttribute), _globalCache);
+        public static bool IsUndoableIntent(IIntent intent) => !HasAttribute(intent, typeof(NonUndoableIntentAttribute), _undoableCache);
+
+        private static bool HasAttribute(IIntent intent, Type attribute, Dictionary<Type, bool> cache)
         {
             var type = intent.GetType();
-            if (_globalCache.TryGetValue(type, out var isGlobal))
-                return isGlobal;
+            if (cache.TryGetValue(type, out var isAttribute))
+                return isAttribute;
 
-            isGlobal = Attribute.IsDefined(type, typeof(GlobalIntentAttribute));
-            _globalCache[type] = isGlobal;
-            return isGlobal;
-        }
-
-        public static bool IsUndoableIntent(IIntent intent)
-        {
-            var type = intent.GetType();
-            if (_undoableCache.TryGetValue(type, out var isUndoable))
-                return isUndoable;
-
-            isUndoable = !Attribute.IsDefined(type, typeof(NonUndoableIntentAttribute));
-            _undoableCache[type] = isUndoable;
-            return isUndoable;
+            isAttribute = Attribute.IsDefined(type, attribute);
+            cache[type] = isAttribute;
+            return isAttribute;
         }
     }
 }
@@ -67,11 +59,9 @@ public record ChangeLayerNameIntent(Guid LayerID, string NewName) : IIntent;
 [NonUndoableIntent] public record OpenParameterEditorIntent() : IIntent;
 [NonUndoableIntent] public record CloseParameterSettingsIntent() : IIntent;
 public record SelectParameterIntent(Guid ParamID) : IIntent;
-public record DeselectParameterIntent() : IIntent;
 [GlobalIntent] public record CreateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
 public record UpdateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
 public record DeleteSelectedParameterIntent() : IIntent;
-[GlobalIntent] public record DeletedParameterIntent(Guid ParamID) : IIntent;
 public record CreateParamPointsIntent() : IIntent;
 [NonUndoableIntent] public record ParameterValueInterpolatedIntent(Guid ParamID, float Value) : IIntent;
 #endregion

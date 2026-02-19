@@ -106,7 +106,6 @@ public class ParameterCommandHandler : ICommandHandler
         {
             ParameterManager.Instance.DeleteParameterSlider(id);
             context.Parameters.Remove(id);
-            ParameterManager.Instance.DispatchToParameterStore(new DeletedParameterIntent(id)); // TODO: remove this
         }
 
         context.GeneralSettings.SelectedParamID = state.SelectedParamID;

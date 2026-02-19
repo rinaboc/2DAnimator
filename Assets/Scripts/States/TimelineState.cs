@@ -30,6 +30,7 @@ namespace Assets.Scripts.States
 
         public Dictionary<Guid, Dictionary<Guid, KeyframeState>> Keyframes { get; set; }
         public Tuple<Guid, Guid> SelectedKeyframe { get; set; }
+        public Guid SelectedParamID { get; set; }
 
         public TimelineState()
         {
@@ -41,6 +42,7 @@ namespace Assets.Scripts.States
             FramePerSec = 16;
             Keyframes = new();
             SelectedKeyframe = new(Guid.Empty, Guid.Empty);
+            SelectedParamID = Guid.Empty;
         }
 
         public TimelineState Clone() => new()
@@ -58,7 +60,8 @@ namespace Assets.Scripts.States
                     p => new KeyframeState(p.Value)
                 )
             ),
-            SelectedKeyframe = SelectedKeyframe
+            SelectedKeyframe = SelectedKeyframe,
+            SelectedParamID = SelectedParamID
         };
     }
 }

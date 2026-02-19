@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Unity.Android.Gradle.Manifest;
 
 namespace Assets.Scripts.Utility.MVI
 {
@@ -38,6 +37,11 @@ namespace Assets.Scripts.Utility.MVI
         {
             if (intent is IIntentUndo) { _dispatcher.Undo(); return; }
             else if (intent is IIntentRedo) { _dispatcher.Redo(); return; }
+            else if (intent is InitializeProjectIntent)
+            {
+                _stateHistory.Clear();
+                _futureStates.Clear();
+            }
 
             if (IntentHelper.IsGlobalIntent(intent))
                 _dispatcher.Dispatch(intent);
@@ -84,7 +88,7 @@ namespace Assets.Scripts.Utility.MVI
             {
                 if (!_stateHistory.TryPop(out var prevState)) return;
                 var (intent, state) = prevState;
-                _futureStates.Push(new(intent, State.Clone()));
+                _futureStates.Push(new(intent, State));
                 State = state;
                 Execute(intent);
             } while (_stateHistory.Count > 0 && !IntentHelper.IsUndoableIntent(_futureStates.Peek().Key));
@@ -98,7 +102,7 @@ namespace Assets.Scripts.Utility.MVI
             {
                 if (!_futureStates.TryPop(out var nextState)) return;
                 var (intent, state) = nextState;
-                _stateHistory.Push(new(intent, State.Clone()));
+                _stateHistory.Push(new(intent, State));
                 State = state;
                 Execute(intent);
             } while (_futureStates.Count > 0 && !IntentHelper.IsUndoableIntent(_futureStates.Peek().Key));
