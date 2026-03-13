@@ -10,6 +10,8 @@ namespace Assets.Scripts.Utility.MVI
         Type GetStateType();
         void Undo();
         void Redo();
+        void CreateSnapshot(IIntent intent);
+        void ClearHistory();
     }
 
     public sealed class Store<TState> : IStore where TState : IState<TState>
@@ -35,18 +37,19 @@ namespace Assets.Scripts.Utility.MVI
 
         public void Dispatch(IIntent intent)
         {
-            if (intent is IIntentUndo) { _dispatcher.Undo(); return; }
-            else if (intent is IIntentRedo) { _dispatcher.Redo(); return; }
-            else if (intent is InitializeProjectIntent)
-            {
-                _stateHistory.Clear();
-                _futureStates.Clear();
-            }
+            // if (intent is IIntentUndo) { _dispatcher.Undo(); return; }
+            // else if (intent is IIntentRedo) { _dispatcher.Redo(); return; }
+            // else if (intent is InitializeProjectIntent)
+            // {
+            //     ClearHistory();
+            // }
 
-            if (IntentHelper.IsGlobalIntent(intent))
-                _dispatcher.Dispatch(intent);
-            else
-                Reduce(intent);
+            // if (IntentHelper.IsGlobalIntent(intent))
+            //     _dispatcher.Dispatch(intent);
+            // else
+            //     Reduce(intent);
+
+            _dispatcher.Dispatch(intent, this);
 
             Execute(intent);
         }
@@ -59,7 +62,7 @@ namespace Assets.Scripts.Utility.MVI
 
         public void Reduce(IIntent intent)
         {
-            _stateHistory.Push(new(intent, State.Clone()));
+            // CreateSnapshot(intent);
 
             var newState = _dispatcher.Reduce(State, intent);
             bool stateChanged = !Equals(State, newState);
@@ -91,7 +94,8 @@ namespace Assets.Scripts.Utility.MVI
                 _futureStates.Push(new(intent, State));
                 State = state;
                 Execute(intent);
-            } while (_stateHistory.Count > 0 && !IntentHelper.IsUndoableIntent(_futureStates.Peek().Key));
+            } while (_stateHistory.Count > 0 &&
+                (!IntentHelper.IsUndoableIntent(_futureStates.Peek().Key)));
 
             StateChanged?.Invoke(State);
         }
@@ -105,9 +109,21 @@ namespace Assets.Scripts.Utility.MVI
                 _stateHistory.Push(new(intent, State));
                 State = state;
                 Execute(intent);
-            } while (_futureStates.Count > 0 && !IntentHelper.IsUndoableIntent(_futureStates.Peek().Key));
+            } while (_futureStates.Count > 0 &&
+                (!IntentHelper.IsUndoableIntent(_futureStates.Peek().Key)));
 
             StateChanged?.Invoke(State);
+        }
+
+        public void CreateSnapshot(IIntent intent)
+        {
+            _stateHistory.Push(new(intent, State.Clone()));
+        }
+
+        public void ClearHistory()
+        {
+            _stateHistory.Clear();
+            _futureStates.Clear();
         }
     }
 }

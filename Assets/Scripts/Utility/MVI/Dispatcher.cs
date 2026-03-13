@@ -1,9 +1,24 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.States;
 using UnityEngine;
 
 namespace Assets.Scripts.Utility.MVI
 {
+    public interface IDispatcher
+    {
+        void Register<TState>(IReducer<TState> reducer);
+        void Register(ICommandHandler handler);
+        void Register(IStore store);
+        void Remove(IStore store);
+        TState Reduce<TState>(TState currentState, IIntent intent);
+        void Execute(IIntent intent, object state);
+        void Dispatch(IIntent intent, IStore store = null);
+        bool TryGetStore<TState>(out Store<TState> store) where TState : IState<TState>;
+        void Undo();
+        void Redo();
+    }
+
     public class Dispatcher : IDispatcher
     {
         private readonly Dictionary<Type, List<object>> _typedReducers = new();
@@ -11,14 +26,39 @@ namespace Assets.Scripts.Utility.MVI
         private readonly IModelContext _context;
         private readonly List<IStore> _stores = new();
 
-
         public Dispatcher(IModelContext context)
         {
             _context = context;
         }
 
-        public void Dispatch(IIntent intent)
+        public void Dispatch(IIntent intent, IStore source)
         {
+            TryGetStore<OperationState>(out var operationStore);
+
+            switch (intent)
+            {
+                case UndoIntent: Undo(); operationStore.Reduce(intent); return;
+                case RedoIntent: Redo(); operationStore.Reduce(intent); return;
+                case InitializeProjectIntent:
+                    foreach (var store in _stores) store.ClearHistory();
+                    return;
+            }
+
+
+            foreach (var store in _stores)
+            {
+                if (store == operationStore || intent is IIntentUnstored) continue;
+
+                store.CreateSnapshot(intent);
+            }
+
+            if (!IntentHelper.IsGlobalIntent(intent) && source != null)
+            {
+                source.Reduce(intent);
+                operationStore.Reduce(intent);
+                return;
+            }
+
             foreach (var store in _stores)
             {
                 store.Reduce(intent);

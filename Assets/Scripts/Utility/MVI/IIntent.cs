@@ -8,6 +8,8 @@ namespace Assets.Scripts.Utility.MVI
     public interface IIntent { }
     public interface IIntentUndo : IIntent { }
     public interface IIntentRedo : IIntent { }
+    public interface IIntentDialog : IIntent { }
+    public interface IIntentUnstored : IIntent { }
 
     public class IntentHelper
     {
@@ -39,7 +41,7 @@ public record RedoIntent() : IIntentRedo;
 #endregion
 
 #region Mesh Transformation
-[NonUndoableIntent] public record UpdateTransformIntent(Guid MeshID, TransformData Data, TransformType Type) : IIntent;
+[NonUndoableIntent] public record UpdateTransformIntent(Guid MeshID, TransformData Data, TransformType Type) : IIntentUnstored;
 public record SaveTransformIntent(Guid MeshID, TransformType Type) : IIntent;
 [NonUndoableIntent] public record InterpolateTransformIntent(Guid MeshID, TransformData Delta) : IIntent;
 [NonUndoableIntent] public record ResetInterpolationIntent(Guid MeshID) : IIntent;
@@ -55,12 +57,12 @@ public record ChangeLayerNameIntent(Guid LayerID, string NewName) : IIntent;
 #endregion
 
 #region Parameter Operations
-[NonUndoableIntent] public record OpenParameterCreatorIntent() : IIntent;
-[NonUndoableIntent] public record OpenParameterEditorIntent() : IIntent;
-[NonUndoableIntent] public record CloseParameterSettingsIntent() : IIntent;
+public record OpenParameterCreatorIntent() : IIntentDialog;
+public record OpenParameterEditorIntent() : IIntentDialog;
+[NonUndoableIntent] public record CloseParameterSettingsIntent() : IIntentDialog;
 public record SelectParameterIntent(Guid ParamID) : IIntent;
-[GlobalIntent] public record CreateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
-public record UpdateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
+[GlobalIntent, NonUndoableIntent] public record CreateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
+[NonUndoableIntent] public record UpdateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
 public record DeleteSelectedParameterIntent() : IIntent;
 public record CreateParamPointsIntent() : IIntent;
 [NonUndoableIntent] public record ParameterValueInterpolatedIntent(Guid ParamID, float Value) : IIntent;

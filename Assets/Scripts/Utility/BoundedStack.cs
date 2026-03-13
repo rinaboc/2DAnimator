@@ -41,6 +41,8 @@ namespace Assets.Scripts.Utility
         {
             _list.Clear();
         }
+
+        public KeyValuePair<IIntent, TState> Peek() => _list.Last.Value;
     }
 }
 

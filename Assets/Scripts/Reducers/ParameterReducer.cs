@@ -167,6 +167,7 @@ public class ParameterReducer : IReducer<ParameterStates>
         updatedParam.DefaultValue = update.Default;
         updatedParam.Name = update.Name;
         updatedParam.CurValue = update.Default;
+        next.IsSettingsOpen = false;
 
         return next;
 
@@ -200,6 +201,8 @@ public class ParameterReducer : IReducer<ParameterStates>
             ParamPointValues = new() { create.Default },
             LinkedMeshLayers = new()
         });
+
+        next.IsSettingsOpen = false;
 
         return next;
     }
