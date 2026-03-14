@@ -24,6 +24,7 @@ namespace Assets.Scripts.States
         public TransformData AnimationTransform { get; set; }
         public TransformData InterpolatedTransform { get; set; }
         public bool IsInterpolated { get; set; }
+        public bool HasParametersAssigned { get; set; }
         #endregion
 
         public MeshLayerState()
@@ -39,6 +40,7 @@ namespace Assets.Scripts.States
             AnimationTransform = new();
             InterpolatedTransform = new();
             IsInterpolated = false;
+            HasParametersAssigned = false;
         }
 
         public MeshLayerState(MeshLayerState ms)
@@ -49,10 +51,11 @@ namespace Assets.Scripts.States
             Texture = ms.Texture;
             SourcePath = ms.SourcePath;
             Name = ms.Name;
-            MeshTransform = ms.MeshTransform;
-            AnimationTransform = ms.AnimationTransform;
-            InterpolatedTransform = ms.InterpolatedTransform;
+            MeshTransform = ms.MeshTransform.Clone();
+            AnimationTransform = ms.AnimationTransform.Clone();
+            InterpolatedTransform = ms.InterpolatedTransform.Clone();
             IsInterpolated = ms.IsInterpolated;
+            HasParametersAssigned = ms.HasParametersAssigned;
         }
 
         public LayerState BuildLayerState()
@@ -71,12 +74,13 @@ namespace Assets.Scripts.States
             return new MeshState()
             {
                 ID = ID,
-                MeshTransform = MeshTransform,
-                AnimationTransform = AnimationTransform,
-                InterpolatedTransform = InterpolatedTransform,
+                MeshTransform = MeshTransform.Clone(),
+                AnimationTransform = AnimationTransform.Clone(),
+                InterpolatedTransform = InterpolatedTransform.Clone(),
                 IsInterpolated = IsInterpolated,
                 IsSelected = IsSelected,
-                DrawOrder = (ushort)(meshCount - 1 - DrawOrder)
+                DrawOrder = (ushort)(meshCount - 1 - DrawOrder),
+                HasParametersAssigned = HasParametersAssigned
             };
         }
     }

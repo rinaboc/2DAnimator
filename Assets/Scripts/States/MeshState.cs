@@ -14,6 +14,7 @@ namespace Assets.Scripts.States
         public bool IsInterpolated { get; set; }
         public bool IsSelected { get; set; }
         public ushort DrawOrder { get; set; }
+        public bool HasParametersAssigned { get; set; }
 
         public MeshState()
         {
@@ -27,6 +28,7 @@ namespace Assets.Scripts.States
             IsInterpolated = false;
             IsSelected = false;
             DrawOrder = 0;
+            HasParametersAssigned = false;
         }
         public MeshState(MeshState ms)
         {
@@ -37,6 +39,7 @@ namespace Assets.Scripts.States
             IsInterpolated = ms.IsInterpolated;
             IsSelected = ms.IsSelected;
             DrawOrder = ms.DrawOrder;
+            HasParametersAssigned = ms.HasParametersAssigned;
         }
     }
 

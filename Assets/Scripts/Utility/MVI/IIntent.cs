@@ -42,9 +42,9 @@ public record RedoIntent() : IIntentRedo;
 
 #region Mesh Transformation
 [NonUndoableIntent] public record UpdateTransformIntent(Guid MeshID, TransformData Data, TransformType Type) : IIntentUnstored;
-public record SaveTransformIntent(Guid MeshID, TransformType Type) : IIntent;
+[NonUndoableIntent] public record SaveTransformIntent(Guid MeshID, TransformType Type) : IIntent;
 [NonUndoableIntent] public record InterpolateTransformIntent(Guid MeshID, TransformData Delta) : IIntent;
-[NonUndoableIntent] public record ResetInterpolationIntent(Guid MeshID) : IIntent;
+public record ResetInterpolationIntent(Guid MeshID) : IIntent;
 #endregion
 
 #region Layer Operations
@@ -64,7 +64,7 @@ public record SelectParameterIntent(Guid ParamID) : IIntent;
 [GlobalIntent, NonUndoableIntent] public record CreateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
 [NonUndoableIntent] public record UpdateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
 public record DeleteSelectedParameterIntent() : IIntent;
-public record CreateParamPointsIntent() : IIntent;
+[GlobalIntent] public record CreateParamPointsIntent() : IIntent;
 [NonUndoableIntent] public record ParameterValueInterpolatedIntent(Guid ParamID, float Value) : IIntent;
 #endregion
 

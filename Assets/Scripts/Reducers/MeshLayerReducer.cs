@@ -22,8 +22,18 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
             MoveLayerUpIntent _ => ReduceMoveLayerUp(previous),
             DeleteLayerIntent _ => ReduceDeleteLayer(previous),
             InitializeProjectIntent init => ReduceInitializeProject(previous, init),
+            CreateParamPointsIntent _ => ReduceCreateParamPoints(previous),
             _ => previous
         };
+    }
+
+    private MeshLayerStates ReduceCreateParamPoints(MeshLayerStates previous)
+    {
+        if (previous.SelectedMeshLayerID == Guid.Empty) return previous;
+
+        var next = previous.Clone();
+        next.MeshLayers[previous.SelectedMeshLayerID].HasParametersAssigned = true;
+        return next;
     }
 
     private MeshLayerStates ReduceChangeLayerName(MeshLayerStates previous, ChangeLayerNameIntent change)
@@ -58,8 +68,7 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
 
     private MeshLayerStates ReduceUpdateTransform(MeshLayerStates previous, UpdateTransformIntent update)
     {
-        // TODO: move this to state and connect an intent to set to true
-        bool areParametersAssigned = ParamCurveRegistry.Instance.GetAssignedParamIDsOfMesh(update.MeshID).Count > 0;
+        bool areParametersAssigned = previous.MeshLayers[update.MeshID].HasParametersAssigned;
 
         var next = previous.Clone();
         var mesh = next.MeshLayers[update.MeshID];
