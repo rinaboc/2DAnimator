@@ -21,7 +21,13 @@ public class MeshLayerCommandHandler : ICommandHandler
             case DeleteLayerIntent _: ExecuteLayerStateChanged(meshLayerState, context); break;
             case InitializeProjectIntent init: ExecuteInitializeProject(init, context); break;
             case SaveTransformIntent _: ExecuteSaveTransform(meshLayerState, context); break;
+            case ResetInterpolationIntent _: ExecuteResetInterpolation(meshLayerState, context); break;
         }
+    }
+
+    private void ExecuteResetInterpolation(MeshLayerStates state, IModelContext context)
+    {
+        ExecuteSaveTransform(state, context);
     }
 
     private void ExecuteSaveTransform(MeshLayerStates state, IModelContext context)
@@ -59,7 +65,7 @@ public class MeshLayerCommandHandler : ICommandHandler
                     point.transform.Rotation = mesh.AnimationTransform.Rotation;
                     point.transform.Scale = mesh.AnimationTransform.Scale;
 
-                    Debug.Log($"updated point at {sliderValue}: " + point);
+                    // Debug.Log($"updated point at {sliderValue}: " + point);
                     break;
                 }
 

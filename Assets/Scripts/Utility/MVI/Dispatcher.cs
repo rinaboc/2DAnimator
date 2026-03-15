@@ -47,9 +47,12 @@ namespace Assets.Scripts.Utility.MVI
 
             foreach (var store in _stores)
             {
-                if (store == operationStore || intent is IIntentUnstored) continue;
+                if (intent is IIntentUnstored) break;
+                if (store == operationStore) continue;
 
                 store.CreateSnapshot(intent);
+
+                store.PrintHistory();
             }
 
             if (!IntentHelper.IsGlobalIntent(intent) && source != null)
@@ -132,6 +135,7 @@ namespace Assets.Scripts.Utility.MVI
             foreach (var store in _stores)
             {
                 store.Undo();
+                store.PrintHistory();
             }
         }
 
@@ -140,6 +144,7 @@ namespace Assets.Scripts.Utility.MVI
             foreach (var store in _stores)
             {
                 store.Redo();
+                store.PrintHistory();
             }
         }
     }

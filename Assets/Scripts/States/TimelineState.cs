@@ -60,7 +60,7 @@ namespace Assets.Scripts.States
                     p => new KeyframeState(p.Value)
                 )
             ),
-            SelectedKeyframe = SelectedKeyframe,
+            SelectedKeyframe = new Tuple<Guid, Guid>(SelectedKeyframe.Item1, SelectedKeyframe.Item2),
             SelectedParamID = SelectedParamID
         };
     }

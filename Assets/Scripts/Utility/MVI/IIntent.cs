@@ -43,7 +43,7 @@ public record RedoIntent() : IIntentRedo;
 #region Mesh Transformation
 [NonUndoableIntent] public record UpdateTransformIntent(Guid MeshID, TransformData Data, TransformType Type) : IIntentUnstored;
 [NonUndoableIntent] public record SaveTransformIntent(Guid MeshID, TransformType Type) : IIntent;
-[NonUndoableIntent] public record InterpolateTransformIntent(Guid MeshID, TransformData Delta) : IIntent;
+[NonUndoableIntent] public record InterpolateTransformIntent(Guid MeshID, TransformData Delta) : IIntentUnstored;
 public record ResetInterpolationIntent(Guid MeshID) : IIntent;
 #endregion
 
@@ -69,7 +69,8 @@ public record DeleteSelectedParameterIntent() : IIntent;
 #endregion
 
 #region Animation
-[NonUndoableIntent] public record InterpolateParameterIntent(Guid ParamID, float Value) : IIntent;
+[NonUndoableIntent] public record InterpolateParameterIntent(Guid ParamID, float Value) : IIntentUnstored;
+[NonUndoableIntent] public record StartParameterDragIntent(Guid ParamID) : IIntent;
 #endregion
 
 #region Timeline Operations

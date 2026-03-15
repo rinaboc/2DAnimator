@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.Utility.MVI;
+using UnityEngine;
 
 namespace Assets.Scripts.Utility
 {
@@ -43,6 +44,19 @@ namespace Assets.Scripts.Utility
         }
 
         public KeyValuePair<IIntent, TState> Peek() => _list.Last.Value;
+        public void Print()
+        {
+            string log = $"{typeof(TState).Name} type's history: \n";
+            var current = _list.Last;
+            while (current != null)
+            {
+                var item = current.Value;
+                log += $"intent {item.Key.GetType().Name} \n";
+                current = current.Previous;
+            }
+
+            Debug.Log(log);
+        }
     }
 }
 

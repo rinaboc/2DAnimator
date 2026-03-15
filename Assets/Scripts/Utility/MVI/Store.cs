@@ -12,6 +12,7 @@ namespace Assets.Scripts.Utility.MVI
         void Redo();
         void CreateSnapshot(IIntent intent);
         void ClearHistory();
+        void PrintHistory();
     }
 
     public sealed class Store<TState> : IStore where TState : IState<TState>
@@ -124,6 +125,11 @@ namespace Assets.Scripts.Utility.MVI
         {
             _stateHistory.Clear();
             _futureStates.Clear();
+        }
+
+        public void PrintHistory()
+        {
+            _stateHistory.Print();
         }
     }
 }

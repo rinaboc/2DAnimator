@@ -30,8 +30,8 @@ namespace Assets.Scripts.States
             Name = ps.Name;
             IsSelected = ps.IsSelected;
             CurValue = ps.CurValue;
-            ParamPointValues = ps.ParamPointValues;
-            LinkedMeshLayers = ps.LinkedMeshLayers;
+            ParamPointValues = new List<float>(ps.ParamPointValues);
+            LinkedMeshLayers = new List<Guid>(ps.LinkedMeshLayers);
         }
     }
 

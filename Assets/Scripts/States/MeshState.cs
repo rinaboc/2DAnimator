@@ -33,9 +33,9 @@ namespace Assets.Scripts.States
         public MeshState(MeshState ms)
         {
             ID = ms.ID;
-            MeshTransform = ms.MeshTransform;
-            AnimationTransform = ms.AnimationTransform;
-            InterpolatedTransform = ms.InterpolatedTransform;
+            MeshTransform = ms.MeshTransform.Clone();
+            AnimationTransform = ms.AnimationTransform.Clone();
+            InterpolatedTransform = ms.InterpolatedTransform.Clone();
             IsInterpolated = ms.IsInterpolated;
             IsSelected = ms.IsSelected;
             DrawOrder = ms.DrawOrder;
