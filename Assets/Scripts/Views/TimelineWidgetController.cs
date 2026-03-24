@@ -76,6 +76,7 @@ public class TimelineWidgetController : BaseUIController, IView<ParameterTimelin
         do
         {
             m_TimelineSlider.CurrentFrame = Currentframe >= _maxFrames ? 1 : Currentframe + 1;
+            _viewModel?.Send(new CurrentFrameChangedIntent(Currentframe));
             yield return new WaitForSecondsRealtime(_playbackInterval);
         } while (isPlaybackRunning);
     }

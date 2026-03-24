@@ -33,6 +33,14 @@ public partial class ParameterSliderElement : VisualElement, IView<ParameterTime
 
         _handle = _slider.Q<VisualElement>("unity-dragger");
         _handle.AddToClassList("param-slider-handle");
+
+        _handle.RegisterCallback<PointerDownEvent>(OnSliderGrabbed);
+    }
+
+    private void OnSliderGrabbed(PointerDownEvent evt)
+    {
+        Debug.Log("Slider grabbed");
+        _viewModel?.Send(new StartTimelineParameterDragIntent());
     }
 
     private void OnSliderChange(ChangeEvent<float> evt)

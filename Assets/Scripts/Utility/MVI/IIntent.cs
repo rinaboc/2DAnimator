@@ -65,7 +65,7 @@ public record SelectParameterIntent(Guid ParamID) : IIntent;
 [NonUndoableIntent] public record UpdateParameterIntent(Guid ParamID, float Min, float Max, float Default, string Name) : IIntent;
 public record DeleteSelectedParameterIntent() : IIntent;
 [GlobalIntent] public record CreateParamPointsIntent() : IIntent;
-[NonUndoableIntent] public record ParameterValueInterpolatedIntent(Guid ParamID, float Value) : IIntent;
+[NonUndoableIntent] public record ParameterValueInterpolatedIntent(Guid ParamID, float Value) : IIntentUnstored;
 #endregion
 
 #region Animation
@@ -80,6 +80,8 @@ public record UpdateMaxFramesIntent(int MaxFrames) : IIntent;
 [NonUndoableIntent] public record TimelineSettingsOpenIntent() : IIntent;
 public record SelectKeyframeIntent(Guid ID) : IIntent;
 public record DeleteKeyframeIntent() : IIntent;
-[NonUndoableIntent] public record CurrentFrameChangedIntent(int Frame) : IIntent;
-public record TimelineParameterSliderChangedIntent(Guid ParamID, float Value) : IIntent;
+public record StartTimelineSliderDragIntent : IIntent;
+[NonUndoableIntent] public record CurrentFrameChangedIntent(int Frame) : IIntentUnstored;
+public record StartTimelineParameterDragIntent : IIntent;
+[NonUndoableIntent] public record TimelineParameterSliderChangedIntent(Guid ParamID, float Value) : IIntentUnstored;
 #endregion

@@ -22,6 +22,8 @@ public class TimelineReducer : IReducer<TimelineState>
             TimelineParameterSliderChangedIntent change => ReduceTimelineParameterSliderChanged(change, previous),
             InitializeProjectIntent init => ReduceInitializeProject(previous, init),
             SelectParameterIntent select => ReduceSelectParameter(previous, select),
+            StartTimelineSliderDragIntent _ => previous.Clone(),
+            StartTimelineParameterDragIntent _ => previous.Clone(),
             _ => previous
         };
     }

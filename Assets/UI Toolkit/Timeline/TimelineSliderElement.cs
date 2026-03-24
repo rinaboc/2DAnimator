@@ -25,7 +25,6 @@ public partial class TimelineSliderElement : VisualElement, IView<ParameterTimel
 
             if (newValue == m_currentFrame) return;
             m_currentFrame = newValue;
-            _viewModel?.Send(new CurrentFrameChangedIntent(CurrentFrame));
         }
     }
 
@@ -212,6 +211,7 @@ public partial class TimelineSliderElement : VisualElement, IView<ParameterTimel
         if (m_sliderGrabbed)
         {
             FrameFromPointer(evt.localPosition.x);
+            _viewModel?.Send(new CurrentFrameChangedIntent(CurrentFrame));
         }
     }
 
@@ -222,6 +222,7 @@ public partial class TimelineSliderElement : VisualElement, IView<ParameterTimel
 
     private void OnGrabHandle(PointerDownEvent evt)
     {
+        _viewModel?.Send(new StartTimelineSliderDragIntent());
         m_sliderGrabbed = true;
         FrameFromPointer(evt.localPosition.x);
     }
@@ -244,9 +245,9 @@ public partial class TimelineSliderElement : VisualElement, IView<ParameterTimel
     /// <summary>
     /// Position the handle in the slider according to the current frame value.
     /// </summary>
-    private void UpdateHandlePosition()
+    private void UpdateHandlePosition(int currentFrame)
     {
-        float x = (CurrentFrame - 1) * _sliderWidth;
+        float x = (currentFrame - 1) * _sliderWidth;
         m_sliderHandle.style.left = Mathf.Clamp(x, 0, _sliderContainerWidth - _sliderWidth);
     }
 
@@ -271,7 +272,6 @@ public partial class TimelineSliderElement : VisualElement, IView<ParameterTimel
         settingsButton.AddToClassList("delete-keyframe-button");
         settingsButton.clicked += () =>
         {
-            Debug.Log("settings clicked");
             _viewModel?.Send(new TimelineSettingsOpenIntent());
         };
 
@@ -299,11 +299,7 @@ public partial class TimelineSliderElement : VisualElement, IView<ParameterTimel
         }
 
         CurrentFrame = m_currentFrameField.value;
-    }
-
-    private void UpdateFrameField()
-    {
-        m_currentFrameField.value = CurrentFrame;
+        _viewModel?.Send(new CurrentFrameChangedIntent(CurrentFrame));
     }
 
     private void RebuildKeyFrameLines(TimelineState state)
@@ -339,9 +335,11 @@ public partial class TimelineSliderElement : VisualElement, IView<ParameterTimel
             RebuildKeyFrameLines(state);
         }
 
-        UpdateHandlePosition();
+        CurrentFrame = state.CurrentFrame;
+
+        UpdateHandlePosition(state.CurrentFrame);
         HighlightBarAt(state.CurrentFrame);
-        UpdateFrameField();
+        m_currentFrameField.value = state.CurrentFrame;
 
 
         m_widgetOpen = state.IsOpen;
