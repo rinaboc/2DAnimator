@@ -108,7 +108,8 @@ public class ParameterReducer : IReducer<ParameterStates>
     private ParameterStates ReduceParameterValueInterpolated(ParameterStates previous, ParameterValueInterpolatedIntent interpolate)
     {
         var ret = previous.Clone();
-        ret.Parameters[interpolate.ParamID].CurValue = interpolate.Value;
+        foreach (KeyValuePair<Guid, float> paramValue in interpolate.ParamValues)
+            ret.Parameters[paramValue.Key].CurValue = paramValue.Value;
         return ret;
     }
 

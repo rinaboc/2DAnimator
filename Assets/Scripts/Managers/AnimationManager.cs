@@ -74,8 +74,7 @@ public class AnimationManager : ManagerBase<AnimationManager>
         await Task.CompletedTask;
         _unityContext?.Post(_ =>
         {
-            foreach (KeyValuePair<Guid, float> result in results)
-                _viewModel?.Send(new ParameterValueInterpolatedIntent(result.Key, result.Value));
+            _viewModel?.Send(new ParameterValueInterpolatedIntent(results));
         }, null);
     }
 
@@ -97,7 +96,7 @@ public class AnimationManager : ManagerBase<AnimationManager>
         await Task.WhenAll(tasks);
         _unityContext?.Post(_ =>
         {
-            ApplyAccumulatedTransforms(accumTransforms, context);
+            MeshManager.Instance.DispatchToMeshViewModel(new InterpolateTransformIntent(accumTransforms));
         }, null);
     }
 
@@ -151,24 +150,6 @@ public class AnimationManager : ManagerBase<AnimationManager>
                 cur.Rotation *= interpRotation;
                 accumTransforms[paramCurve.MeshID] = cur;
             }, null);
-        }
-    }
-
-    private void ApplyAccumulatedTransforms(Dictionary<Guid, TransformData> accum, IModelContext context)
-    {
-        foreach (var kv in accum.ToList())
-        {
-            var meshId = kv.Key;
-            var delta = kv.Value;
-
-            context.Meshes.TryGet(meshId, out MeshData meshData);
-            if (meshData == null)
-            {
-                Debug.LogError("meshdata null in apply accumulated transforms");
-                continue;
-            }
-
-            MeshManager.Instance.DispatchToMeshViewModel(new InterpolateTransformIntent(meshId, delta));
         }
     }
 }

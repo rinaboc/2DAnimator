@@ -106,10 +106,13 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
     {
         var next = previous.Clone();
 
-        var mesh = next.MeshLayers[interpolate.MeshID];
-        mesh.AnimationTransform = interpolate.Delta;
-        mesh.InterpolatedTransform = mesh.MeshTransform + interpolate.Delta;
-        mesh.IsInterpolated = true;
+        foreach ((Guid meshID, TransformData delta) in interpolate.Deltas)
+        {
+            if (!next.MeshLayers.TryGetValue(meshID, out MeshLayerState mesh)) continue;
+            mesh.AnimationTransform = delta;
+            mesh.InterpolatedTransform = mesh.MeshTransform + delta;
+            mesh.IsInterpolated = true;
+        }
 
         return next;
     }

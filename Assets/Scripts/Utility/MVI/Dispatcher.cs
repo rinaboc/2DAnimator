@@ -40,7 +40,11 @@ namespace Assets.Scripts.Utility.MVI
                 case UndoIntent: Undo(); operationStore.Reduce(intent); return;
                 case RedoIntent: Redo(); operationStore.Reduce(intent); return;
                 case InitializeProjectIntent:
-                    foreach (var store in _stores) store.ClearHistory();
+                    foreach (var store in _stores)
+                    {
+                        store.ClearHistory();
+                        store.Reduce(intent);
+                    }
                     return;
             }
 
