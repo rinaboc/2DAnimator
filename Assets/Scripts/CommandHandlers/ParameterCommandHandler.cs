@@ -6,6 +6,15 @@ using Assets.Scripts.Utility.MVI;
 
 public class ParameterCommandHandler : ICommandHandler
 {
+    public Action Execute(IIntent intent, IModelContext context)
+    {
+        return intent switch
+        {
+            _ => null
+        };
+    }
+
+    /**
     public void Execute(IIntent intent, object state, IModelContext context)
     {
         var parameterStates = (state as ParameterTimelineState)?.Parameters;
@@ -158,4 +167,5 @@ public class ParameterCommandHandler : ICommandHandler
         if (state == null) return;
         context.GeneralSettings.SelectedParamID = state.SelectedParamID;
     }
+    **/
 }

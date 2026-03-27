@@ -14,6 +14,7 @@ public interface IRegistry<T, L>
     bool Register(T value);
     bool Remove(Guid id);
     bool TryGet(Guid id, out T value);
+    int Count();
 }
 
 /// <summary>
@@ -73,4 +74,6 @@ public abstract class RegistryBase<T, L> : ScriptableObject, IRegistry<T, L>
 
         return retEntries;
     }
+
+    public int Count() => _map.Count;
 }

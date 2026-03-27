@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace Assets.Scripts.Utility
 {
-    public class BoundedStack<TState>
+    public class BoundedStack
     {
         private readonly int _capacity;
-        private readonly LinkedList<KeyValuePair<IIntent, TState>> _list = new();
+        private readonly LinkedList<Snapshot> _list = new();
 
         public int Count { get => _list.Count; }
 
@@ -16,19 +16,19 @@ namespace Assets.Scripts.Utility
             _capacity = capacity;
         }
 
-        public void Push(KeyValuePair<IIntent, TState> item)
+        public void Push(Snapshot item)
         {
             if (_list.Count >= _capacity)
             {
                 _list.RemoveFirst();
-                while (_list.Count > 0 && !IntentHelper.IsUndoableIntent(_list.First.Value.Key))
+                while (_list.Count > 0 && !IntentHelper.IsUndoableIntent(_list.First.Value.ReceivedIntent))
                     _list.RemoveFirst();
             }
 
             _list.AddLast(item);
         }
 
-        public bool TryPop(out KeyValuePair<IIntent, TState> element)
+        public bool TryPop(out Snapshot element)
         {
             element = default;
             if (_list.Count == 0) return false;
@@ -43,15 +43,15 @@ namespace Assets.Scripts.Utility
             _list.Clear();
         }
 
-        public KeyValuePair<IIntent, TState> Peek() => _list.Last.Value;
+        public Snapshot Peek() => _list.Last.Value;
         public void Print()
         {
-            string log = $"{typeof(TState).Name} type's history: \n";
+            string log = $"App's history: \n";
             var current = _list.Last;
             while (current != null)
             {
                 var item = current.Value;
-                log += $"intent {item.Key.GetType().Name} \n";
+                log += $"intent {item.ReceivedIntent.GetType().Name} \n";
                 current = current.Previous;
             }
 

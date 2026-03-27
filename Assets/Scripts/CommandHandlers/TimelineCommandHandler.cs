@@ -6,6 +6,15 @@ using Assets.Scripts.Utility.MVI;
 
 public class TimelineCommandHandler : ICommandHandler
 {
+    public Action Execute(IIntent intent, IModelContext context)
+    {
+        return intent switch
+        {
+            _ => null
+        };
+    }
+
+    /**
     public void Execute(IIntent intent, object state, IModelContext context)
     {
         var timelineState = (state as ParameterTimelineState)?.Timeline;
@@ -92,4 +101,5 @@ public class TimelineCommandHandler : ICommandHandler
         if (state == null) return;
         ParameterManager.Instance.ParameterWidgetVisibility = !state.IsOpen;
     }
+    **/
 }

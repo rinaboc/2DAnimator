@@ -27,7 +27,19 @@ public class ScaleHandle : DraggableHandle
     {
         if (dragging)
         {
-            ParentTransform.gameObject.GetComponent<MeshController>().SaveTransform(TransformType.SCALE);
+            Corner.position = ClickWorldPosition + cornerOffset;
+
+            Vector3 originalOffsetLocal = ParentTransform.InverseTransformVector(originalOffset);
+            Vector3 currentOffsetLocal = ParentTransform.InverseTransformVector(ParentTransform.position - Corner.position);
+
+            offsetRatio = new Vector3(
+                currentOffsetLocal.x / originalOffsetLocal.x,
+                currentOffsetLocal.y / originalOffsetLocal.y,
+                1f
+            );
+
+            Vector3 newScale = Vector3.Scale(originalScale, offsetRatio);
+            ParentTransform.gameObject.GetComponent<MeshController>().SaveTransform(newScale, TransformType.SCALE);
         }
         dragging = false;
     }

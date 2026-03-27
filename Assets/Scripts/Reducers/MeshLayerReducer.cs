@@ -11,18 +11,18 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
     {
         return intent switch
         {
-            ChangeLayerNameIntent change => ReduceChangeLayerName(previous, change),
+            // ChangeLayerNameIntent change => ReduceChangeLayerName(previous, change),
             SelectLayerIntent select => ReduceSelectLayer(previous, select),
             UpdateTransformIntent update => ReduceUpdateTransform(previous, update),
-            SaveTransformIntent save => ReduceSaveTransform(previous, save),
-            InterpolateTransformIntent interpolate => ReduceInterpolateTransform(previous, interpolate),
-            ResetInterpolationIntent reset => ReduceResetInterpolation(previous, reset),
-            CreateMeshLayerIntent create => ReduceCreateMeshLayer(previous, create),
-            MoveLayerDownIntent _ => ReduceMoveLayerDown(previous),
-            MoveLayerUpIntent _ => ReduceMoveLayerUp(previous),
-            DeleteLayerIntent _ => ReduceDeleteLayer(previous),
-            InitializeProjectIntent init => ReduceInitializeProject(previous, init),
-            CreateParamPointsIntent _ => ReduceCreateParamPoints(previous),
+            // SaveTransformIntent save => ReduceSaveTransform(previous, save),
+            // InterpolateTransformIntent interpolate => ReduceInterpolateTransform(previous, interpolate),
+            // ResetInterpolationIntent reset => ReduceResetInterpolation(previous, reset),
+            // CreateMeshLayerIntent create => ReduceCreateMeshLayer(previous, create),
+            // MoveLayerDownIntent _ => ReduceMoveLayerDown(previous),
+            // MoveLayerUpIntent _ => ReduceMoveLayerUp(previous),
+            // DeleteLayerIntent _ => ReduceDeleteLayer(previous),
+            // InitializeProjectIntent init => ReduceInitializeProject(previous, init),
+            // CreateParamPointsIntent _ => ReduceCreateParamPoints(previous),
             _ => previous
         };
     }
@@ -69,6 +69,7 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
     private MeshLayerStates ReduceUpdateTransform(MeshLayerStates previous, UpdateTransformIntent update)
     {
         bool areParametersAssigned = previous.MeshLayers[update.MeshID].HasParametersAssigned;
+        if (!areParametersAssigned) return previous;
 
         var next = previous.Clone();
         var mesh = next.MeshLayers[update.MeshID];
@@ -76,22 +77,13 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
         switch (update.Type)
         {
             case TransformType.POSITION:
-                if (areParametersAssigned)
-                    mesh.AnimationTransform.Position = update.Data.Position - mesh.MeshTransform.Position;
-                else
-                    mesh.MeshTransform.Position = update.Data.Position;
+                mesh.AnimationTransform.Position = update.Data.Position - mesh.MeshTransform.Position;
                 break;
             case TransformType.ROTATION:
-                if (areParametersAssigned)
-                    mesh.AnimationTransform.Rotation = Quaternion.Inverse(mesh.MeshTransform.Rotation) * update.Data.Rotation;
-                else
-                    mesh.MeshTransform.Rotation = update.Data.Rotation;
+                mesh.AnimationTransform.Rotation = Quaternion.Inverse(mesh.MeshTransform.Rotation) * update.Data.Rotation;
                 break;
             case TransformType.SCALE:
-                if (areParametersAssigned)
-                    mesh.AnimationTransform.Scale = update.Data.Scale - mesh.MeshTransform.Scale;
-                else
-                    mesh.MeshTransform.Scale = update.Data.Scale;
+                mesh.AnimationTransform.Scale = update.Data.Scale - mesh.MeshTransform.Scale;
                 break;
         }
         return next;
@@ -260,6 +252,12 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
             next.MeshLayers[curve.MeshID].AnimationTransform = defaultPoint.transform.Clone();
         }
 
+        return next;
+    }
+
+    public MeshLayerStates Update(MeshLayerStates previous, IModelContext context)
+    {
+        var next = new MeshLayerStates(context, previous);
         return next;
     }
 }

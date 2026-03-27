@@ -42,9 +42,9 @@ public record RedoIntent() : IIntentRedo;
 
 #region Mesh Transformation
 [NonUndoableIntent] public record UpdateTransformIntent(Guid MeshID, TransformData Data, TransformType Type) : IIntentUnstored;
-[NonUndoableIntent] public record SaveTransformIntent(Guid MeshID, TransformType Type) : IIntent;
+[NonUndoableIntent] public record SaveTransformIntent(Guid MeshID, TransformData Data, TransformType Type) : IIntent; // TODO: end drag
 [NonUndoableIntent] public record InterpolateTransformIntent(Dictionary<Guid, TransformData> Deltas) : IIntentUnstored;
-public record ResetInterpolationIntent(Guid MeshID) : IIntent;
+public record ResetInterpolationIntent(Guid MeshID) : IIntent; // TODO: start drag
 #endregion
 
 #region Layer Operations

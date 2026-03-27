@@ -9,6 +9,7 @@ public interface IGeneralSettings
     Guid SelectedParamID { get; set; }
     Guid SelectedMeshID { get; set; }
     int CurrentFrame { get; set; }
+    int HistoryLimit { get; set; }
 }
 
 [CreateAssetMenu(fileName = "GeneralSettings", menuName = "Scriptable Objects/GeneralSettings")]
@@ -19,6 +20,7 @@ public class GeneralSettings : ScriptableObject, IGeneralSettings
     public Guid SelectedParamID { get; set; }
     public Guid SelectedMeshID { get; set; }
     public int CurrentFrame { get; set; }
+    public int HistoryLimit { get; set; }
 
     protected static GeneralSettings _instance;
 
@@ -34,6 +36,7 @@ public class GeneralSettings : ScriptableObject, IGeneralSettings
                 _instance.SelectedParamID = Guid.Empty;
                 _instance.SelectedMeshID = Guid.Empty;
                 _instance.CurrentFrame = 1;
+                _instance.HistoryLimit = 40;
 
                 if (_instance == null)
                 {

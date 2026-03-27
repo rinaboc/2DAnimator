@@ -10,5 +10,6 @@ namespace Assets.Scripts.Utility.MVI
         IRegistry<ParamPoint, ParamPointRegistry> ParamPoints { get; }
         IKeyFrameRegistry KeyFrames { get; }
         IGeneralSettings GeneralSettings { get; }
+        ISessionInfo SessionInfo { get; }
     }
 }

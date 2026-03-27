@@ -10,20 +10,20 @@ public class TimelineReducer : IReducer<TimelineState>
     {
         return intent switch
         {
-            TimelineOpenIntent _ => ReduceOpenTimeline(previous),
-            UpdateFramePerSecIntent update => ReduceUpdateFramePerSec(update, previous),
-            UpdateMaxFramesIntent update => ReduceUpdateMaxFrames(update, previous),
-            TimelineSettingsOpenIntent _ => ReduceOpenTimelineSettings(previous),
-            CreateParameterIntent create => ReduceCreateParameter(previous, create),
-            DeleteSelectedParameterIntent delete => ReduceDeleteSelectedParameter(previous, delete),
-            SelectKeyframeIntent select => ReduceSelectKeyframe(previous, select),
-            DeleteKeyframeIntent _ => ReduceDeleteKeyframe(previous),
-            CurrentFrameChangedIntent change => ReduceCurrentFrameChanged(change, previous),
-            TimelineParameterSliderChangedIntent change => ReduceTimelineParameterSliderChanged(change, previous),
-            InitializeProjectIntent init => ReduceInitializeProject(previous, init),
-            SelectParameterIntent select => ReduceSelectParameter(previous, select),
-            StartTimelineSliderDragIntent _ => previous.Clone(),
-            StartTimelineParameterDragIntent _ => previous.Clone(),
+            // TimelineOpenIntent _ => ReduceOpenTimeline(previous),
+            // UpdateFramePerSecIntent update => ReduceUpdateFramePerSec(update, previous),
+            // UpdateMaxFramesIntent update => ReduceUpdateMaxFrames(update, previous),
+            // TimelineSettingsOpenIntent _ => ReduceOpenTimelineSettings(previous),
+            // CreateParameterIntent create => ReduceCreateParameter(previous, create),
+            // DeleteSelectedParameterIntent delete => ReduceDeleteSelectedParameter(previous, delete),
+            // SelectKeyframeIntent select => ReduceSelectKeyframe(previous, select),
+            // DeleteKeyframeIntent _ => ReduceDeleteKeyframe(previous),
+            // CurrentFrameChangedIntent change => ReduceCurrentFrameChanged(change, previous),
+            // TimelineParameterSliderChangedIntent change => ReduceTimelineParameterSliderChanged(change, previous),
+            // InitializeProjectIntent init => ReduceInitializeProject(previous, init),
+            // SelectParameterIntent select => ReduceSelectParameter(previous, select),
+            // StartTimelineSliderDragIntent _ => previous.Clone(),
+            // StartTimelineParameterDragIntent _ => previous.Clone(),
             _ => previous
         };
     }
@@ -166,5 +166,10 @@ public class TimelineReducer : IReducer<TimelineState>
         var next = previous.Clone();
         next.IsOpen = !next.IsOpen;
         return next;
+    }
+
+    public TimelineState Update(TimelineState previous, IModelContext context)
+    {
+        return previous;
     }
 }

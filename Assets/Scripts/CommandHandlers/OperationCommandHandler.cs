@@ -1,23 +1,54 @@
+using System;
 using Assets.Scripts.Utility.MVI;
 
 public class OperationCommandHandler : ICommandHandler
 {
-    public void Execute(IIntent intent, object state, IModelContext context)
+    public Action Execute(IIntent intent, IModelContext context)
     {
-        switch (intent)
+        return intent switch
         {
-            case OpenProjectIntent open: ExecuteOpenProject(open); break;
-            case SaveProjectIntent save: ExecuteSaveProject(save, context); break;
-        }
+            OpenProjectIntent open => ExecuteOpenProject(open),
+            SaveProjectIntent save => ExecuteSaveProject(save, context),
+            _ => ExecuteDefault(context, intent)
+        };
     }
 
-    private void ExecuteSaveProject(SaveProjectIntent save, IModelContext context)
+    private Action ExecuteDefault(IModelContext context, IIntent intent)
+    {
+        int prevRedoCount = context.SessionInfo.RedoCount;
+
+        if (IntentHelper.IsUndoableIntent(intent))
+        {
+            context.SessionInfo.UndoCount++;
+            if (context.SessionInfo.UndoCount > context.GeneralSettings.HistoryLimit)
+                context.SessionInfo.UndoCount = context.GeneralSettings.HistoryLimit;
+
+            if (context.SessionInfo.HistoryReset)
+                context.SessionInfo.RedoCount = 0;
+            else
+                context.SessionInfo.RedoCount--;
+
+        }
+
+        return () =>
+        {
+            if (!IntentHelper.IsUndoableIntent(intent)) return;
+            context.SessionInfo.UndoCount--;
+            context.SessionInfo.RedoCount++;
+        };
+    }
+
+    private Action ExecuteSaveProject(SaveProjectIntent save, IModelContext context)
     {
         ProjectManager.Instance.SaveProject(save.Path, context);
+
+        return null;
     }
 
-    private void ExecuteOpenProject(OpenProjectIntent open)
+    private Action ExecuteOpenProject(OpenProjectIntent open)
     {
         ProjectManager.Instance.LoadProject(open.Path);
+
+        return null;
     }
 }

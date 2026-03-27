@@ -23,4 +23,9 @@ public class ParameterTimelineReducer : IReducer<ParameterTimelineState>
 
         return next;
     }
+
+    public ParameterTimelineState Update(ParameterTimelineState previous, IModelContext context)
+    {
+        return previous;
+    }
 }

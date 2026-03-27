@@ -35,10 +35,11 @@ public class AppInitializer : MonoBehaviour
             _paramCurveRegistry,
             _paramPointRegistry,
             _keyFrameRegistry,
-            _generalSettings
+            _generalSettings,
+            new SessionInfo()
         );
 
-        _dispatcher = new Dispatcher(_context);
+        _dispatcher = new Dispatcher(_context, new UndoAPI());
 
         _dispatcher.Register(new OperationCommandHandler());
         _dispatcher.Register(new ParameterCommandHandler());

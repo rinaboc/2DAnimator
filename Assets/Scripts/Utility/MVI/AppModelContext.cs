@@ -9,6 +9,8 @@ namespace Assets.Scripts.Utility.MVI
         public IKeyFrameRegistry KeyFrames { get; }
 
         public IGeneralSettings GeneralSettings { get; }
+        public ISessionInfo SessionInfo { get; }
+
 
         public AppModelContext(
             IRegistry<MeshData, MeshRegistry> meshes,
@@ -16,7 +18,8 @@ namespace Assets.Scripts.Utility.MVI
             IParamCurveRegistry paramCurves,
             IRegistry<ParamPoint, ParamPointRegistry> paramPoints,
             IKeyFrameRegistry keyFrames,
-            IGeneralSettings generalSettings
+            IGeneralSettings generalSettings,
+            ISessionInfo sessionInfo
         )
         {
             Meshes = meshes;
@@ -25,6 +28,7 @@ namespace Assets.Scripts.Utility.MVI
             ParamPoints = paramPoints;
             KeyFrames = keyFrames;
             GeneralSettings = generalSettings;
+            SessionInfo = sessionInfo;
         }
     }
 }

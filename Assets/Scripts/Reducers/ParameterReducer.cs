@@ -10,19 +10,19 @@ public class ParameterReducer : IReducer<ParameterStates>
     {
         return intent switch
         {
-            SelectParameterIntent select => ReduceSelectParameter(previous, select),
-            CreateParameterIntent create => ReduceCreateParameter(previous, create),
-            DeleteSelectedParameterIntent _ => ReduceDeleteSelectedParameter(previous),
-            UpdateParameterIntent update => ReduceUpdateParameter(previous, update),
-            CloseParameterSettingsIntent _ => ReduceCloseParameterSettings(previous),
-            OpenParameterCreatorIntent _ => ReduceOpenParameterCreator(previous),
-            OpenParameterEditorIntent _ => ReduceOpenParameterEditor(previous),
-            CreateParamPointsIntent _ => ReduceCreateParamPoints(previous),
-            ParameterValueInterpolatedIntent interpolate => ReduceParameterValueInterpolated(previous, interpolate),
-            TimelineParameterSliderChangedIntent slider => ReduceTimelineParameterSliderChanged(previous, slider),
-            InitializeProjectIntent init => ReduceInitializeProject(previous, init),
-            SelectLayerIntent select => ReduceSelectLayer(previous, select),
-            DeleteLayerIntent _ => ReduceDeleteLayer(previous),
+            // SelectParameterIntent select => ReduceSelectParameter(previous, select),
+            // CreateParameterIntent create => ReduceCreateParameter(previous, create),
+            // DeleteSelectedParameterIntent _ => ReduceDeleteSelectedParameter(previous),
+            // UpdateParameterIntent update => ReduceUpdateParameter(previous, update),
+            // CloseParameterSettingsIntent _ => ReduceCloseParameterSettings(previous),
+            // OpenParameterCreatorIntent _ => ReduceOpenParameterCreator(previous),
+            // OpenParameterEditorIntent _ => ReduceOpenParameterEditor(previous),
+            // CreateParamPointsIntent _ => ReduceCreateParamPoints(previous),
+            // ParameterValueInterpolatedIntent interpolate => ReduceParameterValueInterpolated(previous, interpolate),
+            // TimelineParameterSliderChangedIntent slider => ReduceTimelineParameterSliderChanged(previous, slider),
+            // InitializeProjectIntent init => ReduceInitializeProject(previous, init),
+            // SelectLayerIntent select => ReduceSelectLayer(previous, select),
+            // DeleteLayerIntent _ => ReduceDeleteLayer(previous),
             _ => previous
         };
     }
@@ -225,5 +225,10 @@ public class ParameterReducer : IReducer<ParameterStates>
             SelectedMeshLayerID = previous.SelectedMeshLayerID,
             IsSettingsOpen = previous.IsSettingsOpen
         };
+    }
+
+    public ParameterStates Update(ParameterStates previous, IModelContext context)
+    {
+        return previous;
     }
 }
