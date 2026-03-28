@@ -48,4 +48,19 @@ public class Parameter : EntityBase
 
         ParamCurves = new();
     }
+
+    public Parameter Clone()
+    {
+        Parameter ret = new(MinValue, MaxValue, DefaultValue, Name)
+        {
+            ID = ID
+        };
+
+        foreach (Guid id in ParamCurves)
+            ret.ParamCurves.Add(id);
+
+        return ret;
+    }
+
+
 }
