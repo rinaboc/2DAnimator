@@ -11,65 +11,18 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
     {
         return intent switch
         {
-            // ChangeLayerNameIntent change => ReduceChangeLayerName(previous, change),
-            SelectLayerIntent select => ReduceSelectLayer(previous, select),
             UpdateTransformIntent update => ReduceUpdateTransform(previous, update),
-            // SaveTransformIntent save => ReduceSaveTransform(previous, save),
-            // InterpolateTransformIntent interpolate => ReduceInterpolateTransform(previous, interpolate),
-            // ResetInterpolationIntent reset => ReduceResetInterpolation(previous, reset),
-            // CreateMeshLayerIntent create => ReduceCreateMeshLayer(previous, create),
-            // MoveLayerDownIntent _ => ReduceMoveLayerDown(previous),
-            // MoveLayerUpIntent _ => ReduceMoveLayerUp(previous),
-            // DeleteLayerIntent _ => ReduceDeleteLayer(previous),
+            SaveTransformIntent save => ReduceUpdateTransform(previous, new UpdateTransformIntent(save.MeshID, save.Data, save.Type)),
+            InterpolateTransformIntent interpolate => ReduceInterpolateTransform(previous, interpolate),
+            ResetInterpolationIntent reset => ReduceResetInterpolation(previous, reset),
             // InitializeProjectIntent init => ReduceInitializeProject(previous, init),
-            // CreateParamPointsIntent _ => ReduceCreateParamPoints(previous),
             _ => previous
-        };
-    }
-
-    private MeshLayerStates ReduceCreateParamPoints(MeshLayerStates previous)
-    {
-        if (previous.SelectedMeshLayerID == Guid.Empty) return previous;
-
-        var next = previous.Clone();
-        next.MeshLayers[previous.SelectedMeshLayerID].HasParametersAssigned = true;
-        return next;
-    }
-
-    private MeshLayerStates ReduceChangeLayerName(MeshLayerStates previous, ChangeLayerNameIntent change)
-    {
-        return new()
-        {
-            MeshLayers = previous.MeshLayers.ToDictionary(
-                p => p.Key,
-                p => new MeshLayerState(p.Value)
-                {
-                    Name = p.Key.Equals(change.LayerID) ? change.NewName : p.Value.Name
-                }
-            ),
-            SelectedMeshLayerID = previous.SelectedMeshLayerID
-        };
-    }
-
-    private MeshLayerStates ReduceSelectLayer(MeshLayerStates previous, SelectLayerIntent select)
-    {
-        return new()
-        {
-            MeshLayers = previous.MeshLayers.ToDictionary(
-                p => p.Key,
-                p => new MeshLayerState(p.Value)
-                {
-                    IsSelected = p.Key == select.LayerID
-                }
-            ),
-            SelectedMeshLayerID = select.LayerID
         };
     }
 
     private MeshLayerStates ReduceUpdateTransform(MeshLayerStates previous, UpdateTransformIntent update)
     {
         bool areParametersAssigned = previous.MeshLayers[update.MeshID].HasParametersAssigned;
-        if (!areParametersAssigned) return previous;
 
         var next = previous.Clone();
         var mesh = next.MeshLayers[update.MeshID];
@@ -77,21 +30,25 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
         switch (update.Type)
         {
             case TransformType.POSITION:
-                mesh.AnimationTransform.Position = update.Data.Position - mesh.MeshTransform.Position;
+                if (areParametersAssigned)
+                    mesh.AnimationTransform.Position = update.Data.Position - mesh.MeshTransform.Position;
+                else
+                    mesh.MeshTransform.Position = update.Data.Position;
                 break;
             case TransformType.ROTATION:
-                mesh.AnimationTransform.Rotation = Quaternion.Inverse(mesh.MeshTransform.Rotation) * update.Data.Rotation;
+                if (areParametersAssigned)
+                    mesh.AnimationTransform.Rotation = Quaternion.Inverse(mesh.MeshTransform.Rotation) * update.Data.Rotation;
+                else
+                    mesh.MeshTransform.Rotation = update.Data.Rotation;
                 break;
             case TransformType.SCALE:
-                mesh.AnimationTransform.Scale = update.Data.Scale - mesh.MeshTransform.Scale;
+                if (areParametersAssigned)
+                    mesh.AnimationTransform.Scale = update.Data.Scale - mesh.MeshTransform.Scale;
+                else
+                    mesh.MeshTransform.Scale = update.Data.Scale;
                 break;
         }
         return next;
-    }
-
-    private MeshLayerStates ReduceSaveTransform(MeshLayerStates previous, SaveTransformIntent save)
-    {
-        return previous;
     }
 
     private MeshLayerStates ReduceInterpolateTransform(MeshLayerStates previous, InterpolateTransformIntent interpolate)
@@ -122,96 +79,6 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
             ),
             SelectedMeshLayerID = previous.SelectedMeshLayerID
         };
-    }
-
-    private MeshLayerStates ReduceCreateMeshLayer(MeshLayerStates previous, CreateMeshLayerIntent create)
-    {
-        var next = previous.Clone();
-
-        next.MeshLayers[create.ID] = new()
-        {
-            ID = create.ID,
-            Name = "Layer " + next.MeshLayers.Count,
-            Texture = create.Tex,
-            SourcePath = create.Path,
-            MeshTransform = new TransformData() { Scale = Vector3.one },
-            AnimationTransform = new TransformData(),
-            DrawOrder = (ushort)next.MeshLayers.Count
-        };
-
-        return next;
-    }
-
-    private MeshLayerStates ReduceMoveLayerUp(MeshLayerStates previous)
-    {
-        var next = previous.Clone();
-        MeshLayerState selectedMesh = next.MeshLayers[previous.SelectedMeshLayerID];
-        ushort inf = 0;
-        Guid swapID = Guid.Empty;
-        foreach ((_, MeshLayerState meshLayerState) in next.MeshLayers)
-        {
-            if (meshLayerState.DrawOrder < selectedMesh.DrawOrder && meshLayerState.DrawOrder >= inf)
-            {
-                inf = (ushort)meshLayerState.DrawOrder;
-                swapID = meshLayerState.ID;
-            }
-        }
-
-        if (swapID != Guid.Empty)
-        {
-            MeshLayerState swappedMesh = next.MeshLayers[swapID];
-            (swappedMesh.DrawOrder, selectedMesh.DrawOrder) = (selectedMesh.DrawOrder, swappedMesh.DrawOrder);
-        }
-        else
-            return previous;
-
-        return next;
-    }
-
-    private MeshLayerStates ReduceMoveLayerDown(MeshLayerStates previous)
-    {
-        var next = previous.Clone();
-        MeshLayerState selectedMesh = next.MeshLayers[previous.SelectedMeshLayerID];
-        ushort inf = ushort.MaxValue;
-        Guid swapID = Guid.Empty;
-        foreach ((_, MeshLayerState meshLayerState) in next.MeshLayers)
-        {
-            if (meshLayerState.DrawOrder > selectedMesh.DrawOrder && meshLayerState.DrawOrder < inf)
-            {
-                inf = (ushort)meshLayerState.DrawOrder;
-                swapID = meshLayerState.ID;
-            }
-        }
-
-        if (swapID != Guid.Empty)
-        {
-            MeshLayerState swappedMesh = next.MeshLayers[swapID];
-            (swappedMesh.DrawOrder, selectedMesh.DrawOrder) = (selectedMesh.DrawOrder, swappedMesh.DrawOrder);
-        }
-        else
-            return previous;
-
-        return next;
-    }
-
-    private MeshLayerStates ReduceDeleteLayer(MeshLayerStates previous)
-    {
-        if (previous.SelectedMeshLayerID == Guid.Empty) return previous;
-
-        var next = previous.Clone();
-        next.MeshLayers.Remove(previous.SelectedMeshLayerID);
-        next.SelectedMeshLayerID = Guid.Empty;
-
-        var orderedLayers = next.MeshLayers.Values
-            .OrderBy(layer => layer.DrawOrder)
-            .ToList();
-        for (int i = 0; i < orderedLayers.Count; i++)
-        {
-            orderedLayers[i].DrawOrder = (ushort)i;
-        }
-        next.MeshLayers = orderedLayers.ToDictionary(layer => layer.ID);
-
-        return next;
     }
 
     private MeshLayerStates ReduceInitializeProject(MeshLayerStates previous, InitializeProjectIntent init)

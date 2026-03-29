@@ -18,7 +18,6 @@ public class MeshLayerCommandHandler : ICommandHandler
             DeleteLayerIntent _ => ExecuteDeleteLayer(context),
             ResetInterpolationIntent _ => ExecuteResetInterpolation(context),
             SaveTransformIntent save => ExecuteSaveTransform(save, context),
-            UpdateTransformIntent update => ExecuteUpdateTransform(update, context),
             InitializeProjectIntent init => ExecuteInitializeProject(init, context),
             _ => null
         };
@@ -28,7 +27,7 @@ public class MeshLayerCommandHandler : ICommandHandler
     {
         if (!context.Meshes.TryGet(context.GeneralSettings.SelectedMeshID, out MeshData mesh)) return null;
         bool areParametersAssigned = context.ParamCurves.GetAssignedParamIDsOfMesh(mesh.ID).Count > 0;
-        if (areParametersAssigned) return null;
+        if (areParametersAssigned) return null; // TODO: need to check for param points
 
         var previousTransform = mesh.transform.Clone();
         return () =>
@@ -36,29 +35,6 @@ public class MeshLayerCommandHandler : ICommandHandler
             context.Meshes.TryGet(mesh.ID, out MeshData m);
             m.transform = previousTransform.Clone();
         };
-    }
-
-    private Action ExecuteUpdateTransform(UpdateTransformIntent update, IModelContext context)
-    {
-        if (!context.Meshes.TryGet(update.MeshID, out MeshData mesh)) return null;
-
-        bool areParametersAssigned = context.ParamCurves.GetAssignedParamIDsOfMesh(mesh.ID).Count > 0;
-        if (areParametersAssigned) return null;
-
-        switch (update.Type)
-        {
-            case TransformType.POSITION:
-                mesh.transform.Position = update.Data.Position;
-                break;
-            case TransformType.ROTATION:
-                mesh.transform.Rotation = update.Data.Rotation;
-                break;
-            case TransformType.SCALE:
-                mesh.transform.Scale = update.Data.Scale;
-                break;
-        }
-
-        return null;
     }
 
     private Action ExecuteSaveTransform(SaveTransformIntent save, IModelContext context)
@@ -131,10 +107,11 @@ public class MeshLayerCommandHandler : ICommandHandler
                 break;
             }
 
-            if (isPointUpdated) continue;
-            Debug.Log("no point was updated on this curve");
             int minIndex = Array.IndexOf(distFromPointValues, distFromPointValues.Min());
             ParameterManager.Instance.GetParamSlider(paramCurve.ParamID).SetValue(paramPoints[minIndex].ParamValue);
+
+            if (isPointUpdated) continue;
+            Debug.Log("no point was updated on this curve");
             AnimationManager.Instance.InterpolateParameter(paramPoints[minIndex].ParamValue, paramCurve.ParamID, context);
         }
 

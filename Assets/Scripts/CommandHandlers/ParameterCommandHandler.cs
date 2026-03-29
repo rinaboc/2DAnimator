@@ -15,6 +15,9 @@ public class ParameterCommandHandler : ICommandHandler
             SelectParameterIntent select => ExecuteSelectParameter(select, context),
             OpenParameterCreatorIntent _ => ExecuteOpenParameterCreator(context),
             CreateParamPointsIntent _ => ExecuteCreateParamPoints(context),
+            InterpolateParameterIntent interpolate => ExecuteInterpolateParameter(interpolate, context),
+            InitializeProjectIntent init => ExecuteInitializeProject(init, context),
+            TimelineParameterSliderChangedIntent slider => ExecuteTimelineParameterSliderChanged(slider, context),
             _ => null
         };
     }
@@ -163,36 +166,19 @@ public class ParameterCommandHandler : ICommandHandler
         };
     }
 
-    /**
-    public void Execute(IIntent intent, object state, IModelContext context)
-    {
-        var parameterStates = (state as ParameterTimelineState)?.Parameters;
-
-        switch (intent)
-        {
-            case SelectParameterIntent _: ExecuteSelectParameter(parameterStates, context); break;
-            case CreateParameterIntent _: ExecuteParameterStateChanged(parameterStates, context); break;
-            case CreateParamPointsIntent _: ExecuteCreateParamPoints(parameterStates, context); break;
-            case DeleteSelectedParameterIntent _: ExecuteParameterStateChanged(parameterStates, context); break;
-            case UpdateParameterIntent _: ExecuteParameterStateChanged(parameterStates, context); break;
-            case OpenParameterCreatorIntent _: ExecuteOpenParameterCreator(parameterStates, context); break;
-            case InitializeProjectIntent init: ExecuteInitializeProject(init, context); break;
-            case InterpolateParameterIntent interpolate: ExecuteInterpolateParameter(interpolate, context); break;
-            case TimelineParameterSliderChangedIntent slider: ExecuteTimelineParameterSliderChanged(slider, context); break;
-        }
-    }
-
-    private void ExecuteTimelineParameterSliderChanged(TimelineParameterSliderChangedIntent slider, IModelContext context)
+    private Action ExecuteTimelineParameterSliderChanged(TimelineParameterSliderChangedIntent slider, IModelContext context)
     {
         AnimationManager.Instance.InterpolateParameter(slider.Value, slider.ParamID, context);
+        return null;
     }
 
-    private void ExecuteInterpolateParameter(InterpolateParameterIntent interpolate, IModelContext context)
+    private Action ExecuteInterpolateParameter(InterpolateParameterIntent interpolate, IModelContext context)
     {
         AnimationManager.Instance.InterpolateParameter(interpolate.Value, interpolate.ParamID, context);
+        return null;
     }
 
-    private void ExecuteInitializeProject(InitializeProjectIntent init, IModelContext context)
+    private Action ExecuteInitializeProject(InitializeProjectIntent init, IModelContext context)
     {
         context.Parameters.Clear();
         context.ParamCurves.Clear();
@@ -223,6 +209,8 @@ public class ParameterCommandHandler : ICommandHandler
             }
             ParameterManager.Instance.GetParamSlider(curve.ParamID).CreateParamPointHandles(paramValues);
         }
+
+        return null;
     }
-    **/
+
 }
