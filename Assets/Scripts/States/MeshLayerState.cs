@@ -137,10 +137,10 @@ namespace Assets.Scripts.States
                 }
                 var meshlayer = MeshLayers[meshData.ID];
                 meshlayer.HasParametersAssigned = context.ParamCurves.GetAssignedParamIDsOfMesh(meshData.ID).Count > 0;
-                meshlayer.IsSelected = meshData.ID == context.GeneralSettings.SelectedMeshID;
+                meshlayer.IsSelected = meshData.ID == context.SessionInfo.SelectedMeshID;
             }
 
-            SelectedMeshLayerID = context.GeneralSettings.SelectedMeshID;
+            SelectedMeshLayerID = context.SessionInfo.SelectedMeshID;
         }
     }
 }

@@ -1,7 +1,5 @@
 using System;
 using System.Linq;
-using System.Threading.Tasks;
-using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 
 public class TimelineCommandHandler : ICommandHandler
@@ -10,40 +8,83 @@ public class TimelineCommandHandler : ICommandHandler
     {
         return intent switch
         {
+            TimelineOpenIntent _ => ExecuteOpenTimeline(context),
+            UpdateFramePerSecIntent update => ExecuteUpdateFramePerSec(update, context),
+            UpdateMaxFramesIntent update => ExecuteUpdateMaxFrames(update, context),
+            CurrentFrameChangedIntent change => ExecuteCurrentFrameChanged(change, context),
+            TimelineParameterSliderChangedIntent change => ExecuteTimelineParameterSliderChanged(change, context),
+            DeleteKeyframeIntent _ => ExecuteDeleteKeyframe(context),
+            SelectKeyframeIntent select => ExecuteSelectKeyframe(select, context),
+            InitializeProjectIntent init => ExecuteInitializeProject(init, context),
             _ => null
         };
     }
 
-    /**
-    public void Execute(IIntent intent, object state, IModelContext context)
+    private Action ExecuteSelectKeyframe(SelectKeyframeIntent select, IModelContext context)
     {
-        var timelineState = (state as ParameterTimelineState)?.Timeline;
+        if (context.SessionInfo.SelectedKeyframeID == select.ID) return null;
 
-        switch (intent)
+        var previousID = context.SessionInfo.SelectedKeyframeID;
+        context.SessionInfo.SelectedKeyframeID = select.ID;
+
+        return () => context.SessionInfo.SelectedKeyframeID = previousID;
+    }
+
+    private Action ExecuteDeleteKeyframe(IModelContext context)
+    {
+        if (context.SessionInfo.SelectedKeyframeID == Guid.Empty) return null;
+
+        context.KeyFrames.TryGet(context.SessionInfo.SelectedKeyframeID, out KeyFrame keyFrame);
+        context.KeyFrames.Remove(keyFrame.ID);
+
+        context.SessionInfo.SelectedKeyframeID = Guid.Empty;
+
+        return () =>
         {
-            case TimelineOpenIntent _: ExecuteOpenTimeline(timelineState); break;
-            case CurrentFrameChangedIntent _: ExecuteCurrentFrameChanged(timelineState, context); break;
-            case TimelineParameterSliderChangedIntent _: ExecuteKeyframeStateChanged(timelineState, context); break;
-            case DeleteKeyframeIntent _: ExecuteKeyframeStateChanged(timelineState, context); break;
-            case InitializeProjectIntent init: ExecuteInitializeProject(init, context); break;
-            case UpdateFramePerSecIntent _: ExecuteUpdateFramePerSec(timelineState, context); break;
-            case UpdateMaxFramesIntent _: ExecuteUpdateMaxFrames(timelineState, context); break;
+            context.KeyFrames.Register(keyFrame);
+            context.SessionInfo.SelectedKeyframeID = keyFrame.ID;
+        };
+    }
+
+    private Action ExecuteTimelineParameterSliderChanged(TimelineParameterSliderChangedIntent change, IModelContext context)
+    {
+        var keyframesOfParam = context.KeyFrames.GetKeyFramesOfParam(change.ParamID);
+
+        if (keyframesOfParam.Any(kf => kf.Frame == context.SessionInfo.CurrentFrame))
+        {
+            var update = keyframesOfParam.FirstOrDefault(kf => kf.Frame == context.SessionInfo.CurrentFrame);
+            var previousValue = update.ParamValue;
+            update.ParamValue = change.Value;
+
+            return () => update.ParamValue = previousValue;
         }
+
+        KeyFrame keyframe = new(change.ParamID, change.Value, context.SessionInfo.CurrentFrame) { ID = Guid.NewGuid() };
+        context.KeyFrames.Register(keyframe);
+        AnimationManager.Instance.InterpolateParameter(keyframe.ParamValue, keyframe.ParamID, context);
+
+        return () => context.KeyFrames.Remove(keyframe.ID);
     }
 
-    private void ExecuteUpdateMaxFrames(TimelineState state, IModelContext context)
+    private Action ExecuteUpdateMaxFrames(UpdateMaxFramesIntent update, IModelContext context)
     {
-        if (state == null) return;
-        context.GeneralSettings.MaxFrames = state.MaxFrames;
+        if (context.GeneralSettings.MaxFrames == update.MaxFrames) return null;
+
+        var previousMaxFrames = context.GeneralSettings.MaxFrames;
+        context.GeneralSettings.MaxFrames = update.MaxFrames;
+        return () => context.GeneralSettings.MaxFrames = previousMaxFrames;
     }
 
-    private void ExecuteUpdateFramePerSec(TimelineState state, IModelContext context)
+    private Action ExecuteUpdateFramePerSec(UpdateFramePerSecIntent update, IModelContext context)
     {
-        if (state == null) return;
-        context.GeneralSettings.FramePerSec = state.FramePerSec;
+        if (context.GeneralSettings.FramePerSec == update.FPS) return null;
+
+        var previousFPS = context.GeneralSettings.FramePerSec;
+        context.GeneralSettings.FramePerSec = update.FPS;
+        return () => context.GeneralSettings.FramePerSec = previousFPS;
     }
 
-    private void ExecuteInitializeProject(InitializeProjectIntent init, IModelContext context)
+    private Action ExecuteInitializeProject(InitializeProjectIntent init, IModelContext context)
     {
         context.GeneralSettings.MaxFrames = init.SaveData.AnimationSetting?.maxFrames ?? 24;
         context.GeneralSettings.FramePerSec = init.SaveData.AnimationSetting?.framePerSec ?? 24;
@@ -54,52 +95,30 @@ public class TimelineCommandHandler : ICommandHandler
         {
             context.KeyFrames.Register(item);
         }
+
+        return null;
     }
-
-    private void ExecuteKeyframeStateChanged(TimelineState state, IModelContext context)
+    private Action ExecuteCurrentFrameChanged(CurrentFrameChangedIntent change, IModelContext context)
     {
-        if (state == null) return;
-        var keyframes = context.KeyFrames.GetAll().ToList();
-        foreach ((var paramID, var keyframeLine) in state.Keyframes)
+        static async void AnimateTimeline(int frame, IModelContext context)
         {
-            foreach ((var keyID, var keyframeState) in keyframeLine)
-            {
-                if (!keyframes.Any(kf => kf.ID == keyID)) // create action
-                {
-                    AnimationManager.Instance.InterpolateParameter(keyframeState.Value, paramID, context);
-                    KeyFrame keyFrame = new(paramID, keyframeState.Value, keyframeState.Frame) { ID = keyID };
-                    context.KeyFrames.Register(keyFrame);
-                }
-                else // update action
-                {
-                    keyframes.Remove(keyframes.FirstOrDefault(kf => kf.ID == keyID));
-                    context.KeyFrames.TryGet(keyID, out KeyFrame keyFrame);
-                    keyFrame.Frame = keyframeState.Frame;
-                    keyFrame.ParamValue = keyframeState.Value;
-                    keyFrame.ParamID = paramID;
-
-                }
-            }
+            await AnimationManager.Instance.AnimateTimeline(frame, context);
         }
 
-        foreach (KeyFrame kf in keyframes) // delete action 
+        context.SessionInfo.CurrentFrame = change.Frame;
+        AnimateTimeline(change.Frame, context);
+        return null;
+    }
+
+    private Action ExecuteOpenTimeline(IModelContext context)
+    {
+        context.SessionInfo.TimelineVisibility = !context.SessionInfo.TimelineVisibility;
+        ParameterManager.Instance.ParameterWidgetVisibility = !context.SessionInfo.TimelineVisibility;
+
+        return () =>
         {
-            context.KeyFrames.Remove(kf.ID);
-        }
-
+            context.SessionInfo.TimelineVisibility = !context.SessionInfo.TimelineVisibility;
+            ParameterManager.Instance.ParameterWidgetVisibility = !context.SessionInfo.TimelineVisibility;
+        };
     }
-
-    private async void ExecuteCurrentFrameChanged(TimelineState state, IModelContext context)
-    {
-        if (state == null) return;
-        context.GeneralSettings.CurrentFrame = state.CurrentFrame;
-        await AnimationManager.Instance.AnimateTimeline(state.CurrentFrame, context);
-    }
-
-    private void ExecuteOpenTimeline(TimelineState state)
-    {
-        if (state == null) return;
-        ParameterManager.Instance.ParameterWidgetVisibility = !state.IsOpen;
-    }
-    **/
 }

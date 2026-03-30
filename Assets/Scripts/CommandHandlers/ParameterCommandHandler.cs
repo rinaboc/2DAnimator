@@ -34,8 +34,8 @@ public class ParameterCommandHandler : ICommandHandler
 
     private Action ExecuteCreateParamPoints(IModelContext context)
     {
-        if (!context.Parameters.TryGet(context.GeneralSettings.SelectedParamID, out Parameter parameter)) return null;
-        if (!context.Meshes.TryGet(context.GeneralSettings.SelectedMeshID, out MeshData mesh)) return null;
+        if (!context.Parameters.TryGet(context.SessionInfo.SelectedParamID, out Parameter parameter)) return null;
+        if (!context.Meshes.TryGet(context.SessionInfo.SelectedMeshID, out MeshData mesh)) return null;
 
         if (context.ParamCurves.GetAssignedParamIDsOfMesh(mesh.ID).Contains(parameter.ID)) return null;
 
@@ -68,27 +68,27 @@ public class ParameterCommandHandler : ICommandHandler
 
     private Action ExecuteOpenParameterCreator(IModelContext context)
     {
-        var previousID = context.GeneralSettings.SelectedParamID;
-        context.GeneralSettings.SelectedParamID = Guid.Empty;
+        var previousID = context.SessionInfo.SelectedParamID;
+        context.SessionInfo.SelectedParamID = Guid.Empty;
 
-        return () => context.GeneralSettings.SelectedParamID = previousID;
+        return () => context.SessionInfo.SelectedParamID = previousID;
     }
 
     private Action ExecuteSelectParameter(SelectParameterIntent select, IModelContext context)
     {
-        var previousID = context.GeneralSettings.SelectedParamID;
-        context.GeneralSettings.SelectedParamID = select.ParamID;
+        var previousID = context.SessionInfo.SelectedParamID;
+        context.SessionInfo.SelectedParamID = select.ParamID;
 
         return () =>
         {
-            context.GeneralSettings.SelectedParamID = previousID;
+            context.SessionInfo.SelectedParamID = previousID;
         };
     }
 
     private Action ExecuteDeleteSelectedParameter(IModelContext context)
     {
-        if (context.GeneralSettings.SelectedParamID == Guid.Empty) return null;
-        if (!context.Parameters.TryGet(context.GeneralSettings.SelectedParamID, out Parameter parameter)) return null;
+        if (context.SessionInfo.SelectedParamID == Guid.Empty) return null;
+        if (!context.Parameters.TryGet(context.SessionInfo.SelectedParamID, out Parameter parameter)) return null;
 
         ParameterManager.Instance.GetParamSlider(parameter.ID).DeleteParamPointHandles();
         ParameterManager.Instance.DeleteParameterSlider(parameter.ID);

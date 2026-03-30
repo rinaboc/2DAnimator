@@ -88,10 +88,10 @@ namespace Assets.Scripts.States
                     Parameters.Add(parameter.ID, new ParameterState(parameter, paramState));
                 }
                 var param = Parameters[parameter.ID];
-                param.IsSelected = parameter.ID == context.GeneralSettings.SelectedParamID;
+                param.IsSelected = parameter.ID == context.SessionInfo.SelectedParamID;
             }
-            SelectedParamID = context.GeneralSettings.SelectedParamID;
-            SelectedMeshLayerID = context.GeneralSettings.SelectedMeshID;
+            SelectedParamID = context.SessionInfo.SelectedParamID;
+            SelectedMeshLayerID = context.SessionInfo.SelectedMeshID;
             IsSettingsOpen = ps.IsSettingsOpen;
         }
     }

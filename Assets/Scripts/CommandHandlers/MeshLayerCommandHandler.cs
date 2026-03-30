@@ -25,7 +25,7 @@ public class MeshLayerCommandHandler : ICommandHandler
 
     private Action ExecuteResetInterpolation(IModelContext context)
     {
-        if (!context.Meshes.TryGet(context.GeneralSettings.SelectedMeshID, out MeshData mesh)) return null;
+        if (!context.Meshes.TryGet(context.SessionInfo.SelectedMeshID, out MeshData mesh)) return null;
         bool areParametersAssigned = context.ParamCurves.GetAssignedParamIDsOfMesh(mesh.ID).Count > 0;
         if (areParametersAssigned) return null; // TODO: need to check for param points
 
@@ -64,7 +64,7 @@ public class MeshLayerCommandHandler : ICommandHandler
             };
         }
 
-        if (!context.Parameters.TryGet(context.GeneralSettings.SelectedParamID, out Parameter currentParam)) return null;
+        if (!context.Parameters.TryGet(context.SessionInfo.SelectedParamID, out Parameter currentParam)) return null;
         List<ParamCurve> currentParamCurves = context.ParamCurves.GetEntries(currentParam.ParamCurves);
 
         float sliderValue = ParameterManager.Instance.GetParamSlider(currentParam.ID).GetValue();
@@ -129,7 +129,7 @@ public class MeshLayerCommandHandler : ICommandHandler
 
     private Action ExecuteDeleteLayer(IModelContext context)
     {
-        if (!context.Meshes.TryGet(context.GeneralSettings.SelectedMeshID, out MeshData mesh)) return null;
+        if (!context.Meshes.TryGet(context.SessionInfo.SelectedMeshID, out MeshData mesh)) return null;
 
         LayerManager.Instance.DeleteUILayer(mesh.ID);
 
@@ -155,7 +155,7 @@ public class MeshLayerCommandHandler : ICommandHandler
         }
 
         ParameterManager.Instance.HighlightCurves(new());
-        context.GeneralSettings.SelectedMeshID = Guid.Empty;
+        context.SessionInfo.SelectedMeshID = Guid.Empty;
 
         // TODO: check if it works without this reordering
         var orderedLayers = context.Meshes.GetAll()
@@ -177,14 +177,14 @@ public class MeshLayerCommandHandler : ICommandHandler
             foreach (var pc in deletedParamCurves) context.ParamCurves.Register(pc);
             foreach (var pp in deletedParamPoints) context.ParamPoints.Register(pp);
 
-            context.GeneralSettings.SelectedMeshID = mesh.ID;
+            context.SessionInfo.SelectedMeshID = mesh.ID;
             ParameterManager.Instance.HighlightCurves(context.ParamCurves.GetAssignedParamIDsOfMesh(mesh.ID));
         };
     }
 
     private Action ExecuteMoveLayer(IModelContext context, bool up)
     {
-        if (!context.Meshes.TryGet(context.GeneralSettings.SelectedMeshID, out MeshData curMesh)) return null;
+        if (!context.Meshes.TryGet(context.SessionInfo.SelectedMeshID, out MeshData curMesh)) return null;
 
         ushort inf = up ? (ushort)0 : ushort.MaxValue;
         Guid swapID = Guid.Empty;
@@ -220,9 +220,9 @@ public class MeshLayerCommandHandler : ICommandHandler
 
     private Action ExecuteSelectLayer(SelectLayerIntent select, IModelContext context)
     {
-        Guid prevID = context.GeneralSettings.SelectedMeshID;
+        Guid prevID = context.SessionInfo.SelectedMeshID;
 
-        context.GeneralSettings.SelectedMeshID = select.LayerID;
+        context.SessionInfo.SelectedMeshID = select.LayerID;
 
         List<Guid> paramIDs = context.ParamCurves.GetAssignedParamIDsOfMesh(select.LayerID);
         ParameterManager.Instance.HighlightCurves(paramIDs);
@@ -237,7 +237,7 @@ public class MeshLayerCommandHandler : ICommandHandler
             else
                 ParameterManager.Instance.HighlightCurves(new());
 
-            context.GeneralSettings.SelectedMeshID = prevID;
+            context.SessionInfo.SelectedMeshID = prevID;
         };
     }
 
