@@ -19,16 +19,14 @@ abstract public class DraggableHandle : Clickable
         }
     }
 
-    protected override void Start()
+    protected void OnEnable()
     {
-        base.Start();
-
         clickAndDragAction = InputSystem.actions.FindAction("ClickAndDrag");
         clickAndDragAction.started += OnClickStarted;
         clickAndDragAction.performed += OnDragFinished;
     }
 
-    protected void OnDestroy()
+    protected void OnDisable()
     {
         clickAndDragAction.started -= OnClickStarted;
         clickAndDragAction.performed -= OnDragFinished;

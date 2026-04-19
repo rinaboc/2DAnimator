@@ -22,7 +22,7 @@ public class ViewFactory : MonoBehaviour
 
     public TView CreateView<TView, TDomain, TViewState>()
         where TView : IView<TDomain, TViewState>, new()
-        where TDomain : class
+        where TDomain : IState<TDomain>
     {
         var view = new TView();
         _appInitializer.GetViewModel(out IViewModel<TDomain, TViewState> viewModel);
@@ -32,7 +32,7 @@ public class ViewFactory : MonoBehaviour
 
     public TView CreateView<TView, TDomain, TViewState>(params object[] constructorArgs)
         where TView : IView<TDomain, TViewState>
-        where TDomain : class
+        where TDomain : IState<TDomain>
     {
         var view = (TView)Activator.CreateInstance(typeof(TView), constructorArgs);
         _appInitializer.GetViewModel(out IViewModel<TDomain, TViewState> viewModel);

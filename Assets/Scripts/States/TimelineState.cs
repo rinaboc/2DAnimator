@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Utility.MVI;
 
 namespace Assets.Scripts.States
 {
@@ -29,7 +30,6 @@ namespace Assets.Scripts.States
         public int FramePerSec { get; set; }
 
         public Dictionary<Guid, Dictionary<Guid, KeyframeState>> Keyframes { get; set; }
-        public Tuple<Guid, Guid> SelectedKeyframe { get; set; }
 
         public TimelineState()
         {
@@ -40,7 +40,6 @@ namespace Assets.Scripts.States
             MaxFrames = 24;
             FramePerSec = 16;
             Keyframes = new();
-            SelectedKeyframe = new(Guid.Empty, Guid.Empty);
         }
 
         public TimelineState Clone() => new()
@@ -58,7 +57,32 @@ namespace Assets.Scripts.States
                     p => new KeyframeState(p.Value)
                 )
             ),
-            SelectedKeyframe = SelectedKeyframe
         };
+
+        public TimelineState(IModelContext context, TimelineState ts) : this()
+        {
+            IsOpen = context.SessionInfo.TimelineVisibility;
+            CurrentFrame = context.SessionInfo.CurrentFrame;
+            MaxFrames = context.GeneralSettings.MaxFrames;
+            FramePerSec = context.GeneralSettings.FramePerSec;
+
+            IsPlaying = ts.IsPlaying;
+            IsSettingsOpen = ts.IsSettingsOpen;
+
+            foreach (Parameter parameter in context.Parameters.GetAll())
+            {
+                Keyframes.Add(parameter.ID, new Dictionary<Guid, KeyframeState>());
+            }
+
+            foreach (KeyFrame keyFrame in context.KeyFrames.GetAll())
+            {
+                Keyframes[keyFrame.ParamID][keyFrame.ID] = new KeyframeState()
+                {
+                    Frame = keyFrame.Frame,
+                    IsSelected = context.SessionInfo.SelectedKeyframeID == keyFrame.ID,
+                    Value = keyFrame.ParamValue
+                };
+            }
+        }
     }
 }

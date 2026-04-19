@@ -3,6 +3,7 @@ using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
 public abstract class ViewModelBase<TDomainState, TViewState> : MonoBehaviour, IViewModel<TDomainState, TViewState>
+where TDomainState : IState<TDomainState>
 {
     protected Store<TDomainState> _store;
     protected List<IView<TDomainState, TViewState>> _views = new();

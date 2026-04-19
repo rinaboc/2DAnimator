@@ -25,6 +25,7 @@ public class AppInitializer : MonoBehaviour
     [SerializeField] private TimelineWidgetController _timelineWidgetController;
     [SerializeField] private TimelineSettingsController _timelineSettingsController;
     [SerializeField] private ParameterSettingsView _parameterSettingsView;
+    [SerializeField] private WorkspaceView _workspaceView;
 
     void Awake()
     {
@@ -34,10 +35,11 @@ public class AppInitializer : MonoBehaviour
             _paramCurveRegistry,
             _paramPointRegistry,
             _keyFrameRegistry,
-            _generalSettings
+            _generalSettings,
+            new SessionInfo()
         );
 
-        _dispatcher = new Dispatcher(_context);
+        _dispatcher = new Dispatcher(_context, new UndoAPI());
 
         _dispatcher.Register(new OperationCommandHandler());
         _dispatcher.Register(new ParameterCommandHandler());
@@ -46,6 +48,7 @@ public class AppInitializer : MonoBehaviour
 
         _dispatcher.Register(new MeshLayerReducer());
         _dispatcher.Register(new ParameterTimelineReducer(new ParameterReducer(), new TimelineReducer()));
+        _dispatcher.Register(new OperationReducer());
     }
 
     void Start()
@@ -65,6 +68,11 @@ public class AppInitializer : MonoBehaviour
         if (GetViewModel<ParameterTimelineState, ParameterStates>(out var parameterViewModel))
         {
             _parameterSettingsView.SetViewModel(parameterViewModel);
+        }
+
+        if (GetViewModel<OperationState, OperationState>(out var operationViewModel))
+        {
+            _workspaceView.SetViewModel(operationViewModel);
         }
     }
 
@@ -87,7 +95,7 @@ public class AppInitializer : MonoBehaviour
 
     }
 
-    private void Register<TDomain, TView>(IViewModel<TDomain, TView> viewModel)
+    private void Register<TDomain, TView>(IViewModel<TDomain, TView> viewModel) where TDomain : IState<TDomain>
     {
         var stateType = typeof(TDomain);
         if (!_typedViewModels.ContainsKey(stateType))
@@ -97,7 +105,7 @@ public class AppInitializer : MonoBehaviour
         _typedViewModels[stateType].Add(viewModel);
     }
 
-    public bool GetViewModel<TDomain, TView>(out IViewModel<TDomain, TView> viewModel) where TDomain : class
+    public bool GetViewModel<TDomain, TView>(out IViewModel<TDomain, TView> viewModel) where TDomain : IState<TDomain>
     {
         viewModel = null;
         var stateType = typeof(TDomain);

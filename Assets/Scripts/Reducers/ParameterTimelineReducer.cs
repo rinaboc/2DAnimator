@@ -23,4 +23,12 @@ public class ParameterTimelineReducer : IReducer<ParameterTimelineState>
 
         return next;
     }
+
+    public ParameterTimelineState Update(ParameterTimelineState previous, IModelContext context)
+    {
+        var next = previous.Clone();
+        next.Parameters = _parameterReducer.Update(previous.Parameters, context);
+        next.Timeline = _timelineReducer.Update(previous.Timeline, context);
+        return next;
+    }
 }

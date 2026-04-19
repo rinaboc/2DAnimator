@@ -1,15 +1,18 @@
 using System;
+using System.Collections.Generic;
 
 namespace Assets.Scripts.Utility.MVI
 {
     public interface IStore
     {
         void Reduce(IIntent intent);
-        void Execute(IIntent intent);
         Type GetStateType();
+        void SetState(object state);
+        object GetState();
+        void UpdateState();
     }
 
-    public sealed class Store<TState> : IStore
+    public sealed class Store<TState> : IStore where TState : IState<TState>
     {
         public TState State { get; private set; }
         public event Action<TState> StateChanged;
@@ -29,19 +32,8 @@ namespace Assets.Scripts.Utility.MVI
 
         public void Dispatch(IIntent intent)
         {
-            if (IntentHelper.IsGlobalIntent(intent))
-                _dispatcher.Dispatch(intent);
-            else
-                Reduce(intent);
-
-            Execute(intent);
+            _dispatcher.Dispatch(intent, this);
         }
-
-        public void Execute(IIntent intent)
-        {
-            _dispatcher.Execute(intent, State);
-        }
-
 
         public void Reduce(IIntent intent)
         {
@@ -49,13 +41,32 @@ namespace Assets.Scripts.Utility.MVI
             bool stateChanged = !Equals(State, newState);
             State = newState;
 
-            if (stateChanged)
-                StateChanged?.Invoke(State);
+            if (!stateChanged) return;
+
+            StateChanged?.Invoke(State);
+
         }
 
         public void Unbind()
         {
             _dispatcher.Remove(this);
+        }
+
+        public void SetState(object state)
+        {
+            State = (TState)state;
+            StateChanged?.Invoke(State);
+        }
+
+        public object GetState()
+        {
+            return State.Clone();
+        }
+
+        public void UpdateState()
+        {
+            State = _dispatcher.Update(State);
+            StateChanged?.Invoke(State);
         }
     }
 }

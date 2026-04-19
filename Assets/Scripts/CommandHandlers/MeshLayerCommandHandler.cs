@@ -1,78 +1,280 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
 public class MeshLayerCommandHandler : ICommandHandler
 {
-    public void Execute(IIntent intent, object state, IModelContext context)
+    public Action Execute(IIntent intent, IModelContext context)
     {
-        var meshLayerState = state as MeshLayerStates;
-
-        switch (intent)
+        return intent switch
         {
-            case ChangeLayerNameIntent _: ExecuteChangeLayerName(meshLayerState, context); break;
-            case CreateMeshLayerIntent _: ExecuteLayerStateChanged(meshLayerState, context); break;
-            case SelectLayerIntent _: ExecuteSelectLayer(meshLayerState, context); break;
-            case MoveLayerUpIntent _: ExecuteLayerOrderChanged(meshLayerState, context); break;
-            case MoveLayerDownIntent _: ExecuteLayerOrderChanged(meshLayerState, context); break;
-            case DeleteLayerIntent _: ExecuteLayerStateChanged(meshLayerState, context); break;
-            case InitializeProjectIntent init: ExecuteInitializeProject(init, context); break;
-            case SaveTransformIntent _: ExecuteSaveTransform(meshLayerState, context); break;
-        }
+            ChangeLayerNameIntent change => ExecuteChangeLayerName(change, context),
+            CreateMeshLayerIntent create => ExecuteCreateMeshLayer(create, context),
+            SelectLayerIntent select => ExecuteSelectLayer(select, context),
+            MoveLayerUpIntent _ => ExecuteMoveLayer(context, true),
+            MoveLayerDownIntent _ => ExecuteMoveLayer(context, false),
+            DeleteLayerIntent _ => ExecuteDeleteLayer(context),
+            ResetInterpolationIntent _ => ExecuteResetInterpolation(context),
+            SaveTransformIntent save => ExecuteSaveTransform(save, context),
+            InitializeProjectIntent init => ExecuteInitializeProject(init, context),
+            _ => null
+        };
     }
 
-    private void ExecuteSaveTransform(MeshLayerStates state, IModelContext context)
+    private Action ExecuteResetInterpolation(IModelContext context)
     {
-        if (!context.Parameters.TryGet(context.GeneralSettings.SelectedParamID, out Parameter currentParam)) return;
-        foreach ((var _, var mesh) in state.MeshLayers)
+        if (!context.Meshes.TryGet(context.SessionInfo.SelectedMeshID, out MeshData mesh)) return null;
+        bool areParametersAssigned = context.ParamCurves.GetAssignedParamIDsOfMesh(mesh.ID).Count > 0;
+        if (areParametersAssigned) return null; // TODO: need to check for param points
+
+        var previousTransform = mesh.transform.Clone();
+        return () =>
         {
-            bool areParametersAssigned = context.ParamCurves.GetAssignedParamIDsOfMesh(mesh.ID).Count > 0;
-            if (!areParametersAssigned) continue;
+            context.Meshes.TryGet(mesh.ID, out MeshData m);
+            m.transform = previousTransform.Clone();
+        };
+    }
 
-            List<ParamCurve> currentParamCurves = context.ParamCurves.GetEntries(currentParam.ParamCurves);
+    private Action ExecuteSaveTransform(SaveTransformIntent save, IModelContext context)
+    {
+        bool areParametersAssigned = context.ParamCurves.GetAssignedParamIDsOfMesh(save.MeshID).Count > 0;
+        context.Meshes.TryGet(save.MeshID, out MeshData mesh);
 
-            float sliderValue = ParameterManager.Instance.GetParamSlider(currentParam.ID).GetValue();
-            for (int i = 0; i < currentParamCurves.Count; i++)
+        if (!areParametersAssigned)
+        {
+            var previousTransform = mesh.transform.Clone();
+            switch (save.Type)
             {
-                ParamCurve paramCurve = currentParamCurves[i];
-
-                if (paramCurve.MeshID != mesh.ID) // filter by mesh id
-                    continue;
-
-                List<ParamPoint> paramPoints = context.ParamPoints.GetEntries(paramCurve.ParamPoints);
-
-                bool isPointUpdated = false;
-                float[] distFromPointValues = new float[paramPoints.Count];
-                for (int j = 0; j < paramPoints.Count; j++)
-                {
-                    ParamPoint point = paramPoints[j];
-                    distFromPointValues[j] = point.Dist(sliderValue);
-
-                    if (distFromPointValues[j] > 0.01f) continue;
-
-                    isPointUpdated = true;
-                    point.transform.Position = mesh.AnimationTransform.Position;
-                    point.transform.Rotation = mesh.AnimationTransform.Rotation;
-                    point.transform.Scale = mesh.AnimationTransform.Scale;
-
-                    Debug.Log($"updated point at {sliderValue}: " + point);
+                case TransformType.POSITION:
+                    mesh.transform.Position = save.Data.Position;
                     break;
+                case TransformType.ROTATION:
+                    mesh.transform.Rotation = save.Data.Rotation;
+                    break;
+                case TransformType.SCALE:
+                    mesh.transform.Scale = save.Data.Scale;
+                    break;
+            }
+            return () =>
+            {
+                context.Meshes.TryGet(mesh.ID, out MeshData m);
+                m.transform = previousTransform;
+            };
+        }
+
+        if (!context.Parameters.TryGet(context.SessionInfo.SelectedParamID, out Parameter currentParam)) return null;
+        List<ParamCurve> currentParamCurves = context.ParamCurves.GetEntries(currentParam.ParamCurves);
+
+        float sliderValue = ParameterManager.Instance.GetParamSlider(currentParam.ID).GetValue();
+        ParamPoint pointBeforeUpdate = null;
+        for (int i = 0; i < currentParamCurves.Count; i++)
+        {
+            ParamCurve paramCurve = currentParamCurves[i];
+
+            if (paramCurve.MeshID != mesh.ID) // filter by mesh id
+                continue;
+
+            List<ParamPoint> paramPoints = context.ParamPoints.GetEntries(paramCurve.ParamPoints);
+
+            bool isPointUpdated = false;
+
+            float[] distFromPointValues = new float[paramPoints.Count];
+            for (int j = 0; j < paramPoints.Count; j++)
+            {
+                ParamPoint point = paramPoints[j];
+                distFromPointValues[j] = point.Dist(sliderValue);
+
+                if (distFromPointValues[j] > 0.01f) continue;
+
+                isPointUpdated = true;
+                pointBeforeUpdate = point.Copy();
+
+                switch (save.Type)
+                {
+                    case TransformType.POSITION:
+                        point.transform.Position = save.Data.Position - mesh.transform.Position;
+                        break;
+                    case TransformType.ROTATION:
+                        point.transform.Rotation = Quaternion.Inverse(mesh.transform.Rotation) * save.Data.Rotation;
+                        break;
+                    case TransformType.SCALE:
+                        point.transform.Scale = save.Data.Scale - mesh.transform.Scale;
+                        break;
                 }
 
-                if (isPointUpdated) continue;
-                Debug.Log("no point was updated");
-                int minIndex = Array.IndexOf(distFromPointValues, distFromPointValues.Min());
-                ParameterManager.Instance.GetParamSlider(paramCurve.ParamID).SetValue(paramPoints[minIndex].ParamValue);
-                ParameterManager.Instance.DispatchToParameterStore(new InterpolateParameterIntent(paramCurve.ParamID, paramPoints[minIndex].ParamValue));
+                break;
             }
 
+            int minIndex = Array.IndexOf(distFromPointValues, distFromPointValues.Min());
+            ParameterManager.Instance.GetParamSlider(paramCurve.ParamID).SetValue(paramPoints[minIndex].ParamValue);
+
+            if (isPointUpdated) continue;
+            Debug.Log("no point was updated on this curve");
+            AnimationManager.Instance.InterpolateParameter(paramPoints[minIndex].ParamValue, paramCurve.ParamID, context);
         }
+
+
+        return () =>
+        {
+            // TODO: check if this works correctly
+            if (pointBeforeUpdate != null)
+            {
+                context.ParamPoints.TryGet(pointBeforeUpdate.ID, out ParamPoint point);
+                point.transform = pointBeforeUpdate.transform.Clone();
+            }
+        };
     }
 
-    private void ExecuteInitializeProject(InitializeProjectIntent init, IModelContext context)
+    private Action ExecuteDeleteLayer(IModelContext context)
+    {
+        if (!context.Meshes.TryGet(context.SessionInfo.SelectedMeshID, out MeshData mesh)) return null;
+
+        LayerManager.Instance.DeleteUILayer(mesh.ID);
+
+        context.Meshes.Remove(mesh.ID);
+        MeshManager.Instance.DeleteArtMeshObj(mesh.ID);
+
+        List<ParamCurve> deletedParamCurves = new();
+        List<ParamPoint> deletedParamPoints = new();
+
+        List<ParamCurve> paramCurves = context.ParamCurves.GetParamCurvesOfMesh(mesh.ID);
+        for (int i = 0; i < paramCurves.Count; i++)
+        {
+            ParamCurve paramCurve = paramCurves[i];
+            foreach (Guid pointID in paramCurve.ParamPoints)
+            {
+                context.ParamPoints.TryGet(pointID, out ParamPoint point);
+                deletedParamPoints.Add(point);
+
+                context.ParamPoints.Remove(pointID);
+            }
+            deletedParamCurves.Add(paramCurve);
+            context.ParamCurves.Remove(paramCurve.ID);
+        }
+
+        ParameterManager.Instance.HighlightCurves(new());
+        context.SessionInfo.SelectedMeshID = Guid.Empty;
+
+        // TODO: check if it works without this reordering
+        var orderedLayers = context.Meshes.GetAll()
+            .OrderBy(layer => layer.drawOrder)
+            .ToList();
+        for (int i = 0; i < orderedLayers.Count; i++)
+        {
+            orderedLayers[i].drawOrder = (ushort)i;
+        }
+
+        return () =>
+        {
+            LayerManager.Instance.CreateUIArtLayer(mesh.ID);
+            LayerManager.Instance.SetSiblingIndex(mesh.ID, mesh.drawOrder);
+
+            context.Meshes.Register(mesh);
+            MeshManager.Instance.CreateArtMeshObj(mesh.texture.Data, mesh.ID);
+
+            foreach (var pc in deletedParamCurves) context.ParamCurves.Register(pc);
+            foreach (var pp in deletedParamPoints) context.ParamPoints.Register(pp);
+
+            context.SessionInfo.SelectedMeshID = mesh.ID;
+            ParameterManager.Instance.HighlightCurves(context.ParamCurves.GetAssignedParamIDsOfMesh(mesh.ID));
+        };
+    }
+
+    private Action ExecuteMoveLayer(IModelContext context, bool up)
+    {
+        if (!context.Meshes.TryGet(context.SessionInfo.SelectedMeshID, out MeshData curMesh)) return null;
+
+        ushort inf = up ? (ushort)0 : ushort.MaxValue;
+        Guid swapID = Guid.Empty;
+        MeshData swappedMesh = null;
+        foreach (MeshData meshData in context.Meshes.GetAll())
+            if ((up && meshData.drawOrder < curMesh.drawOrder && meshData.drawOrder >= inf) ||
+                (!up && meshData.drawOrder > curMesh.drawOrder && meshData.drawOrder < inf))
+            {
+                inf = meshData.drawOrder;
+                swapID = meshData.ID;
+                swappedMesh = meshData;
+            }
+
+        if (swapID != Guid.Empty)
+        {
+            (swappedMesh.drawOrder, curMesh.drawOrder) = (curMesh.drawOrder, swappedMesh.drawOrder);
+            LayerManager.Instance.SetSiblingIndex(curMesh.ID, curMesh.drawOrder);
+            LayerManager.Instance.SetSiblingIndex(swappedMesh.ID, swappedMesh.drawOrder);
+        }
+
+
+        return () =>
+        {
+            if (swapID == Guid.Empty) return;
+
+            (swappedMesh.drawOrder, curMesh.drawOrder) = (curMesh.drawOrder, swappedMesh.drawOrder);
+
+            LayerManager.Instance.SetSiblingIndex(curMesh.ID, curMesh.drawOrder);
+            LayerManager.Instance.SetSiblingIndex(swappedMesh.ID, swappedMesh.drawOrder);
+        };
+
+    }
+
+    private Action ExecuteSelectLayer(SelectLayerIntent select, IModelContext context)
+    {
+        Guid prevID = context.SessionInfo.SelectedMeshID;
+
+        context.SessionInfo.SelectedMeshID = select.LayerID;
+
+        List<Guid> paramIDs = context.ParamCurves.GetAssignedParamIDsOfMesh(select.LayerID);
+        ParameterManager.Instance.HighlightCurves(paramIDs);
+
+        return () =>
+        {
+            if (prevID != Guid.Empty)
+            {
+                List<Guid> prevParamIDs = context.ParamCurves.GetAssignedParamIDsOfMesh(prevID);
+                ParameterManager.Instance.HighlightCurves(prevParamIDs);
+            }
+            else
+                ParameterManager.Instance.HighlightCurves(new());
+
+            context.SessionInfo.SelectedMeshID = prevID;
+        };
+    }
+
+    private Action ExecuteCreateMeshLayer(CreateMeshLayerIntent create, IModelContext context)
+    {
+        MeshData newMesh = new(create.Path)
+        {
+            ID = create.ID,
+            drawOrder = (ushort)context.Meshes.Count(),
+            transform = new TransformData() { Scale = Vector3.one },
+            texture = new(create.Tex),
+            name = "Layer " + context.Meshes.Count()
+        };
+
+        LayerManager.Instance.CreateUIArtLayer(newMesh.ID);
+        LayerManager.Instance.SetSiblingIndex(newMesh.ID, newMesh.drawOrder);
+
+        context.Meshes.Register(newMesh);
+        MeshManager.Instance.CreateArtMeshObj(newMesh.texture.Data, newMesh.ID);
+
+        return () =>
+        {
+            context.Meshes.Remove(newMesh.ID);
+            LayerManager.Instance.DeleteUILayer(newMesh.ID);
+            MeshManager.Instance.DeleteArtMeshObj(newMesh.ID);
+        };
+    }
+
+    private Action ExecuteChangeLayerName(ChangeLayerNameIntent change, IModelContext context)
+    {
+        context.Meshes.TryGet(change.LayerID, out MeshData meshData);
+        string oldName = meshData.name;
+        meshData.name = change.NewName;
+
+        return () => meshData.name = oldName;
+    }
+    private Action ExecuteInitializeProject(InitializeProjectIntent init, IModelContext context)
     {
         context.Meshes.Clear();
         MeshManager.Instance.ClearArtMeshObjects();
@@ -92,95 +294,7 @@ public class MeshLayerCommandHandler : ICommandHandler
         {
             LayerManager.Instance.SetSiblingIndex(meshData.ID, meshData.drawOrder);
         }
-    }
 
-    private void ExecuteLayerOrderChanged(MeshLayerStates state, IModelContext context)
-    {
-        foreach ((var _, var meshLayerState) in state.MeshLayers)
-        {
-            LayerManager.Instance.SetSiblingIndex(meshLayerState.ID, meshLayerState.DrawOrder);
-
-            context.Meshes.TryGet(meshLayerState.ID, out MeshData meshData);
-            meshData.drawOrder = (ushort)meshLayerState.DrawOrder;
-        }
-    }
-
-    private void ExecuteLayerStateChanged(MeshLayerStates state, IModelContext context)
-    {
-        var layers = LayerManager.Instance.GetUILayerIDs();
-        foreach ((var _, var meshLayerState) in state.MeshLayers)
-        {
-            if (!layers.Contains(meshLayerState.ID)) // create action
-            {
-                LayerManager.Instance.CreateUIArtLayer(meshLayerState.ID);
-                LayerManager.Instance.SetSiblingIndex(meshLayerState.ID, meshLayerState.DrawOrder);
-
-                MeshData newMesh = new(meshLayerState.Name)
-                {
-                    ID = meshLayerState.ID,
-                    drawOrder = (ushort)meshLayerState.DrawOrder,
-                    transform = meshLayerState.MeshTransform,
-                    sourcePath = meshLayerState.SourcePath,
-                    texture = new(meshLayerState.Texture),
-                    name = meshLayerState.Name
-                };
-
-                context.Meshes.Register(newMesh);
-                MeshManager.Instance.CreateArtMeshObj(meshLayerState.Texture, meshLayerState.ID);
-            }
-            else
-            {
-                layers.Remove(meshLayerState.ID);
-                context.Meshes.TryGet(meshLayerState.ID, out MeshData meshData);
-                meshData.drawOrder = (ushort)meshLayerState.DrawOrder;
-                meshData.transform = meshLayerState.MeshTransform;
-                meshData.sourcePath = meshLayerState.SourcePath;
-                meshData.texture = new(meshLayerState.Texture);
-                meshData.name = meshLayerState.Name;
-            }
-        }
-
-        foreach (Guid id in layers) // delete action
-        {
-            LayerManager.Instance.DeleteUILayer(id);
-
-            context.Meshes.Remove(id);
-            MeshManager.Instance.DeleteArtMeshObj(id);
-
-            List<ParamCurve> paramCurves = context.ParamCurves.GetParamCurvesOfMesh(id);
-            for (int i = 0; i < paramCurves.Count; i++)
-            {
-                ParamCurve paramCurve = paramCurves[i];
-                foreach (Guid pointID in paramCurve.ParamPoints)
-                {
-                    context.ParamPoints.Remove(pointID);
-                }
-                context.ParamCurves.Remove(paramCurve.ID);
-            }
-
-            if (context.GeneralSettings.SelectedMeshID == id)
-            {
-                ParameterManager.Instance.HighlightCurves(new());
-            }
-        }
-
-        context.GeneralSettings.SelectedMeshID = state.SelectedMeshLayerID;
-    }
-
-    private void ExecuteSelectLayer(MeshLayerStates state, IModelContext context)
-    {
-        context.GeneralSettings.SelectedMeshID = state.SelectedMeshLayerID;
-
-        List<Guid> paramIDs = context.ParamCurves.GetAssignedParamIDsOfMesh(state.SelectedMeshLayerID);
-        ParameterManager.Instance.HighlightCurves(paramIDs);
-    }
-
-    private void ExecuteChangeLayerName(MeshLayerStates state, IModelContext context)
-    {
-        foreach ((var id, var meshLayerState) in state.MeshLayers)
-        {
-            context.Meshes.TryGet(id, out MeshData meshData);
-            meshData.name = meshLayerState.Name;
-        }
+        return null;
     }
 }

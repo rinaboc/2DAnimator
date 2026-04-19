@@ -33,6 +33,7 @@ public class ParameterSlider : Clickable, IView<ParameterTimelineState, Paramete
 
     private float sliderValue;
     private string paramName;
+    private bool _isSelected = false;
 
     private IViewModel<ParameterTimelineState, ParameterStates> _viewModel;
 
@@ -49,6 +50,11 @@ public class ParameterSlider : Clickable, IView<ParameterTimelineState, Paramete
             if (float.TryParse(ParameterValueField.text, out float input))
                 SetValue(input);
         });
+    }
+
+    public void OnDragStart()
+    {
+        _viewModel?.Send(new StartParameterDragIntent(paramID, slider.value));
     }
 
     private void OnDestroy()
@@ -80,7 +86,7 @@ public class ParameterSlider : Clickable, IView<ParameterTimelineState, Paramete
 
     void OnClick(InputAction.CallbackContext context)
     {
-        if (IsInsideCollider())
+        if (IsInsideCollider() && !_isSelected)
         {
             _viewModel?.Send(new SelectParameterIntent(paramID));
         }
@@ -89,6 +95,7 @@ public class ParameterSlider : Clickable, IView<ParameterTimelineState, Paramete
     public void SetSelected(bool isSelected)
     {
         Background.color = isSelected ? SelectedColor : DefaultColor;
+        _isSelected = isSelected;
     }
 
     private void SetMinMaxValues(float min, float max)
@@ -132,18 +139,33 @@ public class ParameterSlider : Clickable, IView<ParameterTimelineState, Paramete
         SetMinMaxValues(minValue, maxValue);
     }
 
+    public void DeleteParamPointHandles()
+    {
+        foreach ((_, GameObject item) in paramPoints)
+        {
+            Destroy(item);
+        }
+        paramPoints.Clear();
+    }
+
     public void OnValueChanged()
     {
-        sliderValue = slider.value;
-        ParameterValueField.text = sliderValue.ToString("F2");
-        _viewModel?.Send(new InterpolateParameterIntent(paramID, sliderValue));
+        if (Math.Abs(sliderValue - slider.value) < 0.01f) return;
+        _viewModel?.Send(new InterpolateParameterIntent(paramID, slider.value));
     }
 
     public void SetValue(float value)
     {
         sliderValue = value;
         slider.value = value;
-        ParameterValueField.text = sliderValue.ToString();
+        ParameterValueField.text = sliderValue.ToString("F2");
+    }
+
+    public void SetValueWithoutNotify(float value)
+    {
+        sliderValue = value;
+        slider.SetValueWithoutNotify(value);
+        ParameterValueField.text = sliderValue.ToString("F2");
     }
 
     public float GetValue()
@@ -158,7 +180,7 @@ public class ParameterSlider : Clickable, IView<ParameterTimelineState, Paramete
         SetSelected(parameterState.IsSelected);
         SetParamName(parameterState.Name);
         SetMinMaxValues(parameterState.MinValue, parameterState.MaxValue);
-        SetValue(parameterState.DefaultValue);
+        SetValue(parameterState.CurValue);
     }
 
     public void SetViewModel(IViewModel<ParameterTimelineState, ParameterStates> viewModel)
