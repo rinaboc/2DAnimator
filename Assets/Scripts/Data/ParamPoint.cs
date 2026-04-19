@@ -12,6 +12,13 @@ public class ParamPoint : EntityBase
         transform = new();
     }
 
+    public ParamPoint Copy() => new(ParamValue)
+    {
+        ID = ID,
+        transform = transform.Clone()
+    };
+
+
     public override string ToString() => $"{ID}: paramValue {ParamValue}, {transform}";
 
     public float Dist(ParamPoint pp) => Math.Abs(this.ParamValue - pp.ParamValue);

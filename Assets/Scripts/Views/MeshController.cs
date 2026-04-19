@@ -96,9 +96,24 @@ public class MeshController : MonoBehaviour, IView<MeshLayerStates, MeshStates>
     /// the mesh's transformation difference from the value is calculated and the animation data is updated.
     /// </summary>
     /// <param name="value">transformation's value</param>
-    public void SaveTransform(TransformType type)
+    public void SaveTransform(object value, TransformType type)
     {
-        _viewModel?.Send(new SaveTransformIntent(ID, type));
+        TransformData transform = new();
+
+        switch (type)
+        {
+            case TransformType.POSITION:
+                transform.Position = (Vector3)value;
+                break;
+            case TransformType.ROTATION:
+                transform.Rotation = (Quaternion)value;
+                break;
+            case TransformType.SCALE:
+                transform.Scale = (Vector3)value;
+                break;
+        }
+
+        _viewModel?.Send(new SaveTransformIntent(ID, transform, type));
     }
 
     public void Render(MeshStates state)

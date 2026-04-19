@@ -6,13 +6,10 @@ namespace Assets.Scripts.Utility.MVI
     public interface IStore
     {
         void Reduce(IIntent intent);
-        void Execute(IIntent intent);
         Type GetStateType();
-        void Undo();
-        void Redo();
-        void CreateSnapshot(IIntent intent);
-        void ClearHistory();
-        void PrintHistory();
+        void SetState(object state);
+        object GetState();
+        void UpdateState();
     }
 
     public sealed class Store<TState> : IStore where TState : IState<TState>
@@ -20,9 +17,6 @@ namespace Assets.Scripts.Utility.MVI
         public TState State { get; private set; }
         public event Action<TState> StateChanged;
         private readonly IDispatcher _dispatcher;
-
-        readonly BoundedStack<TState> _stateHistory = new(40);
-        readonly Stack<KeyValuePair<IIntent, TState>> _futureStates = new();
 
         public Store(TState state, IDispatcher dispatcher)
         {
@@ -38,42 +32,14 @@ namespace Assets.Scripts.Utility.MVI
 
         public void Dispatch(IIntent intent)
         {
-            // if (intent is IIntentUndo) { _dispatcher.Undo(); return; }
-            // else if (intent is IIntentRedo) { _dispatcher.Redo(); return; }
-            // else if (intent is InitializeProjectIntent)
-            // {
-            //     ClearHistory();
-            // }
-
-            // if (IntentHelper.IsGlobalIntent(intent))
-            //     _dispatcher.Dispatch(intent);
-            // else
-            //     Reduce(intent);
-
             _dispatcher.Dispatch(intent, this);
-
-            Execute(intent);
         }
-
-        public void Execute(IIntent intent)
-        {
-            _dispatcher.Execute(intent, State);
-        }
-
 
         public void Reduce(IIntent intent)
         {
-            // CreateSnapshot(intent);
-
             var newState = _dispatcher.Reduce(State, intent);
             bool stateChanged = !Equals(State, newState);
             State = newState;
-
-            if (_futureStates.Count > 0)
-            {
-                _futureStates.Clear();
-                _futureStates.TrimExcess();
-            }
 
             if (!stateChanged) return;
 
@@ -86,50 +52,21 @@ namespace Assets.Scripts.Utility.MVI
             _dispatcher.Remove(this);
         }
 
-        public void Undo()
+        public void SetState(object state)
         {
-            do
-            {
-                if (!_stateHistory.TryPop(out var prevState)) return;
-                var (intent, state) = prevState;
-                _futureStates.Push(new(intent, State));
-                State = state;
-                Execute(intent);
-            } while (_stateHistory.Count > 0 &&
-                (!IntentHelper.IsUndoableIntent(_futureStates.Peek().Key)));
-
+            State = (TState)state;
             StateChanged?.Invoke(State);
         }
 
-        public void Redo()
+        public object GetState()
         {
-            do
-            {
-                if (!_futureStates.TryPop(out var nextState)) return;
-                var (intent, state) = nextState;
-                _stateHistory.Push(new(intent, State));
-                State = state;
-                Execute(intent);
-            } while (_futureStates.Count > 0 &&
-                (!IntentHelper.IsUndoableIntent(_futureStates.Peek().Key)));
+            return State.Clone();
+        }
 
+        public void UpdateState()
+        {
+            State = _dispatcher.Update(State);
             StateChanged?.Invoke(State);
-        }
-
-        public void CreateSnapshot(IIntent intent)
-        {
-            _stateHistory.Push(new(intent, State.Clone()));
-        }
-
-        public void ClearHistory()
-        {
-            _stateHistory.Clear();
-            _futureStates.Clear();
-        }
-
-        public void PrintHistory()
-        {
-            _stateHistory.Print();
         }
     }
 }

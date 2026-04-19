@@ -8,10 +8,19 @@ public class OperationReducer : IReducer<OperationState>
     {
         return intent switch
         {
-            UndoIntent _ => ReduceUndo(previous),
-            RedoIntent _ => ReduceRedo(previous),
-            _ => ReduceDefault(previous, intent)
+            // UndoIntent _ => ReduceUndo(previous),
+            // RedoIntent _ => ReduceRedo(previous),
+            // _ => ReduceDefault(previous, intent)
+            _ => previous
         };
+    }
+
+    public OperationState Update(OperationState previous, IModelContext context)
+    {
+        var next = previous.Clone();
+        next.CanUndo = context.SessionInfo.UndoCount > 0;
+        next.CanRedo = context.SessionInfo.RedoCount > 0;
+        return next;
     }
 
     private OperationState ReduceDefault(OperationState previous, IIntent intent)

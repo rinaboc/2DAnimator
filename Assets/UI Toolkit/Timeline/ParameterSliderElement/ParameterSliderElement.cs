@@ -55,6 +55,8 @@ public partial class ParameterSliderElement : VisualElement, IView<ParameterTime
 
     private void AddKeys(List<float> values)
     {
+        if (values == null) return;
+
         var paramKeys = new List<Button>();
         foreach (var child in _container.Children())
         {

@@ -54,7 +54,7 @@ public class ParameterSlider : Clickable, IView<ParameterTimelineState, Paramete
 
     public void OnDragStart()
     {
-        _viewModel?.Send(new StartParameterDragIntent(paramID));
+        _viewModel?.Send(new StartParameterDragIntent(paramID, slider.value));
     }
 
     private void OnDestroy()
@@ -139,20 +139,33 @@ public class ParameterSlider : Clickable, IView<ParameterTimelineState, Paramete
         SetMinMaxValues(minValue, maxValue);
     }
 
+    public void DeleteParamPointHandles()
+    {
+        foreach ((_, GameObject item) in paramPoints)
+        {
+            Destroy(item);
+        }
+        paramPoints.Clear();
+    }
+
     public void OnValueChanged()
     {
         if (Math.Abs(sliderValue - slider.value) < 0.01f) return;
-
-        sliderValue = slider.value;
-        ParameterValueField.text = sliderValue.ToString("F2");
-        _viewModel?.Send(new InterpolateParameterIntent(paramID, sliderValue));
+        _viewModel?.Send(new InterpolateParameterIntent(paramID, slider.value));
     }
 
     public void SetValue(float value)
     {
         sliderValue = value;
         slider.value = value;
-        ParameterValueField.text = sliderValue.ToString();
+        ParameterValueField.text = sliderValue.ToString("F2");
+    }
+
+    public void SetValueWithoutNotify(float value)
+    {
+        sliderValue = value;
+        slider.SetValueWithoutNotify(value);
+        ParameterValueField.text = sliderValue.ToString("F2");
     }
 
     public float GetValue()
@@ -167,7 +180,7 @@ public class ParameterSlider : Clickable, IView<ParameterTimelineState, Paramete
         SetSelected(parameterState.IsSelected);
         SetParamName(parameterState.Name);
         SetMinMaxValues(parameterState.MinValue, parameterState.MaxValue);
-        SetValue(parameterState.DefaultValue);
+        SetValue(parameterState.CurValue);
     }
 
     public void SetViewModel(IViewModel<ParameterTimelineState, ParameterStates> viewModel)

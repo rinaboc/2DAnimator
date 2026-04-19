@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
 namespace Assets.Scripts.States
@@ -58,6 +59,22 @@ namespace Assets.Scripts.States
             HasParametersAssigned = ms.HasParametersAssigned;
         }
 
+        public MeshLayerState(MeshData meshData, MeshLayerState ms)
+        {
+            ID = meshData.ID;
+            DrawOrder = meshData.drawOrder;
+            Texture = meshData.texture.Data;
+            SourcePath = meshData.sourcePath;
+            Name = meshData.name;
+            MeshTransform = meshData.transform.Clone();
+
+            IsSelected = ms.IsSelected;
+            AnimationTransform = ms.AnimationTransform.Clone();
+            InterpolatedTransform = ms.InterpolatedTransform.Clone();
+            IsInterpolated = ms.IsInterpolated;
+            HasParametersAssigned = ms.HasParametersAssigned;
+        }
+
         public LayerState BuildLayerState()
         {
             return new LayerState()
@@ -104,5 +121,26 @@ namespace Assets.Scripts.States
             ),
             SelectedMeshLayerID = SelectedMeshLayerID
         };
+
+        public MeshLayerStates(IModelContext context, MeshLayerStates ms) : this()
+        {
+            foreach (MeshData meshData in context.Meshes.GetAll())
+            {
+                if (!ms.MeshLayers.TryGetValue(meshData.ID, out var meshLayerState))
+                {
+                    MeshLayerState newMeshLayerState = new();
+                    MeshLayers.Add(meshData.ID, new MeshLayerState(meshData, newMeshLayerState));
+                }
+                else
+                {
+                    MeshLayers.Add(meshData.ID, new MeshLayerState(meshData, meshLayerState));
+                }
+                var meshlayer = MeshLayers[meshData.ID];
+                meshlayer.HasParametersAssigned = context.ParamCurves.GetAssignedParamIDsOfMesh(meshData.ID).Count > 0;
+                meshlayer.IsSelected = meshData.ID == context.SessionInfo.SelectedMeshID;
+            }
+
+            SelectedMeshLayerID = context.SessionInfo.SelectedMeshID;
+        }
     }
 }
