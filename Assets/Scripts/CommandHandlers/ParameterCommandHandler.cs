@@ -18,7 +18,19 @@ public class ParameterCommandHandler : ICommandHandler
             InterpolateParameterIntent interpolate => ExecuteInterpolateParameter(interpolate, context),
             InitializeProjectIntent init => ExecuteInitializeProject(init, context),
             TimelineParameterSliderChangedIntent slider => ExecuteTimelineParameterSliderChanged(slider, context),
+            StartParameterDragIntent drag => ExecuteStartParameterDrag(drag, context),
             _ => null
+        };
+    }
+
+    private Action ExecuteStartParameterDrag(StartParameterDragIntent drag, IModelContext context)
+    {
+        float sliderValue = ParameterManager.Instance.GetParamSlider(drag.ParamID).GetValue();
+        ParameterManager.Instance.GetParamSlider(drag.ParamID).SetValueWithoutNotify(drag.StartValue);
+
+        return () =>
+        {
+            ParameterManager.Instance.GetParamSlider(drag.ParamID).SetValueWithoutNotify(sliderValue);
         };
     }
 

@@ -70,7 +70,7 @@ public record DeleteSelectedParameterIntent() : IIntent;
 
 #region Animation
 [NonUndoableIntent] public record InterpolateParameterIntent(Guid ParamID, float Value) : IIntentUnstored;
-[NonUndoableIntent] public record StartParameterDragIntent(Guid ParamID) : IIntentUnstored;
+public record StartParameterDragIntent(Guid ParamID, float StartValue) : IIntent;
 #endregion
 
 #region Timeline Operations

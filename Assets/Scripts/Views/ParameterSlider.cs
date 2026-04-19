@@ -54,7 +54,7 @@ public class ParameterSlider : Clickable, IView<ParameterTimelineState, Paramete
 
     public void OnDragStart()
     {
-        _viewModel?.Send(new StartParameterDragIntent(paramID));
+        _viewModel?.Send(new StartParameterDragIntent(paramID, slider.value));
     }
 
     private void OnDestroy()
@@ -158,6 +158,13 @@ public class ParameterSlider : Clickable, IView<ParameterTimelineState, Paramete
     {
         sliderValue = value;
         slider.value = value;
+        ParameterValueField.text = sliderValue.ToString("F2");
+    }
+
+    public void SetValueWithoutNotify(float value)
+    {
+        sliderValue = value;
+        slider.SetValueWithoutNotify(value);
         ParameterValueField.text = sliderValue.ToString("F2");
     }
 
