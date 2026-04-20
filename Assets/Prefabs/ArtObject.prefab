@@ -728,4 +728,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ArtMeshMaterial: {fileID: 2100000, guid: cb41cb9de57e7a365b72c2b7d814a85d, type: 2}
+  WireframeMaterial: {fileID: 2100000, guid: ab18acdae8821fd41adb9354a66a0c73, type: 2}
+  VerticesMaterial: {fileID: 2100000, guid: 02d976f9ecf70244daac397bfe53eb93, type: 2}
   BoundingBox: {fileID: 775535050593248320}

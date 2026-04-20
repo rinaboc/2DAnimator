@@ -18,4 +18,23 @@ public class ViewportManager : ManagerBase<ViewportManager>
             return _bottomRightAnchor.position;
         }
     }
+
+    [SerializeField] private RectTransform _viewport;
+
+    void Start()
+    {
+
+        Canvas.ForceUpdateCanvases();
+
+        if (_viewport != null)
+        {
+            var size = _viewport.sizeDelta;
+
+            if (_viewport.TryGetComponent<BoxCollider>(out var boxCollider))
+            {
+                boxCollider.size = new Vector3(size.x, size.y, 0.1f);
+                boxCollider.center = new Vector3(-size.x * 0.5f, 0f, 0f);
+            }
+        }
+    }
 }
