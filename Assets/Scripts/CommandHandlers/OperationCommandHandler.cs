@@ -9,8 +9,24 @@ public class OperationCommandHandler : ICommandHandler
         {
             OpenProjectIntent open => ExecuteOpenProject(open),
             SaveProjectIntent save => ExecuteSaveProject(save, context),
+            StartEditModeIntent _ => ExecuteStartEditMode(context),
+            EndEditModeIntent _ => ExecuteEndEditMode(context),
             _ => ExecuteDefault(context, intent)
         };
+    }
+
+    private Action ExecuteEndEditMode(IModelContext context)
+    {
+        throw new NotImplementedException();
+    }
+
+    private Action ExecuteStartEditMode(IModelContext context)
+    {
+        context.SessionInfo.IsEditMode = true;
+
+
+
+        return null;
     }
 
     private Action ExecuteDefault(IModelContext context, IIntent intent)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Data.MeshInfo;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
@@ -172,7 +173,8 @@ public class MeshLayerCommandHandler : ICommandHandler
             LayerManager.Instance.SetSiblingIndex(mesh.ID, mesh.drawOrder);
 
             context.Meshes.Register(mesh);
-            MeshManager.Instance.CreateArtMeshObj(mesh.texture.Data, mesh.ID);
+            GameObject newMeshObject = MeshBuilder.Build(mesh.texture.Data, out MeshInfo meshInfo);
+            MeshManager.Instance.CreateArtMeshObj(newMeshObject, mesh.ID);
 
             foreach (var pc in deletedParamCurves) context.ParamCurves.Register(pc);
             foreach (var pp in deletedParamPoints) context.ParamPoints.Register(pp);
@@ -256,7 +258,8 @@ public class MeshLayerCommandHandler : ICommandHandler
         LayerManager.Instance.SetSiblingIndex(newMesh.ID, newMesh.drawOrder);
 
         context.Meshes.Register(newMesh);
-        MeshManager.Instance.CreateArtMeshObj(newMesh.texture.Data, newMesh.ID);
+        GameObject newMeshObject = MeshBuilder.Build(newMesh.texture.Data, out MeshInfo meshInfo);
+        MeshManager.Instance.CreateArtMeshObj(newMeshObject, newMesh.ID);
 
         return () =>
         {
@@ -285,8 +288,8 @@ public class MeshLayerCommandHandler : ICommandHandler
             if (item.texture.Data == null)
             { Debug.LogError("couldn't load image texture"); continue; }
             context.Meshes.Register(item);
-            MeshManager.Instance.CreateArtMeshObj(item.texture.Data, item.ID);
-
+            GameObject newMeshObject = MeshBuilder.Build(item.texture.Data, out MeshInfo meshInfo);
+            MeshManager.Instance.CreateArtMeshObj(newMeshObject, item.ID);
             LayerManager.Instance.CreateUIArtLayer(item.ID);
         }
 

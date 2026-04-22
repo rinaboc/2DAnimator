@@ -12,6 +12,7 @@ namespace Assets.Scripts.Utility.MVI
         Guid SelectedKeyframeID { get; set; }
         bool TimelineVisibility { get; set; }
         int CurrentFrame { get; set; }
+        bool IsEditMode { get; set; }
 
     }
 
@@ -25,6 +26,7 @@ namespace Assets.Scripts.Utility.MVI
         public Guid SelectedKeyframeID { get; set; }
         public bool TimelineVisibility { get; set; }
         public int CurrentFrame { get; set; }
+        public bool IsEditMode { get; set; }
 
         public SessionInfo()
         {
@@ -36,6 +38,7 @@ namespace Assets.Scripts.Utility.MVI
             SelectedKeyframeID = Guid.Empty;
             TimelineVisibility = false;
             CurrentFrame = 1;
+            IsEditMode = false;
         }
     }
 }

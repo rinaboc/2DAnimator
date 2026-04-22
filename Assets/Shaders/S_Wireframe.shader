@@ -85,13 +85,13 @@ Shader "Unlit/S_Wireframe"
             }
 
             fixed4 frag (g2f i) : SV_Target {
-                if (i.worldPos.x < _TopLeftAnchor.x || i.worldPos.y > _TopLeftAnchor.y ||
-                    i.worldPos.x > _BottomRightAnchor.x || i.worldPos.y < _BottomRightAnchor.y) {
-                    discard;
-                }
+                // if (i.worldPos.x < _TopLeftAnchor.x || i.worldPos.y > _TopLeftAnchor.y ||
+                //     i.worldPos.x > _BottomRightAnchor.x || i.worldPos.y < _BottomRightAnchor.y) {
+                //     discard;
+                // }
 
-                float minBary = min(min(i.bary.x, i.bary.y), i.bary.z);
-                if (minBary > _WireThickness * 100.0) discard;
+                // float minBary = min(min(i.bary.x, i.bary.y), i.bary.z);
+                // if (minBary > _WireThickness * 100.0) discard;
 
                 return _WireColor;
             }

@@ -38,6 +38,8 @@ namespace Assets.Scripts.Utility.MVI
 [GlobalIntent, NonUndoableIntent] public record InitializeProjectIntent(SaveData SaveData) : IIntent;
 public record UndoIntent() : IIntentUndo;
 public record RedoIntent() : IIntentRedo;
+[GlobalIntent, NonUndoableIntent] public record StartEditModeIntent() : IIntent;
+public record EndEditModeIntent() : IIntent;
 #endregion
 
 #region Mesh Transformation

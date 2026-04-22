@@ -40,10 +40,10 @@ public class MeshManager : ManagerBase<MeshManager>
         _meshControllers.Clear();
     }
 
-    public void CreateArtMeshObj(Texture2D texture, Guid ID)
+    public void CreateArtMeshObj(GameObject artMeshObject, Guid ID)
     {
         // create ArtObject inside viewport and assign the image to its sprite
-        MeshController meshController = SetupMeshController(texture, ID);
+        MeshController meshController = SetupMeshController(artMeshObject, ID);
         meshController.SetViewModel(_viewModel);
         meshController.GetBoundingBox().SetViewModel(_viewModel);
 
@@ -55,13 +55,13 @@ public class MeshManager : ManagerBase<MeshManager>
         _viewModel?.Send(intent);
     }
 
-    public MeshController SetupMeshController(Texture2D texture, Guid ID)
+    public MeshController SetupMeshController(GameObject artMeshObject, Guid ID)
     {
         GameObject newArtObject = Instantiate(ArtObjectPrefab, ViewportScale.transform, false);
         newArtObject.name = "ArtObject" + ID;
         MeshController meshController = newArtObject.GetComponent<MeshController>();
         meshController
-            .LoadSprite(texture)
+            .SetArtMeshObject(artMeshObject)
             .SetMeshID(ID);
         return meshController;
     }

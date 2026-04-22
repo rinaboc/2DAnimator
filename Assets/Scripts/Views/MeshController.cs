@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
@@ -7,7 +6,6 @@ using UnityEngine;
 public class MeshController : MonoBehaviour, IView<MeshLayerStates, MeshStates>
 {
     public GameObject ArtMeshObject { get; private set; }
-    [SerializeField] private Material ArtMeshMaterial;
     [SerializeField] private BoundingBox BoundingBox;
     public Guid ID { get; private set; }
 
@@ -15,7 +13,7 @@ public class MeshController : MonoBehaviour, IView<MeshLayerStates, MeshStates>
 
     private void Awake()
     {
-        if (ArtMeshMaterial == null || BoundingBox == null)
+        if (BoundingBox == null)
             Debug.LogError("Not all fields have been assigned.");
     }
 
@@ -43,15 +41,16 @@ public class MeshController : MonoBehaviour, IView<MeshLayerStates, MeshStates>
         return this;
     }
 
-    public MeshController LoadSprite(Texture2D texture)
+    public MeshController SetArtMeshObject(GameObject artMeshObject)
     {
-        // art mesh creation
-        ArtMeshObject = MeshBuilder.Build(BoundingBox.transform, ArtMeshMaterial, texture);
+        ArtMeshObject = artMeshObject;
+        ArtMeshObject.transform.parent = BoundingBox.transform;
+        ArtMeshObject.transform.localPosition = Vector3.zero;
+        ArtMeshObject.transform.localScale = Vector3.one;
 
         BoxCollider boxCollider = ArtMeshObject.GetComponent<BoxCollider>();
         BoundingBox.boxCollider = boxCollider;
         BoundingBox.CreateBoundingBox(boxCollider.center, boxCollider.size);
-
         return this;
     }
 
