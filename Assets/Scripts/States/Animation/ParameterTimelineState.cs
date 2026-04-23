@@ -11,7 +11,7 @@ namespace Assets.Scripts.States
             Timeline = new();
         }
 
-        public ParameterTimelineState Clone() => new()
+        public ParameterTimelineState Copy() => new()
         {
             Parameters = Parameters.Clone(),
             Timeline = Timeline.Clone()

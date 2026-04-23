@@ -74,6 +74,9 @@ public class LayerController : Clickable, IView<MeshLayerStates, LayerStates>
     {
         if (!state.Layers.TryGetValue(ID, out var layer)) return;
 
+        ParentObj.SetActive(layer.IsActive);
+        if (!layer.IsActive) return;
+
         SetSelected(layer.IsSelected);
         if (!LayerInput.isFocused && LayerInput.text != layer.Name)
             LayerInput.text = layer.Name;

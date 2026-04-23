@@ -64,6 +64,11 @@ public class LayerManager : ManagerBase<LayerManager>
         _layerControllers.TryAdd(ID, layerController);
     }
 
+    public void EditModeClicked()
+    {
+        _viewModel?.Send(new StartEditModeIntent());
+    }
+
     public void MoveUIArtLayerUp()
     {
         _viewModel?.Send(new MoveLayerUpIntent());

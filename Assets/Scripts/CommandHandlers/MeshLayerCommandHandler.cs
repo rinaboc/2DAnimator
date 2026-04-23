@@ -260,6 +260,7 @@ public class MeshLayerCommandHandler : ICommandHandler
         context.Meshes.Register(newMesh);
         GameObject newMeshObject = MeshBuilder.Build(newMesh.texture.Data, out MeshInfo meshInfo);
         MeshManager.Instance.CreateArtMeshObj(newMeshObject, newMesh.ID);
+        newMesh.meshInfo = meshInfo;
 
         return () =>
         {

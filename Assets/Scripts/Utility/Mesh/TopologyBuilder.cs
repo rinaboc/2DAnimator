@@ -44,7 +44,12 @@ public class TopologyBuilder
         }
 
         meshInfo.Vertices.AddRange(vNodes);
-        meshInfo.HalfEdges.AddRange(edgeTracker.Values);
+        foreach (var item in edgeTracker.Values)
+        {
+            item.IsConstrained = true;
+            meshInfo.HalfEdges.Add(item);
+        }
+        // meshInfo.HalfEdges.AddRange(edgeTracker.Values);
     }
 
     private static void ConnectTwin(int a, int b, HalfEdge current, Dictionary<(int, int), HalfEdge> tracker)

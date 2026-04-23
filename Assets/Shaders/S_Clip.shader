@@ -8,13 +8,14 @@ Shader "Unlit/S_Clip"
     }
     SubShader
     {
-        Blend One OneMinusSrcAlpha
+        Blend SrcAlpha OneMinusSrcAlpha
         LOD 100
 
         Pass
         {
             ZWrite Off
             Cull Off
+            ZTest Always
 
             CGPROGRAM
             #pragma vertex vert
@@ -25,12 +26,14 @@ Shader "Unlit/S_Clip"
             struct appdata
             {
                 float4 vertex : POSITION;
+                fixed4 color : COLOR;
             };
 
             struct v2f
             {
                 float4 vertex : SV_POSITION;
                 float3 worldPos : TEXCOORD1;
+                fixed4 color : COLOR;
             };
 
             fixed4 _Color;
@@ -42,6 +45,7 @@ Shader "Unlit/S_Clip"
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+                o.color = v.color;
                 return o;
             }
 
@@ -52,7 +56,7 @@ Shader "Unlit/S_Clip"
                     discard;
                 }
 
-                return _Color;
+                return i.color;
             }
             ENDCG
         }

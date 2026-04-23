@@ -15,6 +15,7 @@ namespace Assets.Scripts.States
         public bool IsSelected { get; set; }
         public ushort DrawOrder { get; set; }
         public bool HasParametersAssigned { get; set; }
+        public bool IsActive { get; set; }
 
         public MeshState()
         {
@@ -29,6 +30,7 @@ namespace Assets.Scripts.States
             IsSelected = false;
             DrawOrder = 0;
             HasParametersAssigned = false;
+            IsActive = true;
         }
         public MeshState(MeshState ms)
         {
@@ -40,6 +42,7 @@ namespace Assets.Scripts.States
             IsSelected = ms.IsSelected;
             DrawOrder = ms.DrawOrder;
             HasParametersAssigned = ms.HasParametersAssigned;
+            IsActive = ms.IsActive;
         }
     }
 

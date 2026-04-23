@@ -10,21 +10,27 @@ public class OperationCommandHandler : ICommandHandler
             OpenProjectIntent open => ExecuteOpenProject(open),
             SaveProjectIntent save => ExecuteSaveProject(save, context),
             StartEditModeIntent _ => ExecuteStartEditMode(context),
-            EndEditModeIntent _ => ExecuteEndEditMode(context),
+            EndEditModeIntent exit => ExecuteEndEditMode(exit, context),
             _ => ExecuteDefault(context, intent)
         };
     }
 
-    private Action ExecuteEndEditMode(IModelContext context)
+    private Action ExecuteEndEditMode(EndEditModeIntent exit, IModelContext context)
     {
-        throw new NotImplementedException();
+        context.SessionInfo.IsEditMode = false;
+        ViewportManager.Instance.SetSidebarVisibility(true);
+
+        if (!exit.SaveRequired) return null;
+
+        // TODO: save changes
+
+        return null;
     }
 
     private Action ExecuteStartEditMode(IModelContext context)
     {
         context.SessionInfo.IsEditMode = true;
-
-
+        ViewportManager.Instance.SetSidebarVisibility(false);
 
         return null;
     }

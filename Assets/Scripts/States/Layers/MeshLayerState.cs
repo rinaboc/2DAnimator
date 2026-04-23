@@ -12,6 +12,7 @@ namespace Assets.Scripts.States
         public Guid ID { get; set; }
         public bool IsSelected { get; set; }
         public int DrawOrder { get; set; }
+        public bool IsActive { get; set; }
         #endregion
 
         #region Layer Attributes
@@ -42,6 +43,7 @@ namespace Assets.Scripts.States
             InterpolatedTransform = new();
             IsInterpolated = false;
             HasParametersAssigned = false;
+            IsActive = true;
         }
 
         public MeshLayerState(MeshLayerState ms)
@@ -57,6 +59,7 @@ namespace Assets.Scripts.States
             InterpolatedTransform = ms.InterpolatedTransform.Clone();
             IsInterpolated = ms.IsInterpolated;
             HasParametersAssigned = ms.HasParametersAssigned;
+            IsActive = ms.IsActive;
         }
 
         public MeshLayerState(MeshData meshData, MeshLayerState ms)
@@ -73,6 +76,7 @@ namespace Assets.Scripts.States
             InterpolatedTransform = ms.InterpolatedTransform.Clone();
             IsInterpolated = ms.IsInterpolated;
             HasParametersAssigned = ms.HasParametersAssigned;
+            IsActive = ms.IsActive;
         }
 
         public LayerState BuildLayerState()
@@ -82,7 +86,8 @@ namespace Assets.Scripts.States
                 ID = ID,
                 Name = Name,
                 IsSelected = IsSelected,
-                DrawOrder = DrawOrder
+                DrawOrder = DrawOrder,
+                IsActive = IsActive
             };
         }
 
@@ -97,7 +102,8 @@ namespace Assets.Scripts.States
                 IsInterpolated = IsInterpolated,
                 IsSelected = IsSelected,
                 DrawOrder = (ushort)(meshCount - 1 - DrawOrder),
-                HasParametersAssigned = HasParametersAssigned
+                HasParametersAssigned = HasParametersAssigned,
+                IsActive = IsActive
             };
         }
     }
@@ -113,7 +119,7 @@ namespace Assets.Scripts.States
             SelectedMeshLayerID = Guid.Empty;
         }
 
-        public MeshLayerStates Clone() => new()
+        public MeshLayerStates Copy() => new()
         {
             MeshLayers = MeshLayers.ToDictionary(
                 p => p.Key,

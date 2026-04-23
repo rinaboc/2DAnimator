@@ -119,6 +119,9 @@ public class MeshController : MonoBehaviour, IView<MeshLayerStates, MeshStates>
     {
         if (!state.Meshes.TryGetValue(ID, out var meshState)) return;
 
+        gameObject.SetActive(meshState.IsActive);
+        if (!meshState.IsActive) return;
+
         TransformData transform = meshState.MeshTransform + meshState.AnimationTransform;
         if (meshState.IsInterpolated)
         {

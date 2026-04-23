@@ -1,24 +1,36 @@
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.States;
+using Assets.Scripts.States.EditMode;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
 public class MeshManager : ManagerBase<MeshManager>
 {
     [SerializeField] private Dictionary<Guid, MeshController> _meshControllers = new();
-    private IViewModel<MeshLayerStates, MeshStates> _viewModel;
     [SerializeField] private AppInitializer _appInitializer;
 
     [Header("Art Mesh creation")]
     [SerializeField] private GameObject ArtObjectPrefab;
     [SerializeField] private GameObject ViewportScale;
+    private IViewModel<MeshLayerStates, MeshStates> _viewModel;
+
+    [Header("Mesh Edit creation")]
+    [SerializeField] private GameObject MeshEditPrefab;
+    private IViewModel<MeshUIEditState, MeshEditState> _meshEditViewModel;
+    private GameObject _meshEditObject;
+
 
     public bool GetMeshObject(Guid id, out MeshController artMesh) => _meshControllers.TryGetValue(id, out artMesh);
 
     void Start()
     {
         if (!_appInitializer.GetViewModel(out _viewModel))
+        {
+            Debug.LogError("Couldn't fetch viewModel");
+        }
+
+        if (!_appInitializer.GetViewModel(out _meshEditViewModel))
         {
             Debug.LogError("Couldn't fetch viewModel");
         }
@@ -38,6 +50,22 @@ public class MeshManager : ManagerBase<MeshManager>
             Destroy(artMesh.gameObject);
         }
         _meshControllers.Clear();
+    }
+
+    public void DeleteMeshEditObj()
+    {
+        Destroy(_meshEditObject);
+    }
+
+
+    public void CreateMeshEditObj(GameObject meshEditObject, Guid ID)
+    {
+        GameObject newMeshEditObject = Instantiate(MeshEditPrefab, ViewportScale.transform, false);
+        newMeshEditObject.name = "MeshEdit" + ID;
+        MeshEditView meshEditView = newMeshEditObject.GetComponent<MeshEditView>();
+        meshEditView.SetArtMeshObject(meshEditObject);
+        meshEditView.SetViewModel(_meshEditViewModel);
+        _meshEditObject = newMeshEditObject;
     }
 
     public void CreateArtMeshObj(GameObject artMeshObject, Guid ID)

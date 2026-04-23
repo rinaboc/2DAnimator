@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.States;
+using Assets.Scripts.States.EditMode;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
 
@@ -45,10 +46,12 @@ public class AppInitializer : MonoBehaviour
         _dispatcher.Register(new ParameterCommandHandler());
         _dispatcher.Register(new TimelineCommandHandler());
         _dispatcher.Register(new MeshLayerCommandHandler());
+        _dispatcher.Register(new MeshUIEditCommandHandler());
 
         _dispatcher.Register(new MeshLayerReducer());
         _dispatcher.Register(new ParameterTimelineReducer(new ParameterReducer(), new TimelineReducer()));
         _dispatcher.Register(new OperationReducer());
+        _dispatcher.Register(new MeshUIEditReducer());
     }
 
     void Start()
@@ -93,6 +96,11 @@ public class AppInitializer : MonoBehaviour
         var layerViewModel = ViewModelFactory.Instance.CreateSharedViewModel<LayersViewModel, MeshLayerStates, LayerStates>(gameObject);
         Register(layerViewModel);
 
+        var meshEditViewModel = ViewModelFactory.Instance.CreateViewModel<MeshEditViewModel, MeshUIEditState, MeshEditState>(gameObject);
+        Register(meshEditViewModel);
+
+        var uiEditViewModel = ViewModelFactory.Instance.CreateSharedViewModel<UiEditViewModel, MeshUIEditState, UIEditState>(gameObject);
+        Register(uiEditViewModel);
     }
 
     private void Register<TDomain, TView>(IViewModel<TDomain, TView> viewModel) where TDomain : IState<TDomain>

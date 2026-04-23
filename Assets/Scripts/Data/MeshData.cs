@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using Assets.Scripts.Data.MeshInfo;
 using Assets.Scripts.Utility;
 using UnityEngine;
 
@@ -13,6 +14,7 @@ public class MeshData : EntityBase
 
     public TransformData transform;
     public SerializableTexture texture;
+    public MeshInfo meshInfo;
 
     public MeshData(string sourcePath) : base()
     {
@@ -23,6 +25,7 @@ public class MeshData : EntityBase
         {
             Scale = Vector3.one
         };
+        meshInfo = new();
     }
 
     [OnDeserialized]

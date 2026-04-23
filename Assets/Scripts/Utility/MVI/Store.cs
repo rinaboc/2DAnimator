@@ -60,7 +60,7 @@ namespace Assets.Scripts.Utility.MVI
 
         public object GetState()
         {
-            return State.Clone();
+            return State.Copy();
         }
 
         public void UpdateState()

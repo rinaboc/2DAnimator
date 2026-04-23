@@ -39,7 +39,7 @@ namespace Assets.Scripts.Utility.MVI
 public record UndoIntent() : IIntentUndo;
 public record RedoIntent() : IIntentRedo;
 [GlobalIntent, NonUndoableIntent] public record StartEditModeIntent() : IIntent;
-public record EndEditModeIntent() : IIntent;
+[GlobalIntent] public record EndEditModeIntent(bool SaveRequired) : IIntent;
 #endregion
 
 #region Mesh Transformation

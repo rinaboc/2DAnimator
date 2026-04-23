@@ -8,24 +8,22 @@ public class OperationReducer : IReducer<OperationState>
     {
         return intent switch
         {
-            // UndoIntent _ => ReduceUndo(previous),
-            // RedoIntent _ => ReduceRedo(previous),
-            // _ => ReduceDefault(previous, intent)
             _ => previous
         };
     }
 
     public OperationState Update(OperationState previous, IModelContext context)
     {
-        var next = previous.Clone();
+        var next = previous.Copy();
         next.CanUndo = context.SessionInfo.UndoCount > 0;
         next.CanRedo = context.SessionInfo.RedoCount > 0;
+        next.IsEditMode = context.SessionInfo.IsEditMode;
         return next;
     }
 
     private OperationState ReduceDefault(OperationState previous, IIntent intent)
     {
-        var next = previous.Clone();
+        var next = previous.Copy();
         if (IntentHelper.IsUndoableIntent(intent))
         {
             next.CanUndo = true;
@@ -42,7 +40,7 @@ public class OperationReducer : IReducer<OperationState>
     {
         if (previous.RedoCount == 0) return previous;
 
-        var next = previous.Clone();
+        var next = previous.Copy();
         if (previous.CanRedo && previous.RedoCount > 0)
         {
             next.CanUndo = true;
@@ -59,7 +57,7 @@ public class OperationReducer : IReducer<OperationState>
     {
         if (previous.UndoCount == 0) return previous;
 
-        var next = previous.Clone();
+        var next = previous.Copy();
         if (previous.CanUndo && previous.UndoCount > 0)
         {
             next.CanRedo = true;

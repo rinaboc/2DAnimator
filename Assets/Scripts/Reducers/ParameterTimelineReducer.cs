@@ -14,7 +14,7 @@ public class ParameterTimelineReducer : IReducer<ParameterTimelineState>
 
     public ParameterTimelineState Reduce(ParameterTimelineState previous, IIntent intent)
     {
-        var next = previous.Clone();
+        var next = previous.Copy();
         next.Parameters = _parameterReducer.Reduce(previous.Parameters, intent);
         next.Timeline = _timelineReducer.Reduce(previous.Timeline, intent);
 
@@ -26,7 +26,7 @@ public class ParameterTimelineReducer : IReducer<ParameterTimelineState>
 
     public ParameterTimelineState Update(ParameterTimelineState previous, IModelContext context)
     {
-        var next = previous.Clone();
+        var next = previous.Copy();
         next.Parameters = _parameterReducer.Update(previous.Parameters, context);
         next.Timeline = _timelineReducer.Update(previous.Timeline, context);
         return next;

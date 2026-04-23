@@ -7,8 +7,8 @@
 }
 
 .icon-button {
-    width: 54px;
-    height: 54px;
+    width: 64px;
+    height: 64px;
     padding-top: 0;
     padding-right: 0;
     padding-bottom: 0;
@@ -30,4 +30,8 @@
 
 .icon-button:hover {
     background-color: rgb(118, 118, 118);
+}
+
+.disable {
+    display: none;
 }

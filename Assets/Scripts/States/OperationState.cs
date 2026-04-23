@@ -8,12 +8,15 @@ namespace Assets.Scripts.States
         public bool CanUndo { get; set; }
         public bool CanRedo { get; set; }
 
-        public OperationState Clone() => new()
+        public bool IsEditMode { get; set; }
+
+        public OperationState Copy() => new()
         {
             UndoCount = UndoCount,
             RedoCount = RedoCount,
             CanUndo = CanUndo,
-            CanRedo = CanRedo
+            CanRedo = CanRedo,
+            IsEditMode = IsEditMode
         };
     }
 }

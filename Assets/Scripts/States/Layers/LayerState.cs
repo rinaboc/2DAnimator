@@ -10,6 +10,7 @@ namespace Assets.Scripts.States
         public string Name { get; set; }
         public bool IsSelected { get; set; }
         public int DrawOrder { get; set; }
+        public bool IsActive { get; set; }
 
         public LayerState() { }
         public LayerState(LayerState ls)
@@ -18,6 +19,7 @@ namespace Assets.Scripts.States
             Name = ls.Name;
             IsSelected = ls.IsSelected;
             DrawOrder = ls.DrawOrder;
+            IsActive = ls.IsActive;
         }
     }
 
@@ -32,7 +34,7 @@ namespace Assets.Scripts.States
             SelectedLayerID = Guid.Empty;
         }
 
-        public LayerStates Clone() => new()
+        public LayerStates Copy() => new()
         {
             Layers = Layers.ToDictionary(
                 p => p.Key,

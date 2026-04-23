@@ -15,8 +15,40 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
             SaveTransformIntent save => ReduceUpdateTransform(previous, new UpdateTransformIntent(save.MeshID, save.Data, save.Type)),
             InterpolateTransformIntent interpolate => ReduceInterpolateTransform(previous, interpolate),
             ResetInterpolationIntent reset => ReduceResetInterpolation(previous, reset),
+            StartEditModeIntent _ => ReduceStartEditMode(previous),
+            EndEditModeIntent exit => ReduceEndEditMode(previous, exit),
             // InitializeProjectIntent init => ReduceInitializeProject(previous, init),
             _ => previous
+        };
+    }
+
+    private MeshLayerStates ReduceEndEditMode(MeshLayerStates previous, EndEditModeIntent exit)
+    {
+        return new MeshLayerStates
+        {
+            MeshLayers = previous.MeshLayers.ToDictionary(
+                p => p.Key,
+                p => new MeshLayerState(p.Value)
+                {
+                    IsActive = true
+                }
+            ),
+            SelectedMeshLayerID = previous.SelectedMeshLayerID
+        };
+    }
+
+    private MeshLayerStates ReduceStartEditMode(MeshLayerStates previous)
+    {
+        return new MeshLayerStates
+        {
+            MeshLayers = previous.MeshLayers.ToDictionary(
+                p => p.Key,
+                p => new MeshLayerState(p.Value)
+                {
+                    IsActive = false
+                }
+            ),
+            SelectedMeshLayerID = previous.SelectedMeshLayerID
         };
     }
 
@@ -24,7 +56,7 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
     {
         bool areParametersAssigned = previous.MeshLayers[update.MeshID].HasParametersAssigned;
 
-        var next = previous.Clone();
+        var next = previous.Copy();
         var mesh = next.MeshLayers[update.MeshID];
 
         switch (update.Type)
@@ -53,7 +85,7 @@ public class MeshLayerReducer : IReducer<MeshLayerStates>
 
     private MeshLayerStates ReduceInterpolateTransform(MeshLayerStates previous, InterpolateTransformIntent interpolate)
     {
-        var next = previous.Clone();
+        var next = previous.Copy();
 
         foreach ((Guid meshID, TransformData delta) in interpolate.Deltas)
         {
