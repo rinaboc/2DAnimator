@@ -7,8 +7,8 @@ namespace Assets.Scripts.States.EditMode
     public record MeshEditState : IState<MeshEditState>
     {
         public Texture2D Texture;
-        public MeshInfo Topology;
-        public MeshInfo TopologyDelta;
+        public MeshInfo OriginalTopology;
+        public MeshInfo CurrentTopology;
         public Vertex SelectedVertex;
 
         public MeshEditState Copy()
@@ -16,8 +16,8 @@ namespace Assets.Scripts.States.EditMode
             return new()
             {
                 Texture = Texture,
-                Topology = Topology, // TODO: this will copy by reference, remove it
-                TopologyDelta = TopologyDelta,
+                OriginalTopology = OriginalTopology,
+                CurrentTopology = CurrentTopology,
                 SelectedVertex = SelectedVertex
             };
         }

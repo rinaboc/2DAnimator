@@ -13,8 +13,8 @@ namespace Assets.Scripts.States.EditMode
 
         #region Mesh attributes
         public Texture2D Texture;
-        public MeshInfo Topology;
-        public MeshInfo TopologyDelta;
+        public MeshInfo OriginalTopology;
+        public MeshInfo CurrentTopology;
         public Vertex SelectedVertex;
         #endregion
 
@@ -23,8 +23,8 @@ namespace Assets.Scripts.States.EditMode
             return new MeshEditState()
             {
                 Texture = Texture,
-                Topology = Topology,
-                TopologyDelta = TopologyDelta,
+                OriginalTopology = OriginalTopology,
+                CurrentTopology = CurrentTopology,
                 SelectedVertex = SelectedVertex
             };
         }
@@ -45,8 +45,8 @@ namespace Assets.Scripts.States.EditMode
                 ID = ID,
                 Name = Name,
                 Texture = Texture,
-                Topology = Topology,
-                TopologyDelta = TopologyDelta,
+                OriginalTopology = OriginalTopology,
+                CurrentTopology = CurrentTopology,
                 SelectedVertex = SelectedVertex
             };
         }

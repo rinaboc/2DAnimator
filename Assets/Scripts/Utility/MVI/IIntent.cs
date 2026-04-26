@@ -42,6 +42,12 @@ public record RedoIntent() : IIntentRedo;
 [GlobalIntent] public record EndEditModeIntent(bool SaveRequired) : IIntent;
 #endregion
 
+#region Edit Mode
+public record EditSelectVertexIntent(Vector3 ClickWorldPos) : IIntent;
+[NonUndoableIntent] public record EditMoveVertexIntent(Vector3 ClickWorldPos) : IIntent;
+public record EditMoveVertexEndedIntent() : IIntent;
+#endregion
+
 #region Mesh Transformation
 [NonUndoableIntent] public record UpdateTransformIntent(Guid MeshID, TransformData Data, TransformType Type) : IIntentUnstored;
 [NonUndoableIntent] public record SaveTransformIntent(Guid MeshID, TransformData Data, TransformType Type) : IIntent; // TODO: end drag

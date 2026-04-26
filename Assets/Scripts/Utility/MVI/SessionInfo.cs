@@ -1,4 +1,5 @@
 using System;
+using Assets.Scripts.Data.MeshInfo;
 
 namespace Assets.Scripts.Utility.MVI
 {
@@ -13,7 +14,8 @@ namespace Assets.Scripts.Utility.MVI
         bool TimelineVisibility { get; set; }
         int CurrentFrame { get; set; }
         bool IsEditMode { get; set; }
-
+        MeshInfo CurrentTopology { get; set; }
+        Vertex SelectedVertex { get; set; }
     }
 
     public class SessionInfo : ISessionInfo
@@ -27,6 +29,8 @@ namespace Assets.Scripts.Utility.MVI
         public bool TimelineVisibility { get; set; }
         public int CurrentFrame { get; set; }
         public bool IsEditMode { get; set; }
+        public MeshInfo CurrentTopology { get; set; }
+        public Vertex SelectedVertex { get; set; }
 
         public SessionInfo()
         {
@@ -39,6 +43,8 @@ namespace Assets.Scripts.Utility.MVI
             TimelineVisibility = false;
             CurrentFrame = 1;
             IsEditMode = false;
+            CurrentTopology = null;
+            SelectedVertex = null;
         }
     }
 }

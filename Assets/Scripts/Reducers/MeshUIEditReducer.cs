@@ -1,3 +1,4 @@
+using System;
 using Assets.Scripts.States.EditMode;
 using Assets.Scripts.Utility.MVI;
 
@@ -16,7 +17,9 @@ public class MeshUIEditReducer : IReducer<MeshUIEditState>
         if (!context.Meshes.TryGet(context.SessionInfo.SelectedMeshID, out var mesh)) return previous;
 
         var next = previous.Copy();
-        next.Topology = mesh.meshInfo;
+        next.OriginalTopology = mesh.meshInfo;
+        next.CurrentTopology = context.SessionInfo.CurrentTopology;
+        next.SelectedVertex = context.SessionInfo.SelectedVertex;
         return next;
     }
 }

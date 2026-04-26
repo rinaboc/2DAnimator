@@ -19,6 +19,14 @@ abstract public class DraggableHandle : Clickable
         }
     }
 
+    protected Vector2 ClickScreenPosition
+    {
+        get
+        {
+            return pointPositionAction.ReadValue<Vector2>();
+        }
+    }
+
     protected void OnEnable()
     {
         clickAndDragAction = InputSystem.actions.FindAction("ClickAndDrag");

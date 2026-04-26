@@ -11,8 +11,52 @@ public class MeshUIEditCommandHandler : ICommandHandler
         {
             StartEditModeIntent _ => ExecuteStartEditMode(context),
             EndEditModeIntent exit => ExecuteEndEditMode(exit, context),
+            EditSelectVertexIntent select => ExecuteEditSelectVertex(select, context),
+            EditMoveVertexIntent move => ExecuteEditMoveVertex(move, context),
+            EditMoveVertexEndedIntent _ => ExecuteEditMoveVertexEnded(context),
             _ => null
         };
+    }
+
+    private Action ExecuteEditMoveVertexEnded(IModelContext context)
+    {
+        return null;
+    }
+
+    private Action ExecuteEditMoveVertex(EditMoveVertexIntent move, IModelContext context)
+    {
+        if (!context.SessionInfo.IsEditMode || context.SessionInfo.SelectedVertex == null) return null;
+
+        context.SessionInfo.SelectedVertex.Position = move.ClickWorldPos;
+
+        return null;
+    }
+
+    public Vertex GetVertexAtPos(Vector2 pos, float radius, MeshInfo meshInfo)
+    {
+        float minSqrDist = radius * radius;
+        Vertex closest = null;
+
+        foreach (var v in meshInfo.Vertices)
+        {
+            float pixelDist = (v.Position - pos).sqrMagnitude;
+            if (pixelDist < minSqrDist)
+            {
+                minSqrDist = pixelDist;
+                closest = v;
+            }
+        }
+        return closest;
+    }
+
+    private Action ExecuteEditSelectVertex(EditSelectVertexIntent select, IModelContext context)
+    {
+        if (!context.SessionInfo.IsEditMode) return null;
+
+        var previousVertex = context.SessionInfo.SelectedVertex;
+        context.SessionInfo.SelectedVertex = GetVertexAtPos(select.ClickWorldPos, 0.25f, context.SessionInfo.CurrentTopology);
+
+        return () => context.SessionInfo.SelectedVertex = previousVertex;
     }
 
     private Action ExecuteEndEditMode(EndEditModeIntent exit, IModelContext context)
@@ -21,9 +65,13 @@ public class MeshUIEditCommandHandler : ICommandHandler
 
         MeshManager.Instance.DeleteMeshEditObj();
 
-        if (!exit.SaveRequired) return null;
+        if (exit.SaveRequired)
+        {
+            // TODO: save changes
+        }
 
-        // TODO: save changes
+        context.SessionInfo.CurrentTopology = null;
+        context.SessionInfo.SelectedVertex = null;
 
         return null;
     }
@@ -34,6 +82,8 @@ public class MeshUIEditCommandHandler : ICommandHandler
 
         GameObject newMeshObject = MeshBuilder.Build(mesh.texture.Data, mesh.meshInfo);
         MeshManager.Instance.CreateMeshEditObj(newMeshObject, mesh.ID);
+        context.SessionInfo.CurrentTopology = mesh.meshInfo.Clone();
+        context.SessionInfo.SelectedVertex = null;
 
         return null;
     }

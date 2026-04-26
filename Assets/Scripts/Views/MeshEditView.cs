@@ -1,9 +1,11 @@
+using System;
 using Assets.Scripts.Data.MeshInfo;
 using Assets.Scripts.States.EditMode;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class MeshEditView : MonoBehaviour, IView<MeshUIEditState, MeshEditState>
+public class MeshEditView : DraggableHandle, IView<MeshUIEditState, MeshEditState>
 {
     public GameObject ArtMeshObject { get; private set; }
     [SerializeField] private Material LineMaterial;
@@ -14,11 +16,15 @@ public class MeshEditView : MonoBehaviour, IView<MeshUIEditState, MeshEditState>
 
     private GameObject visualizer;
     private MeshInfo currentMeshInfo = null;
+    private Vertex selectedVertex = null;
+    private bool isDragging = false;
 
     private IViewModel<MeshUIEditState, MeshEditState> _viewModel;
 
-    void Start()
+    override protected void Start()
     {
+        base.Start();
+
         if (!LineMaterial)
         {
             Shader shader = Shader.Find("Hidden/Internal-Colored");
@@ -30,9 +36,11 @@ public class MeshEditView : MonoBehaviour, IView<MeshUIEditState, MeshEditState>
             LineMaterial.SetInt("_ZWrite", 0);
         }
 
-
         ViewportEvents.ScaleChangeEvent.AddListener(OnScaleChanged);
         OnScaleChanged();
+
+        boxCollider = ArtMeshObject.GetComponents<Collider>();
+        ParentTransform = transform;
     }
 
     void OnScaleChanged()
@@ -54,10 +62,13 @@ public class MeshEditView : MonoBehaviour, IView<MeshUIEditState, MeshEditState>
         ArtMeshObject.transform.parent = transform;
         ArtMeshObject.transform.localPosition = Vector3.zero;
         ArtMeshObject.transform.localScale = Vector3.one;
+        var collider = ArtMeshObject.GetComponent<BoxCollider>();
 
         ViewportManager viewportManager = ViewportManager.Instance;
         Vector3 topLeft = viewportManager.TopLeftAnchor;
         Vector3 bottomRight = viewportManager.BottomRightAnchor;
+
+        collider.size = new Vector3(Math.Abs(bottomRight.x - topLeft.x), Math.Abs(bottomRight.y - topLeft.y), 0);
 
         Material[] meshMaterial = ArtMeshObject.GetComponent<MeshRenderer>().materials;
         meshMaterial[0].SetVector("_TopLeftAnchor", topLeft);
@@ -74,13 +85,16 @@ public class MeshEditView : MonoBehaviour, IView<MeshUIEditState, MeshEditState>
 
     public void Render(MeshEditState state)
     {
-        if (state.Topology.Equals(currentMeshInfo)) return;
+        selectedVertex = state.SelectedVertex;
 
-        currentMeshInfo = state.Topology;
+        if (state.CurrentTopology == null || state.CurrentTopology.Equals(currentMeshInfo)) return;
+        currentMeshInfo = state.CurrentTopology;
     }
 
     void OnRenderObject()
     {
+        if (currentMeshInfo == null) return;
+
         LineMaterial.SetPass(0);
 
         GL.PushMatrix();
@@ -111,7 +125,8 @@ public class MeshEditView : MonoBehaviour, IView<MeshUIEditState, MeshEditState>
         {
             Vector2 p = vertex.Position;
 
-            GL.Color(Color.black);
+            if (vertex == selectedVertex) GL.Color(Color.yellow);
+            else GL.Color(Color.black);
 
             GL.Vertex(new Vector3(p.x - halfSize, p.y - halfSize, 0));
             GL.Vertex(new Vector3(p.x - halfSize, p.y + halfSize, 0));
@@ -127,5 +142,30 @@ public class MeshEditView : MonoBehaviour, IView<MeshUIEditState, MeshEditState>
     {
         _viewModel = viewModel;
         _viewModel?.Bind(this);
+    }
+
+    protected override void OnClickStarted(InputAction.CallbackContext context)
+    {
+        if (IsInsideCollider())
+        {
+            Vector3 ClickLocalPos = visualizer.transform.InverseTransformPoint(ClickWorldPosition);
+            _viewModel?.Send(new EditSelectVertexIntent(ClickLocalPos));
+            isDragging = true;
+        }
+    }
+
+    void Update()
+    {
+        if (isDragging)
+        {
+            Vector3 ClickLocalPos = visualizer.transform.InverseTransformPoint(ClickWorldPosition);
+            _viewModel?.Send(new EditMoveVertexIntent(ClickLocalPos));
+        }
+    }
+
+    protected override void OnDragFinished(InputAction.CallbackContext context)
+    {
+        if (isDragging) _viewModel?.Send(new EditMoveVertexEndedIntent());
+        isDragging = false;
     }
 }

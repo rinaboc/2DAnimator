@@ -7,8 +7,8 @@ public sealed class MeshEditViewModel : ViewModelBase<MeshUIEditState, MeshEditS
         return new MeshEditState()
         {
             Texture = domain.Texture,
-            Topology = domain.Topology,
-            TopologyDelta = domain.TopologyDelta,
+            OriginalTopology = domain.OriginalTopology,
+            CurrentTopology = domain.CurrentTopology,
             SelectedVertex = domain.SelectedVertex
         };
     }

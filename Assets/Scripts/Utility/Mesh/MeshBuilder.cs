@@ -93,7 +93,6 @@ public class MeshBuilder : ManagerBase<MeshBuilder>
         }
         mesh.vertices = vertices;
         ArtMeshObject.GetComponent<MeshFilter>().mesh = mesh;
-        boxCollider.enabled = false;
 
         return ArtMeshObject;
     }
