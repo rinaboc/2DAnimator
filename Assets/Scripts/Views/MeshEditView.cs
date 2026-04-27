@@ -75,7 +75,7 @@ public class MeshEditView : DraggableHandle, IView<MeshUIEditState, MeshEditStat
         meshMaterial[0].SetVector("_BottomRightAnchor", bottomRight);
 
         visualizer = new();
-        visualizer.transform.parent = transform;
+        visualizer.transform.parent = ArtMeshObject.transform;
         visualizer.transform.localPosition = Vector3.zero;
         visualizer.transform.localScale = Vector3.one;
         visualizer.name = "Visualizer";
@@ -89,6 +89,9 @@ public class MeshEditView : DraggableHandle, IView<MeshUIEditState, MeshEditStat
 
         if (state.CurrentTopology == null || state.CurrentTopology.Equals(currentMeshInfo)) return;
         currentMeshInfo = state.CurrentTopology;
+
+        var mesh = ArtMeshObject.GetComponent<MeshFilter>().mesh;
+        visualizer.transform.localPosition = -mesh.bounds.center;
     }
 
     void OnRenderObject()
@@ -128,6 +131,15 @@ public class MeshEditView : DraggableHandle, IView<MeshUIEditState, MeshEditStat
             if (vertex == selectedVertex) GL.Color(Color.yellow);
             else GL.Color(Color.black);
 
+            GL.Vertex(new Vector3(p.x - halfSize, p.y - halfSize, 0));
+            GL.Vertex(new Vector3(p.x - halfSize, p.y + halfSize, 0));
+            GL.Vertex(new Vector3(p.x + halfSize, p.y + halfSize, 0));
+            GL.Vertex(new Vector3(p.x + halfSize, p.y - halfSize, 0));
+        }
+
+        {
+            GL.Color(Color.red);
+            Vector2 p = Vector2.zero;
             GL.Vertex(new Vector3(p.x - halfSize, p.y - halfSize, 0));
             GL.Vertex(new Vector3(p.x - halfSize, p.y + halfSize, 0));
             GL.Vertex(new Vector3(p.x + halfSize, p.y + halfSize, 0));

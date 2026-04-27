@@ -4,14 +4,18 @@ using UnityEngine;
 
 public class TopologyBuilder
 {
-    public static void Build(Vector3[] vertices, int[] triangles, out MeshInfo meshInfo)
+    public static void Build(Vector3[] vertices, Vector2[] uv, int[] triangles, out MeshInfo meshInfo)
     {
         meshInfo = new();
 
         Vertex[] vNodes = new Vertex[vertices.Length];
         for (int i = 0; i < vertices.Length; i++)
         {
-            vNodes[i] = new Vertex() { Position = new Vector2(vertices[i].x, vertices[i].y) };
+            vNodes[i] = new Vertex()
+            {
+                Position = new Vector2(vertices[i].x, vertices[i].y),
+                UV = (uv != null && i < uv.Length) ? uv[i] : Vector2.zero
+            };
         }
 
         var edgeTracker = new Dictionary<(int, int), HalfEdge>();
@@ -49,7 +53,6 @@ public class TopologyBuilder
             item.IsConstrained = true;
             meshInfo.HalfEdges.Add(item);
         }
-        // meshInfo.HalfEdges.AddRange(edgeTracker.Values);
     }
 
     private static void ConnectTwin(int a, int b, HalfEdge current, Dictionary<(int, int), HalfEdge> tracker)

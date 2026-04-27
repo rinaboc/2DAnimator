@@ -7,7 +7,7 @@ public class MeshBuilder : ManagerBase<MeshBuilder>
     [SerializeField] private Material[] Materials;
     public static GameObject Build(Texture2D texture, out MeshInfo meshInfo)
     {
-        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelsPerUnit: 100, extrude: 1, meshType: SpriteMeshType.Tight);
+        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelsPerUnit: 100, extrude: 1, meshType: SpriteMeshType.FullRect);
 
         Mesh mesh = new()
         {
@@ -49,18 +49,20 @@ public class MeshBuilder : ManagerBase<MeshBuilder>
         ArtMeshObject.GetComponent<MeshFilter>().mesh = mesh;
         boxCollider.center = Vector3.zero;
 
-        TopologyBuilder.Build(mesh.vertices, mesh.triangles, out meshInfo);
+        TopologyBuilder.Build(mesh.vertices, mesh.uv, mesh.triangles, out meshInfo);
 
         return ArtMeshObject;
     }
 
-    public static GameObject Build(Texture2D texture, MeshInfo meshInfo)
+    public static GameObject Build(Texture2D texture, MeshInfo meshInfo, out Vector2 min, out Vector2 size)
     {
-        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelsPerUnit: 100, extrude: 1, meshType: SpriteMeshType.Tight);
+        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelsPerUnit: 100, extrude: 1, meshType: SpriteMeshType.FullRect);
+        min = sprite.bounds.min;
+        size = sprite.bounds.size;
 
         Mesh mesh = new();
 
-        RebuildMesh(sprite.uv, mesh, meshInfo);
+        RebuildMesh(mesh, meshInfo);
 
         GameObject ArtMeshObject = new("ArtMesh")
         {
@@ -97,16 +99,19 @@ public class MeshBuilder : ManagerBase<MeshBuilder>
         return ArtMeshObject;
     }
 
-    static void RebuildMesh(Vector2[] uv, Mesh mesh, MeshInfo meshInfo)
+    static void RebuildMesh(Mesh mesh, MeshInfo meshInfo)
     {
         int vertexCount = meshInfo.Vertices.Count;
         Vector3[] vert = new Vector3[vertexCount];
+        Vector2[] uvs = new Vector2[vertexCount];
         Dictionary<Vertex, int> vertexToIndex = new();
 
         for (int i = 0; i < vertexCount; i++)
         {
-            vert[i] = meshInfo.Vertices[i].Position;
-            vertexToIndex[meshInfo.Vertices[i]] = i;
+            var vNode = meshInfo.Vertices[i];
+            vert[i] = vNode.Position;
+            uvs[i] = vNode.UV;
+            vertexToIndex[vNode] = i;
         }
 
         int[] tris = new int[meshInfo.Faces.Count * 3];
@@ -123,9 +128,10 @@ public class MeshBuilder : ManagerBase<MeshBuilder>
             tris[triIndex++] = vertexToIndex[e3.Origin];
         }
 
+        mesh.Clear();
         mesh.vertices = vert;
         mesh.triangles = tris;
-        mesh.uv = uv;
+        mesh.uv = uvs;
         mesh.RecalculateBounds();
     }
 }

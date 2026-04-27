@@ -53,7 +53,9 @@ Shader "Unlit/S_Mesh"
             }
 
             fixed4 frag (v2f i) : SV_Target {
+                float mask = step(0.0, i.uv.x) * step(i.uv.x, 1.0) * step(0.0, i.uv.y) * step(i.uv.y, 1.0);
                 fixed4 col = tex2D(_MainTex, i.uv);
+                col.a *= mask;
                 col = col * i.color;
                 col.rgb *= col.a;
 

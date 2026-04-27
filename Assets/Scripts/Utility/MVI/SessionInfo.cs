@@ -1,5 +1,6 @@
 using System;
 using Assets.Scripts.Data.MeshInfo;
+using UnityEngine;
 
 namespace Assets.Scripts.Utility.MVI
 {
@@ -14,6 +15,8 @@ namespace Assets.Scripts.Utility.MVI
         bool TimelineVisibility { get; set; }
         int CurrentFrame { get; set; }
         bool IsEditMode { get; set; }
+        Vector2 TexMin { get; set; }
+        Vector2 TexSize { get; set; }
         MeshInfo CurrentTopology { get; set; }
         Vertex SelectedVertex { get; set; }
     }
@@ -29,6 +32,8 @@ namespace Assets.Scripts.Utility.MVI
         public bool TimelineVisibility { get; set; }
         public int CurrentFrame { get; set; }
         public bool IsEditMode { get; set; }
+        public Vector2 TexMin { get; set; }
+        public Vector2 TexSize { get; set; }
         public MeshInfo CurrentTopology { get; set; }
         public Vertex SelectedVertex { get; set; }
 
@@ -43,6 +48,8 @@ namespace Assets.Scripts.Utility.MVI
             TimelineVisibility = false;
             CurrentFrame = 1;
             IsEditMode = false;
+            TexMin = Vector2.zero;
+            TexSize = Vector2.zero;
             CurrentTopology = null;
             SelectedVertex = null;
         }

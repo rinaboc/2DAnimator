@@ -6,6 +6,7 @@ namespace Assets.Scripts.Data.MeshInfo
     public class Vertex
     {
         public Vector2 Position;
+        public Vector2 UV;
         public HalfEdge IncidentEdge;
     }
 
@@ -31,7 +32,7 @@ namespace Assets.Scripts.Data.MeshInfo
         public MeshInfo Clone()
         {
             var newMesh = new MeshInfo();
-            var vMap = CreateMap(Vertices, newMesh.Vertices, v => new Vertex { Position = v.Position });
+            var vMap = CreateMap(Vertices, newMesh.Vertices, v => new Vertex { Position = v.Position, UV = v.UV });
             var eMap = CreateMap(HalfEdges, newMesh.HalfEdges, e => new HalfEdge { IsConstrained = e.IsConstrained });
             var fMap = CreateMap(Faces, newMesh.Faces, f => new Face());
 
