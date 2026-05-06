@@ -7,7 +7,7 @@ public class MeshBuilder : ManagerBase<MeshBuilder>
     [SerializeField] private Material[] Materials;
     public static GameObject Build(Texture2D texture, out MeshInfo meshInfo)
     {
-        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelsPerUnit: 100, extrude: 1, meshType: SpriteMeshType.FullRect);
+        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelsPerUnit: 100, extrude: 1, meshType: SpriteMeshType.Tight);
 
         Mesh mesh = new()
         {
@@ -56,7 +56,7 @@ public class MeshBuilder : ManagerBase<MeshBuilder>
 
     public static GameObject Build(Texture2D texture, MeshInfo meshInfo, out Vector2 min, out Vector2 size)
     {
-        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelsPerUnit: 100, extrude: 1, meshType: SpriteMeshType.FullRect);
+        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelsPerUnit: 100, extrude: 1, meshType: SpriteMeshType.Tight);
         min = sprite.bounds.min;
         size = sprite.bounds.size;
 
@@ -97,6 +97,17 @@ public class MeshBuilder : ManagerBase<MeshBuilder>
         ArtMeshObject.GetComponent<MeshFilter>().mesh = mesh;
 
         return ArtMeshObject;
+    }
+
+    public static GameObject Build(Texture2D texture, MeshInfo meshInfo)
+    {
+        var obj = Build(texture, meshInfo, out _, out _);
+
+        var boxCollider = obj.GetComponent<BoxCollider>();
+        obj.transform.position -= boxCollider.bounds.center;
+        boxCollider.center = Vector3.zero;
+
+        return obj;
     }
 
     static void RebuildMesh(Mesh mesh, MeshInfo meshInfo)

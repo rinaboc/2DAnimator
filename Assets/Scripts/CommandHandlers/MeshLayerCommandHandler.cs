@@ -173,7 +173,7 @@ public class MeshLayerCommandHandler : ICommandHandler
             LayerManager.Instance.SetSiblingIndex(mesh.ID, mesh.drawOrder);
 
             context.Meshes.Register(mesh);
-            GameObject newMeshObject = MeshBuilder.Build(mesh.texture.Data, out MeshInfo meshInfo);
+            GameObject newMeshObject = MeshBuilder.Build(mesh.texture.Data, mesh.meshInfo);
             MeshManager.Instance.CreateArtMeshObj(newMeshObject, mesh.ID);
 
             foreach (var pc in deletedParamCurves) context.ParamCurves.Register(pc);
@@ -289,7 +289,7 @@ public class MeshLayerCommandHandler : ICommandHandler
             if (item.texture.Data == null)
             { Debug.LogError("couldn't load image texture"); continue; }
             context.Meshes.Register(item);
-            GameObject newMeshObject = MeshBuilder.Build(item.texture.Data, out MeshInfo meshInfo);
+            GameObject newMeshObject = MeshBuilder.Build(item.texture.Data, item.meshInfo);
             MeshManager.Instance.CreateArtMeshObj(newMeshObject, item.ID);
             LayerManager.Instance.CreateUIArtLayer(item.ID);
         }

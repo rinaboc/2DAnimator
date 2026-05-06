@@ -72,5 +72,59 @@ namespace Assets.Scripts.Data.MeshInfo
             }
             return map;
         }
+
+        public MeshInfoData ToData()
+        {
+            var vToIndex = new Dictionary<Vertex, int>();
+            for (int i = 0; i < Vertices.Count; i++) vToIndex[Vertices[i]] = i;
+
+            var eToIndex = new Dictionary<HalfEdge, int>();
+            for (int i = 0; i < HalfEdges.Count; i++) eToIndex[HalfEdges[i]] = i;
+
+            var fToIndex = new Dictionary<Face, int>();
+            for (int i = 0; i < Faces.Count; i++) fToIndex[Faces[i]] = i;
+
+            MeshInfoData data = new()
+            {
+                edges = new HalfEdgeDTO[HalfEdges.Count],
+                vertices = new VertexDTO[Vertices.Count],
+                faces = new FaceDTO[Faces.Count]
+            };
+
+            for (int i = 0; i < HalfEdges.Count; i++)
+            {
+                var e = HalfEdges[i];
+                data.edges[i] = new HalfEdgeDTO
+                {
+                    originIndex = vToIndex[e.Origin],
+                    nextIndex = eToIndex[e.Next],
+                    twinIndex = (e.Twin != null) ? eToIndex[e.Twin] : -1,
+                    faceIndex = fToIndex[e.Face],
+                    isConstrained = e.IsConstrained
+                };
+            }
+
+            for (int i = 0; i < Vertices.Count; i++)
+            {
+                var v = Vertices[i];
+                data.vertices[i] = new VertexDTO
+                {
+                    Position = v.Position,
+                    UV = v.UV,
+                    incidentEdgeIndex = eToIndex[v.IncidentEdge]
+                };
+            }
+
+            for (int i = 0; i < Faces.Count; i++)
+            {
+                var f = Faces[i];
+                data.faces[i] = new FaceDTO
+                {
+                    edgeIndex = eToIndex[f.Edge]
+                };
+            }
+
+            return data;
+        }
     }
 }

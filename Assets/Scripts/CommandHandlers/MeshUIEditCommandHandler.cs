@@ -80,11 +80,7 @@ public class MeshUIEditCommandHandler : ICommandHandler
             mesh.meshInfo = context.SessionInfo.CurrentTopology.Clone();
 
             MeshManager.Instance.DeleteArtMeshObj(mesh.ID);
-            GameObject rebuiltMeshObject = MeshBuilder.Build(mesh.texture.Data, mesh.meshInfo, out _, out _);
-            var boxCollider = rebuiltMeshObject.GetComponent<BoxCollider>();
-            rebuiltMeshObject.transform.position -= boxCollider.bounds.center;
-            boxCollider.center = Vector3.zero;
-
+            GameObject rebuiltMeshObject = MeshBuilder.Build(mesh.texture.Data, mesh.meshInfo);
             MeshManager.Instance.CreateArtMeshObj(rebuiltMeshObject, mesh.ID);
         }
 

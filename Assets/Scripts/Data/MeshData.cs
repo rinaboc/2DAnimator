@@ -14,7 +14,8 @@ public class MeshData : EntityBase
 
     public TransformData transform;
     public SerializableTexture texture;
-    public MeshInfo meshInfo;
+    [NonSerialized] public MeshInfo meshInfo;
+    private MeshInfoData _meshInfoSerialized;
 
     public MeshData(string sourcePath) : base()
     {
@@ -32,6 +33,20 @@ public class MeshData : EntityBase
     private void OnDeserialized(StreamingContext context)
     {
         _objCounter++;
+
+        if (_meshInfoSerialized != null)
+        {
+            meshInfo = _meshInfoSerialized.ToMeshInfo();
+        }
+    }
+
+    [OnSerializing]
+    private void OnSerializing(StreamingContext context)
+    {
+        if (meshInfo != null)
+        {
+            _meshInfoSerialized = meshInfo.ToData();
+        }
     }
 
     public override string ToString() => $"{ID}: {name}, {drawOrder}, {sourcePath}";
