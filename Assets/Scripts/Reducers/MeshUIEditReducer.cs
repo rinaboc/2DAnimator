@@ -18,8 +18,8 @@ public class MeshUIEditReducer : IReducer<MeshUIEditState>
 
         var next = previous.Copy();
         next.OriginalTopology = mesh.meshInfo;
-        next.CurrentTopology = context.SessionInfo.CurrentTopology;
-        next.SelectedVertex = context.SessionInfo.SelectedVertex;
+        next.CurrentTopology = context.SessionInfo.EditModeInfo.CurrentTopology;
+        next.SelectedVertex = context.SessionInfo.EditModeInfo.SelectedVertex;
         return next;
     }
 }

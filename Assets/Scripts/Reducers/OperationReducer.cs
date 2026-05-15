@@ -17,7 +17,8 @@ public class OperationReducer : IReducer<OperationState>
         var next = previous.Copy();
         next.CanUndo = context.SessionInfo.UndoCount > 0;
         next.CanRedo = context.SessionInfo.RedoCount > 0;
-        next.IsEditMode = context.SessionInfo.IsEditMode;
+        next.IsEditMode = context.SessionInfo.EditModeInfo.IsEditMode;
+        next.CurrentTool = context.SessionInfo.EditModeInfo.CurrentTool;
         return next;
     }
 

@@ -9,6 +9,7 @@ namespace Assets.Scripts.States
         public bool CanRedo { get; set; }
 
         public bool IsEditMode { get; set; }
+        public EditTool CurrentTool { get; set; }
 
         public OperationState Copy() => new()
         {
@@ -16,7 +17,8 @@ namespace Assets.Scripts.States
             RedoCount = RedoCount,
             CanUndo = CanUndo,
             CanRedo = CanRedo,
-            IsEditMode = IsEditMode
+            IsEditMode = IsEditMode,
+            CurrentTool = CurrentTool
         };
     }
 }

@@ -72,6 +72,24 @@ public class TopologyBuilder
         }
     }
 
+    public static MeshInfo InsertVertex(MeshInfo meshInfo, Vector3 point)
+    {
+        var topology = meshInfo.Clone();
+
+        // TODO: insert vertex
+
+        return topology;
+    }
+
+    public static MeshInfo RemoveVertex(MeshInfo meshInfo, Vertex v)
+    {
+        var topology = meshInfo.Clone();
+
+        // TODO: remove vertex
+
+        return topology;
+    }
+
     public static string SanityCheck(MeshInfo meshInfo)
     {
         foreach (var edge in meshInfo.HalfEdges)

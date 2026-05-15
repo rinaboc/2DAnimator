@@ -35,3 +35,7 @@
 .disable {
     display: none;
 }
+
+.selected {
+    background-color: rgb(34, 34, 34);
+}

@@ -11,13 +11,25 @@ public class OperationCommandHandler : ICommandHandler
             SaveProjectIntent save => ExecuteSaveProject(save, context),
             StartEditModeIntent _ => ExecuteStartEditMode(context),
             EndEditModeIntent exit => ExecuteEndEditMode(exit, context),
+            ChangeEditToolIntent tool => ExecuteChangeEditTool(tool, context),
             _ => ExecuteDefault(context, intent)
+        };
+    }
+
+    private Action ExecuteChangeEditTool(ChangeEditToolIntent tool, IModelContext context)
+    {
+        var previousTool = context.SessionInfo.EditModeInfo.CurrentTool;
+        context.SessionInfo.EditModeInfo.CurrentTool = tool.EditTool;
+
+        return () =>
+        {
+            context.SessionInfo.EditModeInfo.CurrentTool = previousTool;
         };
     }
 
     private Action ExecuteEndEditMode(EndEditModeIntent exit, IModelContext context)
     {
-        context.SessionInfo.IsEditMode = false;
+        context.SessionInfo.EditModeInfo.IsEditMode = false;
         ViewportManager.Instance.SetSidebarVisibility(true);
 
         if (!exit.SaveRequired) return null;
@@ -29,7 +41,7 @@ public class OperationCommandHandler : ICommandHandler
 
     private Action ExecuteStartEditMode(IModelContext context)
     {
-        context.SessionInfo.IsEditMode = true;
+        context.SessionInfo.EditModeInfo.IsEditMode = true;
         ViewportManager.Instance.SetSidebarVisibility(false);
 
         return null;

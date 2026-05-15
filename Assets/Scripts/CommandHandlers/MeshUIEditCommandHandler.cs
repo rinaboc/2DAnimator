@@ -11,23 +11,23 @@ public class MeshUIEditCommandHandler : ICommandHandler
         {
             StartEditModeIntent _ => ExecuteStartEditMode(context),
             EndEditModeIntent exit => ExecuteEndEditMode(exit, context),
-            EditSelectVertexIntent select => ExecuteEditSelectVertex(select, context),
-            EditMoveVertexIntent move => ExecuteEditMoveVertex(move, context),
-            EditMoveVertexEndedIntent _ => ExecuteEditMoveVertexEnded(context),
+            EditClickIntent select => ExecuteEditClick(select, context),
+            EditDragIntent move => ExecuteEditDrag(move, context),
+            EditDragEndIntent _ => ExecuteEditDragEnd(context),
             _ => null
         };
     }
 
-    private Action ExecuteEditMoveVertexEnded(IModelContext context)
+    private Action ExecuteEditDragEnd(IModelContext context)
     {
         return null;
     }
 
-    private Action ExecuteEditMoveVertex(EditMoveVertexIntent move, IModelContext context)
+    private Action ExecuteEditDrag(EditDragIntent move, IModelContext context)
     {
-        if (!context.SessionInfo.IsEditMode || context.SessionInfo.SelectedVertex == null) return null;
+        if (!context.SessionInfo.EditModeInfo.IsEditMode || context.SessionInfo.EditModeInfo.SelectedVertex == null) return null;
 
-        context.SessionInfo.SelectedVertex.Position = move.ClickWorldPos;
+        context.SessionInfo.EditModeInfo.SelectedVertex.Position = move.ClickWorldPos;
 
         return null;
     }
@@ -49,14 +49,46 @@ public class MeshUIEditCommandHandler : ICommandHandler
         return closest;
     }
 
-    private Action ExecuteEditSelectVertex(EditSelectVertexIntent select, IModelContext context)
+    private Action ExecuteEditClick(EditClickIntent select, IModelContext context)
     {
-        if (!context.SessionInfo.IsEditMode) return null;
+        if (!context.SessionInfo.EditModeInfo.IsEditMode) return null;
 
-        var previousVertex = context.SessionInfo.SelectedVertex;
-        context.SessionInfo.SelectedVertex = GetVertexAtPos(select.ClickWorldPos, 0.25f, context.SessionInfo.CurrentTopology);
+        var currentTool = context.SessionInfo.EditModeInfo.CurrentTool;
 
-        return () => context.SessionInfo.SelectedVertex = previousVertex;
+        if (currentTool == EditTool.CREATE)
+        {
+            var oldTopology = context.SessionInfo.EditModeInfo.CurrentTopology;
+            var newTopology = TopologyBuilder.InsertVertex(context.SessionInfo.EditModeInfo.CurrentTopology, select.ClickWorldPos);
+
+            context.SessionInfo.EditModeInfo.CurrentTopology = newTopology;
+
+            return () => context.SessionInfo.EditModeInfo.CurrentTopology = oldTopology;
+        }
+
+        Vertex selectedVertex = GetVertexAtPos(select.ClickWorldPos, 0.25f, context.SessionInfo.EditModeInfo.CurrentTopology);
+
+        if (currentTool == EditTool.SELECT)
+        {
+            var previousVertex = context.SessionInfo.EditModeInfo.SelectedVertex;
+            context.SessionInfo.EditModeInfo.SelectedVertex = selectedVertex;
+
+            return () => context.SessionInfo.EditModeInfo.SelectedVertex = previousVertex;
+        }
+
+
+        if (currentTool == EditTool.DELETE)
+        {
+            var oldTopology = context.SessionInfo.EditModeInfo.CurrentTopology;
+
+            if (selectedVertex == null) return null;
+            var newTopology = TopologyBuilder.RemoveVertex(context.SessionInfo.EditModeInfo.CurrentTopology, selectedVertex);
+
+            context.SessionInfo.EditModeInfo.CurrentTopology = newTopology;
+
+            return () => context.SessionInfo.EditModeInfo.CurrentTopology = oldTopology;
+        }
+
+        return null;
     }
 
     private Action ExecuteEndEditMode(EndEditModeIntent exit, IModelContext context)
@@ -70,7 +102,7 @@ public class MeshUIEditCommandHandler : ICommandHandler
             var texMin = context.SessionInfo.TexMin;
             var texSize = context.SessionInfo.TexSize;
 
-            var updatedMeshInfo = context.SessionInfo.CurrentTopology.Clone();
+            var updatedMeshInfo = context.SessionInfo.EditModeInfo.CurrentTopology.Clone();
             foreach (var v in updatedMeshInfo.Vertices)
             {
                 float tx = (v.Position.x - texMin.x) / texSize.x;
@@ -85,8 +117,8 @@ public class MeshUIEditCommandHandler : ICommandHandler
             MeshManager.Instance.CreateArtMeshObj(rebuiltMeshObject, mesh.ID);
         }
 
-        context.SessionInfo.CurrentTopology = null;
-        context.SessionInfo.SelectedVertex = null;
+        context.SessionInfo.EditModeInfo.CurrentTopology = null;
+        context.SessionInfo.EditModeInfo.SelectedVertex = null;
 
         return null;
     }
@@ -103,10 +135,10 @@ public class MeshUIEditCommandHandler : ICommandHandler
         boxCollider.size = new Vector3(Math.Abs(bottomRight.x - topLeft.x), Math.Abs(bottomRight.y - topLeft.y), 0);
 
         MeshManager.Instance.CreateMeshEditObj(newMeshObject, mesh.ID);
-        context.SessionInfo.CurrentTopology = mesh.meshInfo.Clone();
+        context.SessionInfo.EditModeInfo.CurrentTopology = mesh.meshInfo.Clone();
         context.SessionInfo.TexMin = min;
         context.SessionInfo.TexSize = size;
-        context.SessionInfo.SelectedVertex = null;
+        context.SessionInfo.EditModeInfo.SelectedVertex = null;
 
         return null;
     }

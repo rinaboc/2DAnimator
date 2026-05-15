@@ -43,9 +43,10 @@ public record RedoIntent() : IIntentRedo;
 #endregion
 
 #region Edit Mode
-public record EditSelectVertexIntent(Vector3 ClickWorldPos) : IIntent;
-[NonUndoableIntent] public record EditMoveVertexIntent(Vector3 ClickWorldPos) : IIntent;
-public record EditMoveVertexEndedIntent() : IIntent;
+public record EditClickIntent(Vector3 ClickWorldPos) : IIntent;
+[NonUndoableIntent] public record EditDragIntent(Vector3 ClickWorldPos) : IIntent;
+public record EditDragEndIntent() : IIntent;
+public record ChangeEditToolIntent(EditTool EditTool) : IIntent;
 #endregion
 
 #region Mesh Transformation

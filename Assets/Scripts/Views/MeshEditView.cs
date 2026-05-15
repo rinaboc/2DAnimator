@@ -147,7 +147,7 @@ public class MeshEditView : DraggableHandle, IView<MeshUIEditState, MeshEditStat
         if (IsInsideCollider())
         {
             Vector3 ClickLocalPos = visualizer.transform.InverseTransformPoint(ClickWorldPosition);
-            _viewModel?.Send(new EditSelectVertexIntent(ClickLocalPos));
+            _viewModel?.Send(new EditClickIntent(ClickLocalPos));
             isDragging = true;
         }
     }
@@ -157,13 +157,13 @@ public class MeshEditView : DraggableHandle, IView<MeshUIEditState, MeshEditStat
         if (isDragging)
         {
             Vector3 ClickLocalPos = visualizer.transform.InverseTransformPoint(ClickWorldPosition);
-            _viewModel?.Send(new EditMoveVertexIntent(ClickLocalPos));
+            _viewModel?.Send(new EditDragIntent(ClickLocalPos));
         }
     }
 
     protected override void OnDragFinished(InputAction.CallbackContext context)
     {
-        if (isDragging) _viewModel?.Send(new EditMoveVertexEndedIntent());
+        if (isDragging) _viewModel?.Send(new EditDragEndIntent());
         isDragging = false;
     }
 }

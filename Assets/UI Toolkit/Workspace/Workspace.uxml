@@ -10,6 +10,15 @@
         <ui:VisualElement name="EditModeHeader" class="disable" style="flex-grow: 1; flex-direction: row-reverse;">
             <ui:VisualElement style="flex-grow: 1;" />
             <ui:Button text="Save changes" name="SaveButton" class="icon-button" style="width: 320px; font-size: 28px; color: rgb(169, 169, 169); -unity-font-style: bold;" />
+            <ui:Button name="DeleteButton" class="icon-button">
+                <ui:VisualElement style="flex-grow: 1; background-image: resource(&apos;UI/delete&apos;); background-size: 70% 80%; -unity-background-image-tint-color: rgb(169, 169, 169);" />
+            </ui:Button>
+            <ui:Button name="CreateButton" class="icon-button">
+                <ui:VisualElement style="flex-grow: 1; background-image: resource(&apos;UI/plus&apos;); background-size: 80% 80%; -unity-background-image-tint-color: rgb(169, 169, 169);" />
+            </ui:Button>
+            <ui:Button name="SelectButton" class="icon-button selected" style="background-image: resource(&apos;UI/cursor&apos;); background-size: 50% 70%; -unity-background-image-tint-color: rgb(169, 169, 169);">
+                <ui:VisualElement style="flex-grow: 1; background-image: none; background-size: 80% 80%; -unity-background-image-tint-color: rgb(169, 169, 169);" />
+            </ui:Button>
             <ui:VisualElement style="flex-grow: 1;" />
             <ui:Button name="ExitButton" class="icon-button">
                 <ui:VisualElement style="flex-grow: 1; background-image: resource(&apos;UI/cross&apos;); -unity-background-image-tint-color: rgb(169, 169, 169); background-size: 80% 80%;" />
