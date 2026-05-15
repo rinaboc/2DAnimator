@@ -70,14 +70,15 @@ public class MeshUIEditCommandHandler : ICommandHandler
             var texMin = context.SessionInfo.TexMin;
             var texSize = context.SessionInfo.TexSize;
 
-            foreach (var v in context.SessionInfo.CurrentTopology.Vertices)
+            var updatedMeshInfo = context.SessionInfo.CurrentTopology.Clone();
+            foreach (var v in updatedMeshInfo.Vertices)
             {
                 float tx = (v.Position.x - texMin.x) / texSize.x;
                 float ty = (v.Position.y - texMin.y) / texSize.y;
 
                 v.UV = new Vector2(tx, ty);
             }
-            mesh.meshInfo = context.SessionInfo.CurrentTopology.Clone();
+            mesh.meshInfo = updatedMeshInfo;
 
             MeshManager.Instance.DeleteArtMeshObj(mesh.ID);
             GameObject rebuiltMeshObject = MeshBuilder.Build(mesh.texture.Data, mesh.meshInfo);
@@ -95,6 +96,12 @@ public class MeshUIEditCommandHandler : ICommandHandler
         if (!context.Meshes.TryGet(context.SessionInfo.SelectedMeshID, out MeshData mesh)) return null;
 
         GameObject newMeshObject = MeshBuilder.Build(mesh.texture.Data, mesh.meshInfo, out var min, out var size);
+
+        var boxCollider = newMeshObject.GetComponent<BoxCollider>();
+        var topLeft = ViewportManager.Instance.TopLeftAnchor;
+        var bottomRight = ViewportManager.Instance.BottomRightAnchor;
+        boxCollider.size = new Vector3(Math.Abs(bottomRight.x - topLeft.x), Math.Abs(bottomRight.y - topLeft.y), 0);
+
         MeshManager.Instance.CreateMeshEditObj(newMeshObject, mesh.ID);
         context.SessionInfo.CurrentTopology = mesh.meshInfo.Clone();
         context.SessionInfo.TexMin = min;

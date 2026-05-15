@@ -62,17 +62,6 @@ public class MeshEditView : DraggableHandle, IView<MeshUIEditState, MeshEditStat
         ArtMeshObject.transform.parent = transform;
         ArtMeshObject.transform.localPosition = Vector3.zero;
         ArtMeshObject.transform.localScale = Vector3.one;
-        var collider = ArtMeshObject.GetComponent<BoxCollider>();
-
-        ViewportManager viewportManager = ViewportManager.Instance;
-        Vector3 topLeft = viewportManager.TopLeftAnchor;
-        Vector3 bottomRight = viewportManager.BottomRightAnchor;
-
-        collider.size = new Vector3(Math.Abs(bottomRight.x - topLeft.x), Math.Abs(bottomRight.y - topLeft.y), 0);
-
-        Material[] meshMaterial = ArtMeshObject.GetComponent<MeshRenderer>().materials;
-        meshMaterial[0].SetVector("_TopLeftAnchor", topLeft);
-        meshMaterial[0].SetVector("_BottomRightAnchor", bottomRight);
 
         visualizer = new();
         visualizer.transform.parent = ArtMeshObject.transform;
@@ -89,9 +78,6 @@ public class MeshEditView : DraggableHandle, IView<MeshUIEditState, MeshEditStat
 
         if (state.CurrentTopology == null || state.CurrentTopology.Equals(currentMeshInfo)) return;
         currentMeshInfo = state.CurrentTopology;
-
-        var mesh = ArtMeshObject.GetComponent<MeshFilter>().mesh;
-        visualizer.transform.localPosition = -mesh.bounds.center;
     }
 
     void OnRenderObject()

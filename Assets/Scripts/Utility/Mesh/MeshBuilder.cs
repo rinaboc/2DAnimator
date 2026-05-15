@@ -39,15 +39,15 @@ public class MeshBuilder : ManagerBase<MeshBuilder>
         BoxCollider boxCollider = ArtMeshObject.AddComponent<BoxCollider>();
 
         // fix offset
-        Vector3[] vertices = mesh.vertices;
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            vertices[i] -= boxCollider.center;
-            vertices[i].z = 0f;
-        }
-        mesh.vertices = vertices;
-        ArtMeshObject.GetComponent<MeshFilter>().mesh = mesh;
-        boxCollider.center = Vector3.zero;
+        // Vector3[] vertices = mesh.vertices;
+        // for (int i = 0; i < vertices.Length; i++)
+        // {
+        //     vertices[i] -= boxCollider.center;
+        //     vertices[i].z = 0f;
+        // }
+        // mesh.vertices = vertices;
+        // ArtMeshObject.GetComponent<MeshFilter>().mesh = mesh;
+        // boxCollider.center = Vector3.zero;
 
         TopologyBuilder.Build(mesh.vertices, mesh.uv, mesh.triangles, out meshInfo);
 
@@ -83,18 +83,7 @@ public class MeshBuilder : ManagerBase<MeshBuilder>
             mats.Add(_mat);
         }
         ArtMeshObject.AddComponent<MeshRenderer>().materials = mats.ToArray();
-
-        BoxCollider boxCollider = ArtMeshObject.AddComponent<BoxCollider>();
-
-        // fix offset
-        Vector3[] vertices = mesh.vertices;
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            vertices[i] -= boxCollider.center;
-            vertices[i].z = 0f;
-        }
-        mesh.vertices = vertices;
-        ArtMeshObject.GetComponent<MeshFilter>().mesh = mesh;
+        ArtMeshObject.AddComponent<BoxCollider>();
 
         return ArtMeshObject;
     }
@@ -102,11 +91,6 @@ public class MeshBuilder : ManagerBase<MeshBuilder>
     public static GameObject Build(Texture2D texture, MeshInfo meshInfo)
     {
         var obj = Build(texture, meshInfo, out _, out _);
-
-        var boxCollider = obj.GetComponent<BoxCollider>();
-        obj.transform.position -= boxCollider.bounds.center;
-        boxCollider.center = Vector3.zero;
-
         return obj;
     }
 
