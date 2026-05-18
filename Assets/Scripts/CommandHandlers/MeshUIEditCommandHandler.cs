@@ -58,8 +58,9 @@ public class MeshUIEditCommandHandler : ICommandHandler
         if (currentTool == EditTool.CREATE)
         {
             var oldTopology = context.SessionInfo.EditModeInfo.CurrentTopology;
-            var newTopology = TopologyBuilder.InsertVertex(context.SessionInfo.EditModeInfo.CurrentTopology, select.ClickWorldPos);
+            var newTopology = TopologyBuilder.InsertVertex(context.SessionInfo.EditModeInfo.CurrentTopology.Clone(), (Vector2)select.ClickWorldPos);
 
+            if (newTopology == null) return null;
             context.SessionInfo.EditModeInfo.CurrentTopology = newTopology;
 
             return () => context.SessionInfo.EditModeInfo.CurrentTopology = oldTopology;
@@ -132,7 +133,8 @@ public class MeshUIEditCommandHandler : ICommandHandler
         var boxCollider = newMeshObject.GetComponent<BoxCollider>();
         var topLeft = ViewportManager.Instance.TopLeftAnchor;
         var bottomRight = ViewportManager.Instance.BottomRightAnchor;
-        boxCollider.size = new Vector3(Math.Abs(bottomRight.x - topLeft.x), Math.Abs(bottomRight.y - topLeft.y), 0);
+        // boxCollider.size = new Vector3(Math.Abs(bottomRight.x - topLeft.x), Math.Abs(bottomRight.y - topLeft.y), 0);
+        boxCollider.size += new Vector3(0.1f, 0.1f, 0f);
 
         MeshManager.Instance.CreateMeshEditObj(newMeshObject, mesh.ID);
         context.SessionInfo.EditModeInfo.CurrentTopology = mesh.meshInfo.Clone();

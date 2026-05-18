@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.Data.MeshInfo;
+using Assets.Scripts.Utility.Mesh;
 using UnityEngine;
 
 public class TopologyBuilder
@@ -51,7 +52,6 @@ public class TopologyBuilder
         foreach (var item in edgeTracker.Values)
         {
             item.IsConstrained = true;
-            meshInfo.HalfEdges.Add(item);
         }
     }
 
@@ -72,22 +72,16 @@ public class TopologyBuilder
         }
     }
 
-    public static MeshInfo InsertVertex(MeshInfo meshInfo, Vector3 point)
+    public static MeshInfo InsertVertex(MeshInfo meshInfo, Vector2 point)
     {
-        var topology = meshInfo.Clone();
-
-        // TODO: insert vertex
-
-        return topology;
+        var cdt = new CDT(meshInfo);
+        return cdt.AddVertex(point);
     }
 
     public static MeshInfo RemoveVertex(MeshInfo meshInfo, Vertex v)
     {
-        var topology = meshInfo.Clone();
-
-        // TODO: remove vertex
-
-        return topology;
+        var cdt = new CDT(meshInfo);
+        return cdt.RemoveVertex(v);
     }
 
     public static string SanityCheck(MeshInfo meshInfo)

@@ -7,7 +7,7 @@
         <ui:Button double-click-selects-word="false" name="UndoButton" class="icon-button">
             <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=-1008301579157283121&amp;guid=06973cdbfc0f48c42ad57bbefc516867&amp;type=3#arrow-left@2x&quot;); -unity-background-image-tint-color: rgb(169, 169, 169);" />
         </ui:Button>
-        <ui:VisualElement name="EditModeHeader" class="disable" style="flex-grow: 1; flex-direction: row-reverse;">
+        <ui:VisualElement name="EditModeHeader" class="disable" style="flex-grow: 1; flex-direction: row-reverse; background-color: rgb(34, 34, 34);">
             <ui:VisualElement style="flex-grow: 1;" />
             <ui:Button text="Save changes" name="SaveButton" class="icon-button" style="width: 320px; font-size: 28px; color: rgb(169, 169, 169); -unity-font-style: bold;" />
             <ui:Button name="DeleteButton" class="icon-button">
