@@ -1,4 +1,3 @@
-using System;
 using Assets.Scripts.Data.MeshInfo;
 using UnityEngine;
 
@@ -10,6 +9,7 @@ namespace Assets.Scripts.States.EditMode
         public MeshInfo OriginalTopology;
         public MeshInfo CurrentTopology;
         public Vertex SelectedVertex;
+        public bool isDebugDraw;
 
         public MeshEditState Copy()
         {
@@ -18,7 +18,8 @@ namespace Assets.Scripts.States.EditMode
                 Texture = Texture,
                 OriginalTopology = OriginalTopology,
                 CurrentTopology = CurrentTopology,
-                SelectedVertex = SelectedVertex
+                SelectedVertex = SelectedVertex,
+                isDebugDraw = isDebugDraw
             };
         }
     }

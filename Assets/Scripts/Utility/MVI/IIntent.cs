@@ -40,6 +40,7 @@ public record UndoIntent() : IIntentUndo;
 public record RedoIntent() : IIntentRedo;
 [GlobalIntent, NonUndoableIntent] public record StartEditModeIntent() : IIntent;
 [GlobalIntent] public record EndEditModeIntent(bool SaveRequired) : IIntent;
+[GlobalIntent] public record ToggleDebugIntent(bool Toggle) : IIntent;
 #endregion
 
 #region Edit Mode

@@ -39,3 +39,9 @@
 .selected {
     background-color: rgb(34, 34, 34);
 }
+
+#unity-checkmark {
+    width: 32px;
+    height: 32px;
+    background-color: rgb(169, 169, 169);
+}

@@ -54,39 +54,47 @@ public class MeshUIEditCommandHandler : ICommandHandler
         if (!context.SessionInfo.EditModeInfo.IsEditMode) return null;
 
         var currentTool = context.SessionInfo.EditModeInfo.CurrentTool;
+        var previousVertex = context.SessionInfo.EditModeInfo.SelectedVertex;
 
         if (currentTool == EditTool.CREATE)
         {
-            var oldTopology = context.SessionInfo.EditModeInfo.CurrentTopology;
+            var oldTopology = context.SessionInfo.EditModeInfo.CurrentTopology.Clone();
             var newTopology = TopologyBuilder.InsertVertex(context.SessionInfo.EditModeInfo.CurrentTopology.Clone(), (Vector2)select.ClickWorldPos);
 
             if (newTopology == null) return null;
             context.SessionInfo.EditModeInfo.CurrentTopology = newTopology;
+            Vertex newVertex = GetVertexAtPos(select.ClickWorldPos, 0.25f, context.SessionInfo.EditModeInfo.CurrentTopology);
+            context.SessionInfo.EditModeInfo.SelectedVertex = newVertex;
 
-            return () => context.SessionInfo.EditModeInfo.CurrentTopology = oldTopology;
+            return () =>
+            {
+                context.SessionInfo.EditModeInfo.CurrentTopology = oldTopology;
+                context.SessionInfo.EditModeInfo.SelectedVertex = previousVertex;
+            };
         }
 
         Vertex selectedVertex = GetVertexAtPos(select.ClickWorldPos, 0.25f, context.SessionInfo.EditModeInfo.CurrentTopology);
+        context.SessionInfo.EditModeInfo.SelectedVertex = selectedVertex;
 
         if (currentTool == EditTool.SELECT)
         {
-            var previousVertex = context.SessionInfo.EditModeInfo.SelectedVertex;
-            context.SessionInfo.EditModeInfo.SelectedVertex = selectedVertex;
-
             return () => context.SessionInfo.EditModeInfo.SelectedVertex = previousVertex;
         }
 
-
         if (currentTool == EditTool.DELETE)
         {
-            var oldTopology = context.SessionInfo.EditModeInfo.CurrentTopology;
+            var oldTopology = context.SessionInfo.EditModeInfo.CurrentTopology.Clone();
 
             if (selectedVertex == null) return null;
             var newTopology = TopologyBuilder.RemoveVertex(context.SessionInfo.EditModeInfo.CurrentTopology, selectedVertex);
 
             context.SessionInfo.EditModeInfo.CurrentTopology = newTopology;
 
-            return () => context.SessionInfo.EditModeInfo.CurrentTopology = oldTopology;
+            return () =>
+            {
+                context.SessionInfo.EditModeInfo.CurrentTopology = oldTopology;
+                context.SessionInfo.EditModeInfo.SelectedVertex = previousVertex;
+            };
         }
 
         return null;

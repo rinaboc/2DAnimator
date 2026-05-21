@@ -18,6 +18,7 @@ public class MeshEditView : DraggableHandle, IView<MeshUIEditState, MeshEditStat
     private MeshInfo currentMeshInfo = null;
     private Vertex selectedVertex = null;
     private bool isDragging = false;
+    private bool isDebugDraw = false;
 
     private IViewModel<MeshUIEditState, MeshEditState> _viewModel;
 
@@ -75,6 +76,7 @@ public class MeshEditView : DraggableHandle, IView<MeshUIEditState, MeshEditStat
     public void Render(MeshEditState state)
     {
         selectedVertex = state.SelectedVertex;
+        isDebugDraw = state.isDebugDraw;
 
         if (state.CurrentTopology == null || state.CurrentTopology.Equals(currentMeshInfo)) return;
         currentMeshInfo = state.CurrentTopology;
@@ -97,16 +99,34 @@ public class MeshEditView : DraggableHandle, IView<MeshUIEditState, MeshEditStat
             Vector2 b = edge.Next.Origin.Position;
 
             Vector2 dir = (b - a).normalized;
-            Vector2 normal = new(-dir.y, dir.x);
+            Vector2 normal = new(dir.y, -dir.x);
 
-            Vector2 offset = normal * (scaledLineThickness * 0.5f);
+            Vector2 shift = normal * (scaledLineThickness * 1.5f);
+            if (!isDebugDraw) shift = Vector2.zero;
+
+            Vector2 startPos = a + shift;
+            Vector2 endPos = b + shift;
+
+            Vector2 lineOffset = normal * (scaledLineThickness * 0.5f);
 
             GL.Color(edge.IsConstrained ? Color.red : Color.cyan * 0.8f);
 
-            GL.Vertex(a + offset);
-            GL.Vertex(a - offset);
-            GL.Vertex(b - offset);
-            GL.Vertex(b + offset);
+            GL.Vertex(startPos + lineOffset);
+            GL.Vertex(startPos - lineOffset);
+            GL.Vertex(endPos - lineOffset);
+            GL.Vertex(endPos + lineOffset);
+
+            if (isDebugDraw)
+            {
+                float arrowSize = scaledLineThickness * 4f;
+                Vector2 tip = endPos - dir * (scaledVertexSize * 0.6f);
+                Vector2 arrowBase = tip - dir * arrowSize;
+
+                GL.Vertex(tip);
+                GL.Vertex(arrowBase + normal * (arrowSize * 0.6f));
+                GL.Vertex(arrowBase);
+                GL.Vertex(arrowBase - normal * (arrowSize * 0.6f));
+            }
         }
 
         float halfSize = scaledVertexSize * 0.5f;

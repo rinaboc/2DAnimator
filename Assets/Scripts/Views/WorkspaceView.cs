@@ -1,3 +1,4 @@
+using System;
 using Assets.Scripts.States;
 using Assets.Scripts.Utility.MVI;
 using UnityEngine.UIElements;
@@ -8,6 +9,7 @@ public class WorkspaceView : BaseUIController, IView<OperationState, OperationSt
     private Button _undoButton, _redoButton;
     private Button _saveButton, _exitButton;
     private Button _selectButton, _deleteButton, _createButton;
+    private Toggle _toggleDebug;
     private VisualElement _editModeHeader;
 
     override protected void Awake()
@@ -21,6 +23,7 @@ public class WorkspaceView : BaseUIController, IView<OperationState, OperationSt
         _selectButton = ui.Q<Button>("SelectButton");
         _deleteButton = ui.Q<Button>("DeleteButton");
         _createButton = ui.Q<Button>("CreateButton");
+        _toggleDebug = ui.Q<Toggle>("DebugToggle");
     }
 
     void Start()
@@ -32,6 +35,13 @@ public class WorkspaceView : BaseUIController, IView<OperationState, OperationSt
         _selectButton.clicked += () => _viewModel?.Send(new ChangeEditToolIntent(EditTool.SELECT));
         _deleteButton.clicked += () => _viewModel?.Send(new ChangeEditToolIntent(EditTool.DELETE));
         _createButton.clicked += () => _viewModel?.Send(new ChangeEditToolIntent(EditTool.CREATE));
+
+        _toggleDebug.RegisterValueChangedCallback(OnDebugToggleChanged);
+    }
+
+    private void OnDebugToggleChanged(ChangeEvent<bool> evt)
+    {
+        _viewModel?.Send(new ToggleDebugIntent(evt.newValue));
     }
 
     public void Render(OperationState state)

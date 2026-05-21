@@ -4,12 +4,6 @@ public sealed class MeshEditViewModel : ViewModelBase<MeshUIEditState, MeshEditS
 {
     protected override MeshEditState Project(MeshUIEditState domain)
     {
-        return new MeshEditState()
-        {
-            Texture = domain.Texture,
-            OriginalTopology = domain.OriginalTopology,
-            CurrentTopology = domain.CurrentTopology,
-            SelectedVertex = domain.SelectedVertex
-        };
+        return domain.BuildMeshEditState();
     }
 }

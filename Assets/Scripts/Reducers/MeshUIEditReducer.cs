@@ -8,8 +8,16 @@ public class MeshUIEditReducer : IReducer<MeshUIEditState>
     {
         return intent switch
         {
+            ToggleDebugIntent toggle => ReduceToggleDebug(previous, toggle),
             _ => previous
         };
+    }
+
+    private MeshUIEditState ReduceToggleDebug(MeshUIEditState previous, ToggleDebugIntent toggle)
+    {
+        var next = previous.Copy();
+        next.isDebugDraw = toggle.Toggle;
+        return next;
     }
 
     public MeshUIEditState Update(MeshUIEditState previous, IModelContext context)

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Assets.Scripts.Data.MeshInfo;
 using UnityEngine;
 
@@ -222,7 +223,67 @@ namespace Assets.Scripts.Utility.Mesh
 
         public MeshInfo RemoveVertex(Vertex v)
         {
-            throw new System.NotImplementedException();
+            if (v == null || !_mesh.Vertices.Contains(v)) return _mesh;
+
+            // collected edges starting from v
+            List<HalfEdge> edges_v = new();
+            HalfEdge e = v.IncidentEdge;
+            if (e == null) return _mesh;
+
+            HalfEdge start = e;
+            do
+            {
+                edges_v.Add(e);
+                e = e.Twin?.Next;
+            } while (e != null && e != start);
+
+            // vertex is on mesh boundary
+            if (e == null || edges_v.Count < 3) return _mesh;
+
+            // get vertices connected to v
+            int n = edges_v.Count;
+            HalfEdge[] boundary = new HalfEdge[n];
+            for (int i = 0; i < n; i++) boundary[i] = edges_v[i].Next;
+
+            foreach (var s in edges_v)
+            {
+                _mesh.HalfEdges.Remove(s);
+                _mesh.HalfEdges.Remove(s.Next.Next);
+                _mesh.Faces.Remove(s.Face);
+            }
+            _mesh.Vertices.Remove(v);
+
+            HalfEdge lastInternal = null;
+            for (int i = n - 1; i > 1; i--)
+            {
+                Face f = new();
+                _mesh.Faces.Add(f);
+
+                HalfEdge e1 = (i == n - 1) ? boundary[n - 1] : lastInternal;
+                HalfEdge e2 = boundary[i - 1];
+                HalfEdge e3;
+
+                if (i > 2)
+                {
+                    e3 = new HalfEdge { Origin = boundary[i - 2].Origin, Face = f };
+                    HalfEdge e3Twin = new() { Origin = boundary[n - 1].Origin };
+                    e3.Twin = e3Twin; e3Twin.Twin = e3;
+                    _mesh.HalfEdges.Add(e3); _mesh.HalfEdges.Add(e3Twin);
+                    lastInternal = e3Twin;
+                }
+                else
+                {
+                    e3 = boundary[0];
+                }
+
+                e1.Face = f; e2.Face = f; e3.Face = f;
+                e1.Next = e2; e2.Next = e3; e3.Next = e1;
+                f.Edge = e1;
+            }
+
+            foreach (var be in boundary) be.Origin.IncidentEdge = be;
+
+            return _mesh;
         }
 
         private HalfEdge FindEdgeContaining(Vector2 p)
